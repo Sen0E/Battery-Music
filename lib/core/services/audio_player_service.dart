@@ -190,7 +190,11 @@ class AudioPlayerService {
           }
         } else {
           log("获取播放链接失败 (URL 为空)");
-          // playNext();
+          // 记录错误但继续播放下一首
+          await _audioPlayer.stop();
+          // 短暂延迟后再尝试播放下一首
+          await Future.delayed(const Duration(milliseconds: 100));
+          playNext();
         }
       } catch (e) {
         log("播放流程出错: $e");

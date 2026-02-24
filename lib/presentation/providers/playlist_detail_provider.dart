@@ -1,4 +1,5 @@
 import 'package:battery_music/core/services/node_service_api.dart';
+import 'package:battery_music/models/base_response.dart';
 import 'package:battery_music/models/playlist_track_new_response.dart';
 import 'package:flutter/material.dart';
 
@@ -33,12 +34,10 @@ class PlaylistDetailProvider extends ChangeNotifier {
 
     try {
       _currentPage = 1;
-      final response = await NodeServiceApi.instance.playlistTrackNew(
-        listid,
-        _currentPage,
-        _pageSize,
-      );
-      if (response.data != null) {
+      final ApiResponse<PlaylistTrackDataNew> response = await NodeServiceApi
+          .instance
+          .playlistTrackNew(listid, _currentPage, _pageSize);
+      if (response.status == 1) {
         _playlistData = response.data;
         _songs = response.data!.songs ?? [];
 
@@ -64,13 +63,11 @@ class PlaylistDetailProvider extends ChangeNotifier {
 
     try {
       final nextPage = _currentPage + 1;
-      final response = await NodeServiceApi.instance.playlistTrackNew(
-        listid,
-        nextPage,
-        _pageSize,
-      );
+      final ApiResponse<PlaylistTrackDataNew> response = await NodeServiceApi
+          .instance
+          .playlistTrackNew(listid, nextPage, _pageSize);
 
-      if (response.data != null && response.data!.songs != null) {
+      if (response.status == 1 && response.data!.songs != null) {
         final newSongs = response.data!.songs!;
         _songs.addAll(newSongs);
         _currentPage = nextPage;

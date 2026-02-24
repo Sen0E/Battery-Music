@@ -1,4 +1,5 @@
 import 'package:battery_music/core/services/node_service_api.dart';
+import 'package:battery_music/models/base_response.dart';
 import 'package:battery_music/models/user_playlist_response.dart';
 import 'package:flutter/material.dart';
 
@@ -28,15 +29,17 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await NodeServiceApi.instance.userPlayList();
-      if (response.data != null) {
+      final ApiResponse<UserPlaylistData> response = await NodeServiceApi
+          .instance
+          .userPlayList();
+      if (response.status == 1) {
         _allPlaylists = response.data!.info ?? [];
         _filterPlaylists();
       } else {
         _errorMessage = "获取歌单失败";
       }
     } catch (e) {
-      _errorMessage = "网络错误: $e";
+      _errorMessage = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -56,7 +59,9 @@ class PlaylistProvider extends ChangeNotifier {
 
     // 筛选 收藏歌单 (isDef == 1)
     try {
-      _favoritePlaylist = _allPlaylists.firstWhere((p) => p.isDef == 1);
+      _favoritePlaylist = _allPlaylists.firstWhere(
+        (p) => p.isDef == 1 && p.status == 1,
+      );
     } catch (_) {
       _favoritePlaylist = null;
     }

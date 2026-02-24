@@ -39,7 +39,7 @@ class UserPlaylistData {
 class UserPlaylist {
   // --- 核心展示信息 ---
   final int? listId;
-  final String? name; // 歌单名 "我喜欢"
+  final String? name; // 歌单名
   final int? count; // 歌曲总数
   final String? pic; // 封面图 (包含 {size})
   final String? intro; // 简介
@@ -49,6 +49,7 @@ class UserPlaylist {
   final String? globalId; // 全局ID collection_...
   final int? source; // 来源
   final int? type;
+  final int? status;
 
   // --- 创建者信息 ---
   final int? userId;
@@ -69,6 +70,7 @@ class UserPlaylist {
     this.globalId,
     this.source,
     this.type,
+    this.status,
     this.userId,
     this.username,
     this.userPic,
@@ -80,8 +82,11 @@ class UserPlaylist {
     return UserPlaylist(
       listId: json['listid'] as int?,
       name: json['name'] as String?,
-      // count 兼容逻辑：优先取 count，没有则取 m_count
-      count: json['count'] as int? ?? json['m_count'] as int?,
+      count: json['count'] is int
+          ? json['count'] as int
+          : json['count'] is String
+          ? int.parse(json['count'])
+          : null,
       pic: json['pic'] as String?,
       intro: json['intro'] as String?,
 
@@ -90,6 +95,7 @@ class UserPlaylist {
       globalId: json['global_collection_id'] as String?,
       source: json['source'] as int?,
       type: json['type'] as int?,
+      status: json['status'] as int?,
 
       userId: json['list_create_userid'] as int?,
       username: json['list_create_username'] as String?,

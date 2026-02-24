@@ -138,6 +138,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                 index: index,
                 songName: song.songNameOnly,
                 singerName: song.singerName,
+                musicpackAdvance: song.transParam!['musicpack_advance'],
                 coverUrl: song.getCoverUrl(size: 100),
                 duration: song.timeLen,
                 isDurationInMs: true, // 歌单详情里的时长是毫秒

@@ -76,6 +76,7 @@ class PlaylistSong {
   final String? mvHash; // 新版 MV Hash 直接在歌曲对象里
   final int? size; // 文件大小
   final int? bpm;
+  final int? musicpackAdvance;
 
   PlaylistSong({
     this.name,
@@ -95,20 +96,21 @@ class PlaylistSong {
     this.mvHash,
     this.size,
     this.bpm,
+    this.musicpackAdvance,
   });
 
   factory PlaylistSong.fromJson(Map<String, dynamic> json) {
     return PlaylistSong(
       name: json['name'] as String?,
       hash: json['hash'] as String?,
-      // 修正：新版为 audio_id，旧版为 Audioid
+      // 新版为 audio_id，旧版为 Audioid
       audioId: json['audio_id'] as int? ?? json['Audioid'] as int?,
-      // 修正：新版为 timelen (毫秒)
+      // 新版为 timelen (毫秒)
       timeLen: json['timelen'] as int?,
       bitrate: json['bitrate'] as int?,
-      // 修正：新版没有直接的 extname，有时候在 name 后缀里，保留旧版兼容
+      // 新版没有直接的 extname，有时候在 name 后缀里，保留旧版兼容
       extName: json['extname'] as String?,
-      // 修正：新版为 media_privilege，旧版为 privilege
+      // 新版为 media_privilege，旧版为 privilege
       privilege: json['media_privilege'] as int? ?? json['privilege'] as int?,
 
       albumInfo: json['albuminfo'] != null
@@ -133,6 +135,8 @@ class PlaylistSong {
       mvHash: json['mvhash'] as String?,
       size: json['size'] as int?,
       bpm: json['bpm'] as int?,
+      // 是否需要音乐包（会员）
+      musicpackAdvance: json['musicpack_advance'] as int?,
     );
   }
 

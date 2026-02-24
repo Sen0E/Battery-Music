@@ -9,7 +9,7 @@ class ApiResponse<T> {
     T Function(Object? json) fromJsonT,
   ) {
     return ApiResponse(
-      status: json['status'],
+      status: json['status'], // 1 成功 0 失败
       errorCode: json['error_code'],
       data: json['data'] != null ? fromJsonT(json['data']) : null,
     );

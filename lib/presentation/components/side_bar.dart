@@ -125,7 +125,10 @@ class _SideBarState extends State<SideBar> {
 
     if (playlistProvider.errorMessage != null) {
       return Center(
-        child: Text("加载失败", style: TextStyle(color: theme.colorScheme.error)),
+        child: Text(
+          "加载失败:${playlistProvider.errorMessage}}",
+          style: TextStyle(color: theme.colorScheme.error),
+        ),
       );
     }
 
