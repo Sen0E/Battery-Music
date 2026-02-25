@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:battery_music/core/services/node_service_api.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/models/base_response.dart';
 import 'package:battery_music/models/login_response.dart';
 import 'package:battery_music/models/user_detial_response.dart';
 import 'package:battery_music/presentation/layout/main_layout.dart';
+import 'package:battery_music/presentation/test/test_node_api.dart';
 import 'package:flutter/material.dart';
 import 'package:battery_music/core/services/node_api_client.dart';
 import 'package:battery_music/presentation/page/login_page.dart';
@@ -29,6 +32,11 @@ class _SplashPageState extends State<SplashPage> {
   /// 2. 如果有，尝试刷新 Token
   /// 3. 根据结果跳转
   Future<void> _checkLoginStatus() async {
+    // 测试用
+    log("进入测试页面"); // 调试信息可以保留
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _navigateToApiTest(),
+    ); // 确保在当前帧绘制完成后跳转
     // 检查本地是否有 Cookie
     final hasLocalCookies = await NodeApiClient.instance.hasCookies();
 
@@ -76,6 +84,13 @@ class _SplashPageState extends State<SplashPage> {
     Navigator.of(
       context,
     ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
+  }
+
+  // 跳转到API测试页面
+  void _navigateToApiTest() {
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const TestNodeApi()));
   }
 
   @override

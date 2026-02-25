@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:battery_music/core/services/v2/node_manager.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
@@ -19,8 +20,9 @@ void main() async {
   // 初始化音频支持
   JustAudioMediaKit.ensureInitialized();
 
-  await NodeServiceManager.instance.startNodeService(); // 启动 NodeService
-  await NodeApiClient.instance.init(); // 初始化 Cookie 管理
+  // await NodeServiceManager.instance.startNodeService(); // 启动 NodeService
+  // await NodeApiClient.instance.init(); // 初始化 Cookie 管理
+
   await windowManager.ensureInitialized(); // 初始化窗口管理器
 
   windowManager.waitUntilReadyToShow().then((_) async {
