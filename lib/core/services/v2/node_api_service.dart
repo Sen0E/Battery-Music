@@ -4,6 +4,7 @@ import 'package:battery_music/models/v2/login_qr_check.dart';
 import 'package:battery_music/models/v2/login_qr_key.dart';
 import 'package:battery_music/models/v2/user_info.dart';
 import 'package:battery_music/models/v2/user_info_detail.dart';
+import 'package:battery_music/models/v2/user_playlist.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -30,7 +31,7 @@ class NodeApiService {
     debugPrint("Login response: ${response.data}");
     return BaseApi<UserInfo>.fromMap(
       response.data,
-      (json) => UserInfo.fromMap(json as Map<String, dynamic>),
+      (map) => UserInfo.fromMap(map),
     );
   }
 
@@ -80,10 +81,12 @@ class NodeApiService {
   /// 刷新登录
   /// [token] 用户 Token
   /// [userid] 用户 ID
-  Future<BaseApi<UserInfo>> loginToken(String token, String userid) async {
+  Future<BaseApi<UserInfo>> loginToken({String? token, String? userid}) async {
     Response response = await _nodeApiClient.get(
       '/login/token',
-      queryParameters: {'token': token, 'userid': userid},
+      queryParameters: (token == null || userid == null)
+          ? null
+          : {'token': token, 'userid': userid},
     );
     debugPrint("loginToken response: ${response.data}");
     return BaseApi<UserInfo>.fromMap(
@@ -99,6 +102,24 @@ class NodeApiService {
     return BaseApi<UserInfoDetail>.fromMap(
       response.data,
       (map) => UserInfoDetail.fromMap(map),
+    );
+  }
+
+  /// 获取用户歌单
+  Future<BaseApi<KugouSongListData>> userPlaylist({
+    int? page,
+    int? pageSize,
+  }) async {
+    Response response = await _nodeApiClient.get(
+      '/user/playlist',
+      queryParameters: (page == null || pageSize == null)
+          ? null
+          : {'page': page, 'pagesize': pageSize},
+    );
+    debugPrint("User playlist response: ${response.data}");
+    return BaseApi<KugouSongListData>.fromMap(
+      response.data,
+      (map) => KugouSongListData.fromMap(map),
     );
   }
 }

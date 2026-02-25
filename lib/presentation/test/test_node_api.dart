@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:battery_music/core/services/v2/node_api_client.dart';
@@ -7,6 +8,7 @@ import 'package:battery_music/models/v2/login_qr_check.dart';
 import 'package:battery_music/models/v2/login_qr_key.dart';
 import 'package:battery_music/models/v2/user_info.dart';
 import 'package:battery_music/models/v2/user_info_detail.dart';
+import 'package:battery_music/models/v2/user_playlist.dart';
 import 'package:flutter/material.dart';
 
 class TestNodeApi extends StatefulWidget {
@@ -28,7 +30,45 @@ class _TestNodeApiState extends State<TestNodeApi> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Node API 测试')),
-      body: Center(child: _buildPhoneLogin()),
+      body: Center(child: _buildMusicApi()),
+    );
+  }
+
+  Future<void> _getUserPlayList() async {
+    final userPlayList = await _nodeApiService.userPlaylist(
+      page: 1,
+      pageSize: 10,
+    );
+    debugPrint(userPlayList.toString());
+    debugPrint(userPlayList.data?.toJson().toString());
+    // log(res.data!.info);
+    // 遍历歌单
+    for (final item in userPlayList.data!.info!) {
+      log(
+        "${item.name!}\t\t\t ListID: ${item.listid}\t Pic: ${item.getCoverUrl(size: 200)}\t Count: ${item.count}",
+      );
+      if (item.authors != null) {
+        for (final author in item.authors!) {
+          log("Author: ${author.authorName} (for item: ${item.name})");
+        }
+      } else {
+        log(
+          "Authors: null (for item: ${item.name})",
+        ); // 当 authors 为 null 时，打印提示信息
+      }
+    }
+  }
+
+  Widget _buildMusicApi() {
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            _getUserPlayList();
+          },
+          child: Text("获取歌单"),
+        ),
+      ],
     );
   }
 
@@ -73,10 +113,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
 
   Future<void> _loginToken() async {
     String? token = await _nodeApiClient.getToken();
-    final BaseApi<UserInfo> result = await _nodeApiService.loginToken(
-      token!,
-      _userId.toString(),
-    );
+    final BaseApi<UserInfo> result = await _nodeApiService.loginToken();
     debugPrint(result.data?.toJson().toString());
   }
 
