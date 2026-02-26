@@ -318,14 +318,15 @@ class SongListInfo {
       SongListInfo.fromMap(json.decode(source));
   String toJson() => json.encode(toMap());
 
-  // 获取歌单封面url
+  /// 获取歌单封面url
+  /// [size] 歌单图片大小
   String getCoverUrl({int size = 256}) {
     return pic!.replaceAll('{size}', size.toString());
   }
 }
 
 /// 顶层歌单数据模型（仅data部分）
-class KugouSongListData {
+class UserPlaylist {
   // 包含所有歌单 / 专辑详情
   final List<SongListInfo>? info;
   // 设备标识
@@ -340,7 +341,7 @@ class KugouSongListData {
   // 收藏类内容数量
   final int? collectCount;
 
-  KugouSongListData({
+  UserPlaylist({
     this.info,
     this.phoneFlag,
     this.totalVer,
@@ -350,8 +351,8 @@ class KugouSongListData {
     this.collectCount,
   });
 
-  factory KugouSongListData.fromMap(Map<String, dynamic> map) {
-    return KugouSongListData(
+  factory UserPlaylist.fromMap(Map<String, dynamic> map) {
+    return UserPlaylist(
       info: map['info'] != null
           ? List<SongListInfo>.from(
               (map['info'] as List).map(
@@ -380,13 +381,7 @@ class KugouSongListData {
     };
   }
 
-  /// 核心解析方法：从完整接口JSON字符串解析（自动跳过外层status/error_code）
-  // factory KugouSongListData.fromFullJson(String fullJson) {
-  //   Map<String, dynamic> fullMap = json.decode(fullJson);
-  //   return KugouSongListData.fromMap(fullMap['data'] as Map<String, dynamic>);
-  // }
-
-  factory KugouSongListData.fromJson(String source) =>
-      KugouSongListData.fromMap(json.decode(source));
+  factory UserPlaylist.fromJson(String source) =>
+      UserPlaylist.fromMap(json.decode(source));
   String toJson() => json.encode(toMap());
 }

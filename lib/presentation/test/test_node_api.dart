@@ -4,11 +4,15 @@ import 'dart:typed_data';
 import 'package:battery_music/core/services/v2/node_api_client.dart';
 import 'package:battery_music/core/services/v2/node_api_service.dart';
 import 'package:battery_music/models/v2/base_api.dart';
+import 'package:battery_music/models/v2/daily_recommend.dart';
 import 'package:battery_music/models/v2/login_qr_check.dart';
 import 'package:battery_music/models/v2/login_qr_key.dart';
+import 'package:battery_music/models/v2/search_hot.dart';
+import 'package:battery_music/models/v2/top_card.dart';
 import 'package:battery_music/models/v2/user_info.dart';
 import 'package:battery_music/models/v2/user_info_detail.dart';
 import 'package:battery_music/models/v2/user_playlist.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class TestNodeApi extends StatefulWidget {
@@ -59,6 +63,49 @@ class _TestNodeApiState extends State<TestNodeApi> {
     }
   }
 
+  Future<void> _getSearchHot() async {
+    final BaseApi<SearchHot> response = await _nodeApiService.searchHot();
+    // debugPrint(response.data?.toJson().toString()); //太多了，不能输出
+    for (final item in response.data!.list!) {
+      log("${item.name!}: ${item.keywords!.first.keyword!}"); //输出一个刚刚好
+    }
+  }
+
+  Future<void> _getEveryDayRecommend() async {
+    final response = await _nodeApiService.everydayRecommend();
+    // debugPrint(res.data?.toJson().toString());
+    for (final item in response.data!.songList!) {
+      if (item.recCopyWrite != null) {
+        // log(item.toJson());
+        log(
+          "音乐名称: ${item.songname}" +
+              "\t作者: ${item.authorName}" +
+              "\tHash: ${item.hash}" +
+              "\t封面: ${item.getSizableCoverUrl()}",
+        );
+      }
+    }
+  }
+
+  Future<void> _getTopCard() async {
+    final response = await _nodeApiService.topCard(1);
+    // log(response.data!.toJson());
+    for (final item in response.data!.songList ?? []) {
+      // log(item.toJson());
+      log(
+        "音乐名称: ${item.songname}" +
+            "\t作者: ${item.authorName}" +
+            "\tHash: ${item.hash}" +
+            "\t封面: ${item.getSizableCoverUrl()}",
+      );
+    }
+  }
+
+  Future<void> _getMusicUrl(String hash) async {
+    final response = await _nodeApiService.songUrl(hash);
+    log(response.toString());
+  }
+
   Widget _buildMusicApi() {
     return Column(
       children: [
@@ -67,6 +114,30 @@ class _TestNodeApiState extends State<TestNodeApi> {
             _getUserPlayList();
           },
           child: Text("获取歌单"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _getSearchHot();
+          },
+          child: Text("获取热搜"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _getEveryDayRecommend();
+          },
+          child: Text("获取每日推荐"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _getTopCard();
+          },
+          child: Text("歌曲推荐"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _getMusicUrl("FE9DCD9D1D142832AB10D5E98CA17C98");
+          },
+          child: Text("获取音乐URL"),
         ),
       ],
     );
