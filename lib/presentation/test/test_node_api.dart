@@ -105,19 +105,9 @@ class _TestNodeApiState extends State<TestNodeApi> {
     }
   }
 
-  // Future<void> _getDfid() async {
-  //   final response = await _nodeApiService.registerDev();
-  //   setState(() {
-  //     _registerDev = response.data;
-  //   });
-  // }
-
   Future<void> _getMusicUrl(String hash) async {
     try {
-      final response = await _nodeApiService.songUrl(
-        hash: hash,
-        quality: 'flac',
-      );
+      final response = await _nodeApiService.songUrl(hash, quality: 'flac');
       log(response.url!.first);
     } catch (e) {
       log(e.toString());
@@ -129,7 +119,15 @@ class _TestNodeApiState extends State<TestNodeApi> {
       "collection_3_1250725353_23_0",
       pageSize: 2,
     );
-    debugPrint(response.toString());
+    debugPrint(response.data!.toJson());
+  }
+
+  Future<void> _searchKeyword() async {
+    final response = await _nodeApiService.searchKeywords(
+      "HOYO-MIX",
+      pageSize: 2,
+    );
+    log(response.data!.toJson());
   }
 
   Widget _buildMusicApi() {
@@ -170,6 +168,12 @@ class _TestNodeApiState extends State<TestNodeApi> {
             _getPlayListDetail();
           },
           child: Text("获取歌单详情"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _searchKeyword();
+          },
+          child: Text("搜索关键词"),
         ),
       ],
     );

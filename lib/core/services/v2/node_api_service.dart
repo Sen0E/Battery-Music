@@ -1,10 +1,13 @@
 import 'package:battery_music/core/services/v2/node_api_client.dart';
+import 'package:battery_music/models/search_hot_response.dart';
 import 'package:battery_music/models/v2/base_api.dart';
 import 'package:battery_music/models/v2/daily_recommend.dart';
 import 'package:battery_music/models/v2/login_qr_check.dart';
 import 'package:battery_music/models/v2/login_qr_key.dart';
+import 'package:battery_music/models/v2/playlist_track.dart';
 import 'package:battery_music/models/v2/register_dev.dart';
 import 'package:battery_music/models/v2/search_hot.dart';
+import 'package:battery_music/models/v2/search_keywords.dart';
 import 'package:battery_music/models/v2/song_data.dart';
 import 'package:battery_music/models/v2/top_card.dart';
 import 'package:battery_music/models/v2/user_info.dart';
@@ -139,7 +142,7 @@ class NodeApiService {
   /// [id] 歌单 全局id
   /// [page] 页码
   /// [pageSize] 每页数量
-  Future<Response> playlistTrack(
+  Future<BaseApi<PlaylistTrack>> playlistTrack(
     String id, {
     int? page,
     int? pageSize = 30,
@@ -149,7 +152,10 @@ class NodeApiService {
       queryParameters: {'id': id, 'page': page, 'pagesize': pageSize},
     );
     debugPrint("Playlist track response: ${response.data}");
-    return response;
+    return BaseApi<PlaylistTrack>.fromMap(
+      response.data,
+      (map) => PlaylistTrack.fromMap(map),
+    );
   }
 
   /// 获取热搜列表(实际并非热搜，太扯了这个API)
@@ -191,16 +197,73 @@ class NodeApiService {
   ///[hash] 歌曲hash
   ///[freePart] 是否返回试听部分（仅部分歌曲）(0：否, 1：是)
   ///[quality] 音质(128,320,flac,high)
-  Future<SongData> songUrl({
-    String? hash,
+  Future<SongData> songUrl(
+    String hash, {
     int? freePart,
     String? quality,
   }) async {
-    Response response = await _nodeApiClient.get(
+    Response response = await _nodeApiClient.post(
       '/song/url',
-      queryParameters: {'hash': hash},
+      queryParameters: {
+        'hash': hash,
+        if (freePart != null) 'free_part': freePart,
+        if (quality != null) 'quality': quality,
+      },
     );
     debugPrint(response.data.toString());
     return SongData.fromMap(response.data);
+  }
+
+  /// 搜索
+  /// [keywords] 关键字
+  /// [type] 搜索类型(默认为单曲，special：歌单，lyric：歌词，song：单曲，album：专辑，author：歌手，mv：mv)
+  /// [page] 页码
+  /// [pageSize] 每页数量
+  Future<BaseApi<SearchKeywords>> searchKeywords(
+    String keywords, {
+    String? type,
+    int? page,
+    int? pageSize,
+  }) async {
+    Response response = await _nodeApiClient.post(
+      '/search',
+      queryParameters: {
+        'keywords': keywords,
+        if (type != null) 'type': type,
+        if (page != null) 'page': page,
+        if (pageSize != null) 'pagesize': pageSize,
+      },
+    );
+    return BaseApi<SearchKeywords>.fromMap(
+      response.data,
+      (map) => SearchKeywords.fromMap(map),
+    );
+  }
+
+  /// 搜索建议
+  /// [keywords] 关键词
+  /// [albumTipCount] 专辑提示数量
+  /// [correctTipCount] 不知道
+  /// [mvTipCount] MV提示数量
+  /// [musicTipCount] 音乐提示数量
+  Future<Response> searchSuggest(
+    String keywords, {
+    int? albumTipCount,
+    int? correctTipCount,
+    int? mvTipCount,
+    int? musicTipCount,
+  }) async {
+    final response = await _nodeApiClient.post(
+      '/search/suggest',
+      queryParameters: {
+        'keywords': keywords,
+        if (albumTipCount != null) 'albumTipCount': albumTipCount,
+        if (correctTipCount != null) 'correctTipCount': correctTipCount,
+        if (mvTipCount != null) 'mvTipCount': mvTipCount,
+        if (musicTipCount != null) 'musicTipCount': musicTipCount,
+      },
+    );
+    debugPrint(response.data.toString());
+    return response;
   }
 }

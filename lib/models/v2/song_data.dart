@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:battery_music/utils/safe_convert.dart';
+
 class Classmap {
   final int? attr0;
 
@@ -305,7 +307,8 @@ class SongData {
           ? Classmap.fromMap(map['classmap'] as Map<String, dynamic>)
           : null,
       status: map['status'] as int?,
-      volume: map['volume'] as double?,
+      // volume: map['volume'] as double?,
+      volume: SafeConvert.toDouble(map['volume']),
       stdHashTime: map['std_hash_time'] as int?,
       backupUrl: map['backupUrl'] != null
           ? List<String>.from(map['backupUrl'] as List)
@@ -325,7 +328,8 @@ class SongData {
       timeLength: map['timeLength'] as int?,
       bitRate: map['bitRate'] as int?,
       privStatus: map['priv_status'] as int?,
-      volumePeak: map['volume_peak'] as double?,
+      // volumePeak: map['volume_peak'] as double?,
+      volumePeak: SafeConvert.toDouble(map['volume_peak']),
       volumeGain: map['volume_gain'] as int?,
       q: map['q'] as int?,
       fileName: map['fileName'] as String?,
