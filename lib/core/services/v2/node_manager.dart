@@ -87,7 +87,12 @@ class NodeManager {
     _nodeProcess = await Process.start(
       _nodeExecPath!,
       [],
-      environment: {'API_TOKEN': _authToken!, 'PORT': '0', 'HOST': '127.0.0.1'},
+      environment: {
+        'API_TOKEN': _authToken!,
+        'PORT': '0',
+        'HOST': '127.0.0.1',
+        'platform': 'lite',
+      },
     );
     debugPrint("node service: started pid:${_nodeProcess!.pid}");
 

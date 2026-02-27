@@ -36,12 +36,12 @@ dependencies:
   cookie_jar: ^4.0.8  #  Cookie的存储实现
   path: ^1.9.1  #  路径处理
 
-  path_provider: ^2.1.5  #  获取文件路径
+  path_provider: ^2.0.15  #  获取文件路径
 
   # uuid: ^4.5.2  #  生成uuid
 
   window_manager: ^0.5.1  #  窗口管理
-  shared_preferences: ^2.2.2  #  本地数据存储
+  shared_preferences: ^2.5.4  #  本地数据存储
 
   provider: ^6.1.5+1  #  状态管理
 
@@ -81,6 +81,7 @@ flutter:
   assets:
     - assets/node_service/
     - assets/images/logo/
+    - assets/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

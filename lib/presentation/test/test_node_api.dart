@@ -7,6 +7,7 @@ import 'package:battery_music/models/v2/base_api.dart';
 import 'package:battery_music/models/v2/daily_recommend.dart';
 import 'package:battery_music/models/v2/login_qr_check.dart';
 import 'package:battery_music/models/v2/login_qr_key.dart';
+import 'package:battery_music/models/v2/register_dev.dart';
 import 'package:battery_music/models/v2/search_hot.dart';
 import 'package:battery_music/models/v2/top_card.dart';
 import 'package:battery_music/models/v2/user_info.dart';
@@ -102,7 +103,12 @@ class _TestNodeApiState extends State<TestNodeApi> {
   }
 
   Future<void> _getMusicUrl(String hash) async {
-    final response = await _nodeApiService.songUrl(hash);
+    BaseApi<RegisterDev> registerDev = await _nodeApiService
+        .registerDev(); // 鉴权（必须调用）
+    final response = await _nodeApiService.songUrl(
+      hash,
+      registerDev.data!.dfid!,
+    );
     log(response.toString());
   }
 

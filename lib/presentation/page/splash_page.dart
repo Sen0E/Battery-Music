@@ -37,6 +37,7 @@ class _SplashPageState extends State<SplashPage> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _navigateToApiTest(),
     ); // 确保在当前帧绘制完成后跳转
+
     // 检查本地是否有 Cookie
     final hasLocalCookies = await NodeApiClient.instance.hasCookies();
 

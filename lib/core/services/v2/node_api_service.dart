@@ -171,11 +171,10 @@ class NodeApiService {
 
   ///获取音乐URL
   ///[hash] 歌曲hash
-  Future<Response> songUrl(String hash) async {
-    registerDev(); // 鉴权（必须调用）
+  Future<Response> songUrl(String hash, String dfid) async {
     Response response = await _nodeApiClient.get(
       '/song/url',
-      queryParameters: {'hash': hash},
+      queryParameters: {'hash': hash, 'dfid': dfid},
     );
     debugPrint(response.data.toString());
     return response;
