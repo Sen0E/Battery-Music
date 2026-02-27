@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 class RegisterDev {
-  final String? dfid;
+  final String dfid;
 
-  RegisterDev({this.dfid});
+  RegisterDev({required this.dfid});
 
   factory RegisterDev.fromMap(Map<String, dynamic> json) {
     return RegisterDev(dfid: json['dfid']);

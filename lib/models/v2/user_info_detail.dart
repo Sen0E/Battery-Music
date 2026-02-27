@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:battery_music/utils/safe_convert.dart';
 
 class UserInfoDetail {
-  // 主昵称
+  /// 主昵称
   final String nickname;
-  // K歌昵称
+
+  /// K歌昵称
   final String kNickname;
-  // 分享昵称
+
+  /// 分享昵称
   final String fxNickname;
 
   final int kqTalent;
@@ -15,37 +17,51 @@ class UserInfoDetail {
   final String pic;
   final String kPic;
   final String fxPic;
-  // 性别 (1=男，2=女)
+
+  /// 性别 (1=男，2=女)
   final int gender;
-  // VIP类型
+
+  /// VIP类型
   final int vipType;
-  // 付费包
+
+  /// 付费包
   final int mType;
-  // 年度会员
+
+  /// 年度会员
   final int yType;
-  // 个人简介
+
+  /// 个人简介
   final String descri;
-  // 关注数
+
+  /// 关注数
   final int follows;
-  // 粉丝数
+
+  /// 粉丝数
   final int fans;
-  // 访客数
+
+  /// 访客数
   final int visitors;
-  // 星座
+
+  /// 星座
   final int constellation;
   final Map<String, dynamic> medal;
   final int starStatus;
   final int starId;
-  // 生日
+
+  /// 生日
   final String birthday;
-  // 城市
+
+  /// 城市
   final String city;
-  // 省份
+
+  /// 省份
   final String province;
-  // 职业
+
+  /// 职业
   final String occupation;
   final String bgPic;
-  // 与当前查看者的关系
+
+  /// 与当前查看者的关系
   final int relation;
   final String authInfo;
   final String authInfoSinger;
@@ -56,9 +72,11 @@ class UserInfoDetail {
   final int friends;
   final int faceAuth;
   final int avatarReview;
-  // 服务器时间
+
+  /// 服务器时间
   final int servertime;
-  // 听书会员
+
+  /// 听书会员
   final int bookvipValid;
   final int iden;
   final int isStar;
@@ -83,16 +101,20 @@ class UserInfoDetail {
   final int kuqunVisible;
   final int userType;
   final int userYType;
-  // 超级VIP开始时间
+
+  /// 超级VIP开始时间
   final String suVipBeginTime;
-  // 超级VIP结束时间
+
+  /// 超级VIP结束时间
   final String suVipEndTime;
   final String suVipClearday;
   final String suVipYEndtime;
-  // 上次登录时间
+
+  /// 上次登录时间
   final int logintime;
   final String loc;
-  // 以Visible都是个人主页哪些模块对别人可见
+
+  /// 以Visible都是个人主页哪些模块对别人可见
   final int commentVisible;
   final int studentVisible;
   final int followlistVisible;
@@ -134,9 +156,11 @@ class UserInfoDetail {
   final int faxingkaVisible;
   final int aiSongVisible;
   final int mcardVisible;
-  // 名称牌
+
+  /// 名称牌
   final int nameplateId;
-  // 名称牌图标
+
+  /// 名称牌图标
   final String nameplateUrl;
   final String nameplateDynamic;
   final int nameplateType;
@@ -144,15 +168,18 @@ class UserInfoDetail {
   final String nameplateDynamicV1;
   final int hvisitors;
   final int nvisitors;
-  // 注册时间
+
+  /// 注册时间
   final int rtime;
   final String hobby;
   final int actorStatus;
   final String remark;
   final int duration;
-  // 超级VIP等级
+
+  /// 超级VIP等级
   final int svipLevel;
-  // 超级VIP成长值
+
+  /// 超级VIP成长值
   final int svipScore;
   final int visible;
   final int kStar;

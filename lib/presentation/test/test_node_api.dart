@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:battery_music/core/services/v2/user_service.dart';
 import 'package:battery_music/core/services/v2/node_api_client.dart';
 import 'package:battery_music/core/services/v2/node_api_service.dart';
 import 'package:battery_music/models/v2/base_api.dart';
@@ -28,9 +29,11 @@ class _TestNodeApiState extends State<TestNodeApi> {
   final _codeController = TextEditingController();
   final _nodeApiService = NodeApiService();
   final _nodeApiClient = NodeApiClient();
+  final _userService = UserService();
   Uint8List? _qrCode;
   String? _qrCodeKey;
   int? _userId;
+  RegisterDev? _registerDev;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +53,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
     // 遍历歌单
     for (final item in userPlayList.data!.info!) {
       log(
-        "${item.name!}\t\t\t ListID: ${item.listid}\t Pic: ${item.getCoverUrl(size: 200)}\t Count: ${item.count}",
+        "${item.name!}\t\t\t ListID: ${item.listid}\t GlableId:${item.globalCollectionId} Pic: ${item.getCoverUrl(size: 200)}\t Count: ${item.count}",
       );
       if (item.authors != null) {
         for (final author in item.authors!) {
@@ -102,14 +105,31 @@ class _TestNodeApiState extends State<TestNodeApi> {
     }
   }
 
+  // Future<void> _getDfid() async {
+  //   final response = await _nodeApiService.registerDev();
+  //   setState(() {
+  //     _registerDev = response.data;
+  //   });
+  // }
+
   Future<void> _getMusicUrl(String hash) async {
-    BaseApi<RegisterDev> registerDev = await _nodeApiService
-        .registerDev(); // 鉴权（必须调用）
-    final response = await _nodeApiService.songUrl(
-      hash,
-      registerDev.data!.dfid!,
+    try {
+      final response = await _nodeApiService.songUrl(
+        hash: hash,
+        quality: 'flac',
+      );
+      log(response.url!.first);
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<void> _getPlayListDetail() async {
+    final response = await _nodeApiService.playlistTrack(
+      "collection_3_1250725353_23_0",
+      pageSize: 2,
     );
-    log(response.toString());
+    debugPrint(response.toString());
   }
 
   Widget _buildMusicApi() {
@@ -141,9 +161,15 @@ class _TestNodeApiState extends State<TestNodeApi> {
         ),
         ElevatedButton(
           onPressed: () {
-            _getMusicUrl("FE9DCD9D1D142832AB10D5E98CA17C98");
+            _getMusicUrl("953539B9367C8C500CC8E41F0C03BA13");
           },
           child: Text("获取音乐URL"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _getPlayListDetail();
+          },
+          child: Text("获取歌单详情"),
         ),
       ],
     );
@@ -158,9 +184,12 @@ class _TestNodeApiState extends State<TestNodeApi> {
     setState(() {
       _userId = result.data!.userId;
     });
+    _userService.saveUserInfo(user: result.data);
   }
 
   Future<void> _captchaSent() async {
+    final r = await _nodeApiService.registerDev();
+    _userService.saveUserInfo(registerDev: r.data);
     final BaseApi result = await _nodeApiService.captchaSent(
       _phoneController.text,
     );
@@ -210,7 +239,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
           onPressed: () {
             _captchaSent();
           },
-          child: const Text('获取验证码'),
+          child: const Text('获取验证码(自动设置dfid了)'),
         ),
         // 登录
         ElevatedButton(
@@ -249,6 +278,20 @@ class _TestNodeApiState extends State<TestNodeApi> {
             _loginToken();
           },
           child: const Text('刷新登录'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            log(UserService.getUserId.toString());
+            log(UserService.getNickname);
+            log(UserService.getAvatarUrl);
+            log(UserService.getVipType.toString());
+            log(UserService.getToken);
+            log(UserService.getVipBeginTime);
+            log(UserService.getVipEndTime);
+            log(UserService.getBirthday);
+            log(UserService.getDfid);
+          },
+          child: Text("获取UserServicex信息"),
         ),
       ],
     );

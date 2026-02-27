@@ -71,85 +71,120 @@ class TransParam {
 
 /// 歌单/专辑详情模型（info数组项）
 class SongListInfo {
-  // 歌单标签（逗号分隔字符串）
+  /// 歌单标签（逗号分隔字符串）
   final String? tags;
-  // 状态：1 = 正常，0 = 失效 / 删除
+
+  /// 状态：1 = 正常，0 = 失效 / 删除
   final int? status;
-  // 歌单创建者头像 URL
+
+  /// 歌单创建者头像 URL
   final String? createUserPic;
   final int? perNum;
   final int? pubNew;
   final int? isDrop;
-  // 歌单创建者 ID（自建歌单 = 当前用户 ID，收藏歌单 = 原作者 ID）
+
+  /// 歌单创建者 ID（自建歌单 = 当前用户 ID，收藏歌单 = 原作者 ID）
   final int? listCreateUserid;
-  // 是否公开：1 = 公开，0 = 私有
+
+  /// 是否公开：1 = 公开，0 = 私有
   final int? isPublish;
-  // 标签结构化数据（数组）
+
+  /// 标签结构化数据（数组）
   final List<MusiclibTag>? musiclibTags;
   final int? pubTime;
-  // 歌单 / 专辑名称
+
+  /// 歌单 / 专辑名称
   final String? name;
   final int? isFeatured;
-  // 歌单版本号
+
+  /// 歌单版本号
   final int? listVer;
-  // 歌单简介
+
+  /// 歌单简介
   final String? intro;
-  // 类型标识：0 = 用户自建歌单 / 系统默认歌单，1 = 收藏的他人歌单，2 = 收藏的专辑
+
+  /// 类型标识：0 = 用户自建歌单 / 系统默认歌单，1 = 收藏的他人歌单，2 = 收藏的专辑
   final int? type;
-  //原歌单 ID（收藏歌单特有）
+
+  ///原歌单 ID（收藏歌单特有）
   final int? listCreateListid;
   final int? radioId;
-  // 来源类型：1 = 歌单，2 = 专辑
+
+  /// 来源类型：1 = 歌单，2 = 专辑
   final int? source;
-  // 是否删除：0 = 未删除，1 = 已删除
+
+  /// 是否删除：0 = 未删除，1 = 已删除
   final int? isDel;
-  // 是否为当前用户自建：0 = 否（收藏 / 专辑），1 = 是
+
+  /// 是否为当前用户自建：0 = 否（收藏 / 专辑），1 = 是
   final int? isMine;
   final int? perCount;
-  // 创建时间戳（秒级）
+
+  /// 创建时间戳（秒级）
   final int? createTime;
   final int? kqTalent;
-  // 是否可编辑：1 = 自建歌单可编辑，0 = 收藏 / 专辑不可编辑
+
+  /// 是否可编辑：1 = 自建歌单可编辑，0 = 收藏 / 专辑不可编辑
   final int? isEdit;
-  // 最后更新时间戳
+
+  /// 最后更新时间戳
   final int? updateTime;
-  // 歌单内歌曲数量
+
+  /// 歌单内歌曲数量
   final int? mCount;
-  // 	音质标识（空 = 默认
+
+  /// 	音质标识（空 = 默认
   final String? soundQuality;
-  // 歌单展示排序权重
+
+  /// 歌单展示排序权重
   final int? sort;
-  // 透传参数
+
+  /// 透传参数
   final TransParam? transParam;
-  // 是否系统默认歌单：1 = 默认收藏，2 = 我喜欢
+
+  /// 是否系统默认歌单：1 = 默认收藏，2 = 我喜欢
   final int? isDef;
   final String? listCreateGid;
-  // 全局唯一标识
+
+  /// 全局唯一标识
   final String? globalCollectionId;
   final int? isPer;
-  // 歌单封面图 URL 含"{size}"
+
+  /// 歌单封面图 URL 含"{size}"
   final String? pic;
-  // 歌单创建者昵称
+
+  /// 歌单创建者昵称
   final String? listCreateUsername;
-  // 是否私密歌单：0 = 否，1 = 是
+
+  /// 是否私密歌单：0 = 否，1 = 是
   final int? isPri;
-  // 是否自定义封面：1 = 是（他人歌单），0 = 否（系统 / 自建）
+
+  /// 是否自定义封面：1 = 是（他人歌单），0 = 否（系统 / 自建）
   final int? isCustomPic;
-  // 歌单 / 专辑在当前用户收藏中的本地 ID
+
+  /// 歌单 / 专辑在当前用户收藏中的本地 ID
   final int? listid;
-  // 发布类型：0 = 普通，2 = 他人原创歌单
+
+  /// 发布类型：0 = 普通，2 = 他人原创歌单
   final int? pubType;
-  // 歌单内歌曲数量
-  final dynamic count; // 可能是int或String（专辑是String）
-  // 收藏歌单特有：跳转 / 复制标识
+
+  /// 歌单内歌曲数量
+  final dynamic count;
+
+  /// 可能是int或String（专辑是String）
+  /// 收藏歌单特有：跳转 / 复制标识
   final int? jumpCopy;
-  // 收藏歌单特有：原歌单 ID
+
+  /// 收藏歌单特有：原歌单 ID
   final int? fromListid;
-  // 收藏歌单特有：原作者相关标识
+
+  /// 收藏歌单特有：原作者相关标识
   final int? cutd;
-  // 专辑特有(创作者数组)
+
+  /// 专辑特有(创作者数组)
   final List<Author>? authors;
-  // 专辑特有：原专辑在酷狗音乐库的 ID
+
+  /// 专辑特有：原专辑在酷狗音乐库的 ID
   final int? musiclibId;
 
   SongListInfo({
@@ -249,7 +284,9 @@ class SongListInfo {
       isCustomPic: map['is_custom_pic'] as int?,
       listid: map['listid'] as int?,
       pubType: map['pub_type'] as int?,
-      count: map['count'], // 保留原始类型
+      count: map['count'],
+
+      /// 保留原始类型
       jumpCopy: map['jump_copy'] as int?,
       fromListid: map['from_listid'] as int?,
       cutd: map['cutd'] as int?,
@@ -327,18 +364,23 @@ class SongListInfo {
 
 /// 顶层歌单数据模型（仅data部分）
 class UserPlaylist {
-  // 包含所有歌单 / 专辑详情
+  /// 包含所有歌单 / 专辑详情
   final List<SongListInfo>? info;
-  // 设备标识
+
+  /// 设备标识
   final int? phoneFlag;
   final int? totalVer;
-  // 所属用户 ID
+
+  /// 所属用户 ID
   final int? userid;
-  // 收藏专辑数量
+
+  /// 收藏专辑数量
   final int? albumCount;
-  // 歌单总数量
+
+  /// 歌单总数量
   final int? listCount;
-  // 收藏类内容数量
+
+  /// 收藏类内容数量
   final int? collectCount;
 
   UserPlaylist({

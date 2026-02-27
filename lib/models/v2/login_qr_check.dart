@@ -16,7 +16,9 @@ class LoginQrCheck {
   });
   factory LoginQrCheck.fromMap(Map<String, dynamic> json) {
     return LoginQrCheck(
-      status: json['status'], // 0： 已过期 1: 等待扫码 2: 待确认 4: 授权登录成功
+      status: json['status'],
+
+      /// 0： 已过期 1: 等待扫码 2: 待确认 4: 授权登录成功
       nickname: json['nickname'],
       pic: json['pic'],
       token: json['token'],

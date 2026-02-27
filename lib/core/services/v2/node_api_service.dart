@@ -5,6 +5,7 @@ import 'package:battery_music/models/v2/login_qr_check.dart';
 import 'package:battery_music/models/v2/login_qr_key.dart';
 import 'package:battery_music/models/v2/register_dev.dart';
 import 'package:battery_music/models/v2/search_hot.dart';
+import 'package:battery_music/models/v2/song_data.dart';
 import 'package:battery_music/models/v2/top_card.dart';
 import 'package:battery_music/models/v2/user_info.dart';
 import 'package:battery_music/models/v2/user_info_detail.dart';
@@ -134,6 +135,23 @@ class NodeApiService {
     );
   }
 
+  /// 获取歌单内音乐(所有的歌单)
+  /// [id] 歌单 全局id
+  /// [page] 页码
+  /// [pageSize] 每页数量
+  Future<Response> playlistTrack(
+    String id, {
+    int? page,
+    int? pageSize = 30,
+  }) async {
+    Response response = await _nodeApiClient.get(
+      '/playlist/track/all',
+      queryParameters: {'id': id, 'page': page, 'pagesize': pageSize},
+    );
+    debugPrint("Playlist track response: ${response.data}");
+    return response;
+  }
+
   /// 获取热搜列表(实际并非热搜，太扯了这个API)
   Future<BaseApi<SearchHot>> searchHot() async {
     Response response = await _nodeApiClient.post('/search/hot');
@@ -171,12 +189,18 @@ class NodeApiService {
 
   ///获取音乐URL
   ///[hash] 歌曲hash
-  Future<Response> songUrl(String hash, String dfid) async {
+  ///[freePart] 是否返回试听部分（仅部分歌曲）(0：否, 1：是)
+  ///[quality] 音质(128,320,flac,high)
+  Future<SongData> songUrl({
+    String? hash,
+    int? freePart,
+    String? quality,
+  }) async {
     Response response = await _nodeApiClient.get(
       '/song/url',
-      queryParameters: {'hash': hash, 'dfid': dfid},
+      queryParameters: {'hash': hash},
     );
     debugPrint(response.data.toString());
-    return response;
+    return SongData.fromMap(response.data);
   }
 }

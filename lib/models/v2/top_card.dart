@@ -1,44 +1,3 @@
-// import 'dart:convert';
-
-// // -----------------------------------------------------------------------------
-// // Root 类：API 响应最外层
-// // -----------------------------------------------------------------------------
-// class RecommendResponse {
-//   final TopCard? data;
-//   final int? status;
-//   final int? errorCode;
-
-//   const RecommendResponse({
-//     this.data,
-//     this.status,
-//     this.errorCode,
-//   });
-
-//   factory RecommendResponse.fromMap(Map<String, dynamic> map) {
-//     return RecommendResponse(
-//       data: map['data'] != null ? TopCard.fromMap(map['data']) : null,
-//       status: map['status'],
-//       errorCode: map['error_code'],
-//     );
-//   }
-
-//   factory RecommendResponse.fromJson(String source) =>
-//       RecommendResponse.fromMap(json.decode(source));
-
-//   Map<String, dynamic> toMap() {
-//     return {
-//       'data': data?.toMap(),
-//       'status': status,
-//       'error_code': errorCode,
-//     };
-//   }
-
-//   String toJson() => json.encode(toMap());
-// }
-
-// -----------------------------------------------------------------------------
-// Data 类：推荐流数据载荷
-// -----------------------------------------------------------------------------
 import 'dart:convert';
 
 class TopCard {
@@ -112,9 +71,9 @@ class TopCard {
   String toJson() => json.encode(toMap());
 }
 
-// -----------------------------------------------------------------------------
-// Song_list (SongItem) 类：单曲详情
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// Song_list (SongItem) 类：单曲详情
+/// -----------------------------------------------------------------------------
 class SongItem {
   /// 无损 FLAC 文件大小
   final int? filesizeFlac;
@@ -155,10 +114,14 @@ class SongItem {
   final int? scid;
   final String? suffixAudioName;
   final String? mvHash;
-  final String? hash; // 标准 Hash
+  final String? hash;
+
+  /// 标准 Hash
   final String? authorName;
   final List<SongTag>? tags;
-  final String? rankLabel; // 榜单标签 (如 "昨日超万人播放")
+  final String? rankLabel;
+
+  /// 榜单标签 (如 "昨日超万人播放")
   final int? bitrate;
   final int? isMvFileHead;
   final int? hasAccompany;
@@ -306,7 +269,8 @@ class SongItem {
       isFileHead320: map['is_file_head_320'],
       algPath: map['alg_path'],
       isFileHead: map['is_file_head'],
-      // JSON中是浮点数，需要转换
+
+      /// JSON中是浮点数，需要转换
       timelength320: (map['timelength_320'] as num?)?.toDouble(),
       scid: map['scid'],
       suffixAudioName: map['suffix_audio_name'],
@@ -371,7 +335,8 @@ class SongItem {
       hashApe: map['hash_ape'],
       hashOther: map['hash_other'],
       privilege: map['privilege'],
-      // JSON中是浮点数，需要转换
+
+      /// JSON中是浮点数，需要转换
       timeLength: (map['time_length'] as num?)?.toDouble(),
       mixsongid: map['mixsongid'],
       failProcess: map['fail_process'],
@@ -462,9 +427,9 @@ class SongItem {
   }
 }
 
-// -----------------------------------------------------------------------------
-// Tags 类：标签信息
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// Tags 类：标签信息
+/// -----------------------------------------------------------------------------
 class SongTag {
   final int? tagId;
   final int? parentId;
@@ -485,9 +450,9 @@ class SongTag {
   }
 }
 
-// -----------------------------------------------------------------------------
-// TrackerInfo 类：追踪/鉴权信息
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// TrackerInfo 类：追踪/鉴权信息
+/// -----------------------------------------------------------------------------
 class TrackerInfo {
   final String? auth;
   final int? moduleId;
@@ -508,9 +473,9 @@ class TrackerInfo {
   }
 }
 
-// -----------------------------------------------------------------------------
-// IpsTag 类：热度/状态标签
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// IpsTag 类：热度/状态标签
+/// -----------------------------------------------------------------------------
 class IpsTag {
   final String? name;
   final String? ipId;
@@ -527,9 +492,9 @@ class IpsTag {
   }
 }
 
-// -----------------------------------------------------------------------------
-// RelateGoods 类：关联商品 (空对象)
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// RelateGoods 类：关联商品 (空对象)
+/// -----------------------------------------------------------------------------
 class RelateGoods {
   const RelateGoods();
 
@@ -540,9 +505,9 @@ class RelateGoods {
   Map<String, dynamic> toMap() => {};
 }
 
-// -----------------------------------------------------------------------------
-// SingerInfo 类：歌手信息
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// SingerInfo 类：歌手信息
+/// -----------------------------------------------------------------------------
 class SingerInfo {
   final String? name;
   final int? isPublish;
@@ -565,9 +530,9 @@ class SingerInfo {
   }
 }
 
-// -----------------------------------------------------------------------------
-// TransParam 类：传输/版权参数
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// TransParam 类：传输/版权参数
+/// -----------------------------------------------------------------------------
 class TransParam {
   /// 付费块模板 ID (Payment Block Template)
   final int? payBlockTpl;
@@ -679,9 +644,9 @@ class TransParam {
   }
 }
 
-// -----------------------------------------------------------------------------
-// 辅助映射类 (ClassMap, QualityMap, IpMap)
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
+/// 辅助映射类 (ClassMap, QualityMap, IpMap)
+/// -----------------------------------------------------------------------------
 class ClassMap {
   final int? attr0;
 
