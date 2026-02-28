@@ -129,11 +129,12 @@ class _SearchResultPageState extends State<SearchResultPage>
         if (provider.playlistResults.isEmpty) {
           return _buildEmptyState(theme, '没有找到相关歌单');
         }
-        
+
         return NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
             // 检测是否滚动到底部并还有更多数据可加载
-            if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
+            if (scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent - 200 &&
                 !provider.isLoading &&
                 provider.hasMorePlaylists) {
               provider.searchPlaylists(isLoadMore: true);
@@ -142,11 +143,15 @@ class _SearchResultPageState extends State<SearchResultPage>
           },
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            itemCount: provider.playlistResults.length + (provider.isLoading && provider.hasMorePlaylists ? 1 : 0),
+            itemCount:
+                provider.playlistResults.length +
+                (provider.isLoading && provider.hasMorePlaylists ? 1 : 0),
             separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               // 如果是最后一个项目且还有更多数据，显示加载更多的提示
-              if (index == provider.playlistResults.length && provider.isLoading && provider.hasMorePlaylists) {
+              if (index == provider.playlistResults.length &&
+                  provider.isLoading &&
+                  provider.hasMorePlaylists) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -157,7 +162,7 @@ class _SearchResultPageState extends State<SearchResultPage>
                   ),
                 );
               }
-              
+
               return _PlaylistItemWidget(
                 playlist: provider.playlistResults[index],
               );
@@ -180,11 +185,12 @@ class _SearchResultPageState extends State<SearchResultPage>
         if (provider.songResults.isEmpty) {
           return _buildEmptyState(theme, '没有找到相关歌曲');
         }
-        
+
         return NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
             // 检测是否滚动到底部并还有更多数据可加载
-            if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
+            if (scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent - 200 &&
                 !provider.isLoading &&
                 provider.hasMoreSongs) {
               provider.searchSongs(isLoadMore: true);
@@ -193,12 +199,16 @@ class _SearchResultPageState extends State<SearchResultPage>
           },
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            itemCount: provider.songResults.length + (provider.isLoading && provider.hasMoreSongs ? 1 : 0),
+            itemCount:
+                provider.songResults.length +
+                (provider.isLoading && provider.hasMoreSongs ? 1 : 0),
             // 桌面端列表通常比较密集，不需要 excessive spacing
             itemExtent: 60,
             itemBuilder: (context, index) {
               // 如果是最后一个项目且还有更多数据，显示加载更多的提示
-              if (index == provider.songResults.length && provider.isLoading && provider.hasMoreSongs) {
+              if (index == provider.songResults.length &&
+                  provider.isLoading &&
+                  provider.hasMoreSongs) {
                 return Container(
                   height: 60,
                   alignment: Alignment.center,
@@ -208,7 +218,7 @@ class _SearchResultPageState extends State<SearchResultPage>
                   ),
                 );
               }
-              
+
               final song = provider.songResults[index];
               return SongListItem(
                 index: index,
@@ -315,10 +325,7 @@ class _PlaylistItemWidget extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               playlist.formattedPlayCount,
-              style: TextStyle(
-                color: theme.disabledColor,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: theme.disabledColor, fontSize: 12),
             ),
           ],
         ),

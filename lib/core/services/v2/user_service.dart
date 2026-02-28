@@ -1,5 +1,5 @@
-import 'package:battery_music/models/v2/register_dev.dart';
-import 'package:battery_music/models/v2/user_info.dart';
+import 'package:battery_music/models/v2/response/register_dev.dart';
+import 'package:battery_music/models/v2/response/user_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 用户服务类
