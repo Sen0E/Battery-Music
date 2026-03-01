@@ -218,7 +218,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
     setState(() {
       _userId = result.data!.userId;
     });
-    _userService.saveUserInfo(user: result.data);
+    _userService.saveUserInfo(userInfo: result.data);
   }
 
   Future<void> _captchaSent() async {

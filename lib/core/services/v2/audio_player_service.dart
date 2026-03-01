@@ -1,9 +1,7 @@
 import 'dart:developer';
 
-import 'package:battery_music/core/services/node_api_client.dart';
 import 'package:battery_music/core/services/v2/node_api_service.dart';
 import 'package:battery_music/models/v2/entity/music_item.dart';
-import 'package:battery_music/models/v2/response/base_api.dart';
 import 'package:battery_music/models/v2/response/song_data.dart';
 import 'package:media_kit/media_kit.dart';
 
@@ -14,7 +12,6 @@ class AudioPlayerService {
 
   late final Player player;
 
-  final NodeApiClient _nodeApiClient = NodeApiClient();
   final NodeApiService _nodeApiService = NodeApiService();
 
   final List<MusicItem> _playlist = [];
@@ -57,9 +54,10 @@ class AudioPlayerService {
         // 解析成功，交给 media_kit 播放
         await player.open(Media(realUrl));
         await player.play();
+      } else {
+        log("当前音乐无法播放，正在切换下一首");
+        playNext();
       }
-      log("当前音乐无法播放，正在切换下一首");
-      await player.next();
     } catch (e) {
       log("获取播放链接失败: $e");
       // 解析失败策略：可以自动跳过当前歌曲播放下一首
@@ -70,7 +68,7 @@ class AudioPlayerService {
   /// 将 hash 转换为真实 URL
   Future<String?> _fetchRealUrlFromHash(String hash) async {
     SongData res = await _nodeApiService.songUrl(hash);
-    if (res.status == 1) {
+    if (res.status == 1 && res.url != null && res.url!.isNotEmpty) {
       return res.url!.first;
     }
     return null;
@@ -151,6 +149,16 @@ class AudioPlayerService {
   Future<void> playSpecific(int index) async {
     await _playInternal(index);
   }
+
+  /// 设置音量 (接收0.0-100.0范围的值)
+  Future<void> setVolume(double volume) async {
+    // 确保音量在有效范围内
+    double clampedVolume = volume.clamp(0.0, 100.0);
+    await player.setVolume(clampedVolume);
+  }
+
+  /// 获取当前音量
+  double get volume => player.state.volume;
 
   /// 销毁释放资源 (通常在 App 退出时调用)
   void dispose() {

@@ -85,7 +85,7 @@ class _SplashPageState extends State<SplashPage> {
     // }
     BaseApi<UserInfo> result = await _nodeApiService.loginToken();
     if (result.status == 1) {
-      _userService.saveUserInfo(user: result.data);
+      _userService.saveUserInfo(userInfo: result.data);
       _navigateToHome();
     } else {
       _userService.logOut();

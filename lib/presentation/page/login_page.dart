@@ -2,11 +2,8 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:battery_music/core/services/node_service_api.dart';
-import 'package:battery_music/core/services/user_service.dart';
-import 'package:battery_music/models/base_response.dart';
-import 'package:battery_music/models/login_qr_key_response.dart';
-import 'package:battery_music/models/login_response.dart';
+import 'package:battery_music/core/services/v2/node_api_service.dart';
+import 'package:battery_music/core/services/v2/user_service.dart';
 import 'package:battery_music/presentation/components/window_controls.dart';
 import 'package:battery_music/presentation/layout/main_layout.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +21,9 @@ class LoginPage extends StatefulWidget {
 enum _LoginType { phone, qrCode }
 
 class _LoginPageState extends State<LoginPage> {
-  final NodeServiceApi _nodeServiceApi = NodeServiceApi();
+  // final NodeServiceApi _nodeServiceApi = NodeServiceApi();
+  final NodeApiService _nodeApiService = NodeApiService();
+  final UserService _userService = UserService();
 
   // 二维码登录相关状态
   Timer? _pollingTimer;
@@ -89,13 +88,14 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final ApiResponse<LoginQrKey> response = await _nodeServiceApi
-          .loginQrKey();
+      // final ApiResponse<LoginQrKey> response = await _nodeServiceApi
+      //     .loginQrKey();
+      final response = await _nodeApiService.loginQrKey();
       if (!mounted) return;
 
       if (response.data?.qrcode != null) {
         setState(() {
-          _qrImageBytes = response.data!.imageBytes!;
+          _qrImageBytes = response.data!.qrImage!;
           _qrKey = response.data!.qrcode!;
           _qrStatusMessage = '请使用酷狗APP扫描';
           _isQrLoading = false;
@@ -137,7 +137,8 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       try {
-        final response = await _nodeServiceApi.loginQrCheck(key);
+        // final response = await _nodeServiceApi.loginQrCheck(key);
+        final response = await _nodeApiService.loginQrCheck(key);
         if (!mounted) return;
 
         final qrCheck = response.data;
@@ -147,27 +148,18 @@ class _LoginPageState extends State<LoginPage> {
           // Stop timers to prevent further checks.
           timer.cancel();
           _qrRefreshTimer?.cancel();
+          _userService.saveUserInfo(loginQrCheck: qrCheck);
 
-          // 获取用户信息
-          final userDetialResult = await NodeServiceApi.instance.userDetial();
-          if (!mounted) return;
-
-          await UserService.instance.saveUserInfo(userDetialResult.data!);
-          if (!mounted) return;
-
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(
-          //     content: Text('登录成功！'),
-          //     backgroundColor: Theme.of(context).colorScheme.primary,
-          //   ),
-          // );
+          log("登录成功");
 
           // 登录成功，跳转到主界面
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainLayout()),
-          );
-          return; // Exit after navigation
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MainLayout()),
+            );
+          }
+          return;
         } else if (qrCheck.isExpired) {
           if (!mounted) return;
           setState(() {
@@ -217,7 +209,8 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await _nodeServiceApi.captchaSent(_phoneController.text);
+      // await _nodeServiceApi.captchaSent(_phoneController.text);
+      await _nodeApiService.captchaSent(_phoneController.text);
       if (!mounted) return;
       // ScaffoldMessenger.of(
       //   context,
@@ -269,29 +262,33 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final ApiResponse<LoginResponse> response = await _nodeServiceApi
-          .loginForCellPhone(_phoneController.text, _codeController.text);
+      // final ApiResponse<LoginResponse> response = await _nodeServiceApi
+      //     .loginForCellPhone(_phoneController.text, _codeController.text);
+      final response = await _nodeApiService.loginForCellPhone(
+        _phoneController.text,
+        _codeController.text,
+      );
 
-      if (!mounted) return;
-
-      // API返回200通常表示请求成功，具体业务成功需要根据返回内容判断
       if (response.status == 1) {
-        final userDetailResponse = await NodeServiceApi.instance.userDetial();
-        if (userDetailResponse.data != null) {
-          await UserService.instance.saveUserInfo(userDetailResponse.data!);
-          if (!mounted) return;
-          // ScaffoldMessenger.of(
-          //   context,
-          // ).showSnackBar(const SnackBar(content: Text('登录成功！')));
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainLayout()),
-          );
-        } else {
-          setState(() {
-            _phoneLoginErrorText = '获取用户信息失败，请重试';
-          });
-        }
+        _userService.saveUserInfo(userInfo: response.data!);
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainLayout()),
+        );
+        // final userDetailResponse = await NodeServiceApi.instance.userDetial();
+        // final userDetailResponse = await _nodeApiService.userDetail();
+        // if (userDetailResponse.data != null) {
+        //   await UserService.instance.saveUserInfo(userDetailResponse.data!);
+        //   if (!mounted) return;
+        //   // ScaffoldMessenger.of(
+        //   //   context,
+        //   // ).showSnackBar(const SnackBar(content: Text('登录成功！')));
+        // } else {
+        //   setState(() {
+        //     _phoneLoginErrorText = '获取用户信息失败，请重试';
+        //   });
+        // }
       } else {
         setState(() {
           _phoneLoginErrorText = '登录失败，请检查验证码或手机号';

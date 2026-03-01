@@ -1,4 +1,5 @@
 import 'package:battery_music/core/services/node_api_client.dart';
+import 'package:battery_music/models/v2/response/login_qr_check.dart';
 import 'package:battery_music/models/v2/response/register_dev.dart';
 import 'package:battery_music/models/v2/response/user_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,16 +52,20 @@ class UserService {
     dfid = _prefs.getString('dfid') ?? '';
   }
 
-  Future<void> saveUserInfo({UserInfo? user, RegisterDev? registerDev}) async {
-    if (user != null) {
-      userId = user.userId;
-      nickname = user.nickname;
-      avatarUrl = user.pic;
-      vipType = user.vipType;
-      token = user.token;
-      vipBeginTime = user.vipBeginTime;
-      vipEndTime = user.vipEndTime;
-      birthday = user.birthday;
+  Future<void> saveUserInfo({
+    UserInfo? userInfo,
+    LoginQrCheck? loginQrCheck,
+    RegisterDev? registerDev,
+  }) async {
+    if (userInfo != null) {
+      userId = userInfo.userId;
+      nickname = userInfo.nickname;
+      avatarUrl = userInfo.pic;
+      vipType = userInfo.vipType;
+      token = userInfo.token;
+      vipBeginTime = userInfo.vipBeginTime;
+      vipEndTime = userInfo.vipEndTime;
+      birthday = userInfo.birthday;
       await _prefs.setInt('userId', userId);
       await _prefs.setString('nickname', nickname);
       await _prefs.setString('avatarUrl', avatarUrl);
@@ -69,6 +74,15 @@ class UserService {
       await _prefs.setString('vipBeginTime', vipBeginTime);
       await _prefs.setString('vipEndTime', vipEndTime);
       await _prefs.setString('birthday', birthday);
+    }
+    if (loginQrCheck != null) {
+      nickname = loginQrCheck.nickname!;
+      avatarUrl = loginQrCheck.pic!;
+      token = loginQrCheck.token!;
+      userId = loginQrCheck.userId!;
+      await _prefs.setString('nickname', nickname);
+      await _prefs.setString('avatarUrl', avatarUrl);
+      await _prefs.setString('token', token);
     }
     if (registerDev != null) {
       dfid = registerDev.dfid;
