@@ -1,3 +1,4 @@
+import 'package:battery_music/core/services/node_api_client.dart';
 import 'package:battery_music/models/v2/response/register_dev.dart';
 import 'package:battery_music/models/v2/response/user_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,7 @@ class UserService {
   factory UserService() => _userService;
 
   late SharedPreferences _prefs;
+  NodeApiClient _nodeApiClient = NodeApiClient();
 
   static int userId = 0;
   static String nickname = '';
@@ -29,6 +31,8 @@ class UserService {
   static String get getVipEndTime => vipEndTime;
   static String get getBirthday => birthday;
   static String get getDfid => dfid;
+
+  static bool get hasLogin => userId != '' && token != '';
 
   UserService._internal() {
     _initUserService();
@@ -70,5 +74,18 @@ class UserService {
       dfid = registerDev.dfid;
       await _prefs.setString('dfid', dfid);
     }
+  }
+
+  /// 退出登录
+  Future<void> logOut() async {
+    await _nodeApiClient.clearCookies();
+    await _prefs.remove('userId');
+    await _prefs.remove('nickname');
+    await _prefs.remove('avatarUrl');
+    await _prefs.remove('vipType');
+    await _prefs.remove('token');
+    await _prefs.remove('vipBeginTime');
+    await _prefs.remove('vipEndTime');
+    await _prefs.remove('birthday');
   }
 }

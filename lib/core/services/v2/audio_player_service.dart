@@ -1,14 +1,3 @@
-// import 'package:just_audio/just_audio.dart';
-
-// class AudioPlayerService {
-//   static final AudioPlayerService _audioPlayerService =
-//       AudioPlayerService._internal();
-//   factory AudioPlayerService() => _audioPlayerService;
-//   AudioPlayerService._internal();
-// }
-
-// class HashAudioSource extends StreamAudio {}
-// audio_player_service.dart
 import 'dart:developer';
 
 import 'package:battery_music/core/services/node_api_client.dart';

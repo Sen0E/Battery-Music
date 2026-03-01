@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:battery_music/core/services/user_service.dart';
-import 'package:battery_music/models/search_suggest_response.dart';
+// import 'package:battery_music/core/services/user_service.dart';
+import 'package:battery_music/core/services/v2/user_service.dart';
+import 'package:battery_music/models/v2/response/search_suggest.dart';
 import 'package:battery_music/presentation/components/window_controls.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
 import 'package:flutter/material.dart';
@@ -245,7 +246,7 @@ class _HotSearch extends StatelessWidget {
 }
 
 class _SearchSuggestions extends StatelessWidget {
-  final List<SearchSugges> suggestions;
+  final List<RecordData> suggestions;
   final Function(String) onTap;
 
   const _SearchSuggestions({required this.suggestions, required this.onTap});
@@ -408,7 +409,6 @@ class SearchTextField extends StatelessWidget {
 
 class UserInfoWidget extends StatelessWidget {
   const UserInfoWidget({super.key});
-  UserService get _userService => UserService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -431,7 +431,7 @@ class UserInfoWidget extends StatelessWidget {
               ? name.substring(0, 1).toUpperCase()
               : "U";
           userPicUrl = userInfo['avatarUrl'] ?? "";
-          isVip = userInfo['isVip'] ?? false;
+          isVip = userInfo['VipType'] != 0;
         }
 
         return Row(
@@ -490,9 +490,9 @@ class UserInfoWidget extends StatelessWidget {
 
   Future<Map<String, dynamic>> _loadUserInfo() async {
     // 使用新的 UserService 方法
-    final nickname = await _userService.getNickname();
-    final avatarUrl = await _userService.getAvatarUrl();
-    final isVip = await _userService.isVip();
-    return {'nickname': nickname, 'avatarUrl': avatarUrl, 'isVip': isVip};
+    final nickname = UserService.getNickname;
+    final avatarUrl = UserService.getAvatarUrl;
+    final vipType = UserService.vipType;
+    return {'nickname': nickname, 'avatarUrl': avatarUrl, 'VipType': vipType};
   }
 }

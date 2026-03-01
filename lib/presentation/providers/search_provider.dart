@@ -1,9 +1,14 @@
-import 'package:battery_music/models/search_hot_response.dart';
-import 'package:battery_music/models/search_special_response.dart';
-import 'package:battery_music/models/search_suggest_response.dart';
+import 'package:battery_music/core/services/v2/node_api_service.dart';
+import 'package:battery_music/models/v2/response/search_hot.dart';
+// import 'package:battery_music/models/search_hot_response.dart';
+// import 'package:battery_music/models/search_special_response.dart';
+// import 'package:battery_music/models/search_suggest_response.dart';
+import 'package:battery_music/models/v2/response/search_keywords_song.dart';
+import 'package:battery_music/models/v2/response/search_keywords_special.dart';
+import 'package:battery_music/models/v2/response/search_suggest.dart';
 import 'package:flutter/foundation.dart';
-import 'package:battery_music/models/search_song_response.dart';
-import 'package:battery_music/core/services/node_service_api.dart';
+// import 'package:battery_music/models/search_song_response.dart';
+// import 'package:battery_music/core/services/node_service_api.dart';
 
 /// 搜索类型枚举
 enum SearchType { songs, playlists }
@@ -11,14 +16,15 @@ enum SearchType { songs, playlists }
 /// 搜索状态管理 Provider
 /// 负责管理搜索关键词、搜索结果（单曲/歌单）、热搜榜、搜索建议及分页加载状态
 class SearchProvider extends ChangeNotifier {
-  final NodeServiceApi _api = NodeServiceApi.instance;
+  // final NodeServiceApi _api = NodeServiceApi.instance;
+  final NodeApiService _nodeApiService = NodeApiService();
 
   // --- 状态 ---
   String _currentKeyword = '';
   List<SearchCategory> _hotSearchCategories = [];
-  List<SearchSugges> _searchSuggestions = [];
-  List<SongItem> _songResults = [];
-  List<PlaylistItem> _playlistResults = [];
+  List<RecordData> _searchSuggestions = [];
+  List<SearchKeywordsSong> _songResults = [];
+  List<SearchKeywordsSpecial> _playlistResults = [];
   bool _isLoading = false;
   int _searchTabIndex = 0; // 0: 歌曲, 1: 歌单
 
@@ -32,9 +38,9 @@ class SearchProvider extends ChangeNotifier {
   // --- Getters ---
   String get currentKeyword => _currentKeyword;
   List<SearchCategory> get hotSearchCategories => _hotSearchCategories;
-  List<SearchSugges> get searchSuggestions => _searchSuggestions;
-  List<SongItem> get songResults => _songResults;
-  List<PlaylistItem> get playlistResults => _playlistResults;
+  List<RecordData> get searchSuggestions => _searchSuggestions;
+  List<SearchKeywordsSong> get songResults => _songResults;
+  List<SearchKeywordsSpecial> get playlistResults => _playlistResults;
   bool get isLoading => _isLoading;
   int get searchTabIndex => _searchTabIndex;
   bool get hasMoreSongs => _hasMoreSongs;
@@ -61,14 +67,24 @@ class SearchProvider extends ChangeNotifier {
 
     try {
       // 默认执行歌曲搜索
-      final response = await _api.searchKeywords<SearchSongResponse>(
+      // final response = await _api.searchKeywords<SearchSongResponse>(
+      //   _currentKeyword,
+      //   _songPage,
+      //   pageSize: _pageSize,
+      //   type: 'song',
+      //   fromJson: SearchSongResponse.fromJson,
+      // );
+      final response = await _nodeApiService.searchKeywords<SearchKeywordsSong>(
         _currentKeyword,
-        _songPage,
+        page: _songPage,
         pageSize: _pageSize,
-        type: 'song',
-        fromJson: SearchSongResponse.fromJson,
       );
-
+      // if (response.data != null) {
+      //   final newItems = response.data!.lists ?? [];
+      //   _songResults = newItems;
+      //   _hasMoreSongs = newItems.length >= _pageSize;
+      //   _songPage++;
+      // }
       if (response.data != null) {
         final newItems = response.data!.lists ?? [];
         _songResults = newItems;
@@ -114,14 +130,30 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _api.searchKeywords<SearchSongResponse>(
-        _currentKeyword,
-        _songPage,
-        pageSize: _pageSize,
-        type: 'song',
-        fromJson: SearchSongResponse.fromJson,
-      );
+      // final response = await _api.searchKeywords<SearchSongResponse>(
+      //   _currentKeyword,
+      //   _songPage,
+      //   pageSize: _pageSize,
+      //   type: 'song',
+      //   fromJson: SearchSongResponse.fromJson,
+      // );
 
+      // if (response.data != null) {
+      //   final newItems = response.data!.lists ?? [];
+      //   if (isLoadMore) {
+      //     _songResults.addAll(newItems);
+      //   } else {
+      //     _songResults = newItems;
+      //   }
+      //   _hasMoreSongs = newItems.length >= _pageSize;
+      //   _songPage++;
+      // }
+
+      final response = await _nodeApiService.searchKeywords<SearchKeywordsSong>(
+        _currentKeyword,
+        page: _songPage,
+        pageSize: _pageSize,
+      );
       if (response.data != null) {
         final newItems = response.data!.lists ?? [];
         if (isLoadMore) {
@@ -153,14 +185,32 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _api.searchKeywords<SearchSpecialResponse>(
-        _currentKeyword,
-        _playlistPage,
-        pageSize: _pageSize,
-        type: 'special',
-        fromJson: SearchSpecialResponse.fromJson,
-      );
+      // final response = await _api.searchKeywords<SearchSpecialResponse>(
+      //   _currentKeyword,
+      //   _playlistPage,
+      //   pageSize: _pageSize,
+      //   type: 'special',
+      //   fromJson: SearchSpecialResponse.fromJson,
+      // );
 
+      // if (response.data != null) {
+      //   final newItems = response.data!.lists ?? [];
+      //   if (isLoadMore) {
+      //     _playlistResults.addAll(newItems);
+      //   } else {
+      //     _playlistResults = newItems;
+      //   }
+      //   _hasMorePlaylists = newItems.length >= _pageSize;
+      //   _playlistPage++;
+      // }
+
+      final response = await _nodeApiService
+          .searchKeywords<SearchKeywordsSpecial>(
+            _currentKeyword,
+            type: 'special',
+            page: _playlistPage,
+            pageSize: _pageSize,
+          );
       if (response.data != null) {
         final newItems = response.data!.lists ?? [];
         if (isLoadMore) {
@@ -185,8 +235,12 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _api.searchHot();
-      if (response.data != null) {
+      // final response = await _api.searchHot();
+      // if (response.data != null) {
+      //   _hotSearchCategories = response.data!.list ?? [];
+      // }
+      final response = await _nodeApiService.searchHot();
+      if (response.status == 1) {
         _hotSearchCategories = response.data!.list ?? [];
       }
     } catch (e) {
@@ -206,7 +260,13 @@ class SearchProvider extends ChangeNotifier {
       return;
     }
     try {
-      _searchSuggestions = await _api.searchSuggest(keyword);
+      // _searchSuggestions = await _api.searchSuggest(keyword);
+      final response = await _nodeApiService.searchSuggest(keyword);
+      if (response.status == 1) {
+        _searchSuggestions = response.data!.first.recordDatas!;
+      } else {
+        _searchSuggestions = [];
+      }
     } catch (e) {
       debugPrint('Error fetching search suggestions: $e');
       _searchSuggestions = [];

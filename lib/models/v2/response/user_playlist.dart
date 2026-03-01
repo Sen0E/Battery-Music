@@ -116,7 +116,7 @@ class SongListInfo {
   /// 是否删除：0 = 未删除，1 = 已删除
   final int? isDel;
 
-  /// 是否为当前用户自建：0 = 否（收藏 / 专辑），1 = 是
+  /// 是否为当前用户自建：0 = 否，1 = 是
   final int? isMine;
   final int? perCount;
 

@@ -1,4 +1,5 @@
-import 'package:battery_music/models/search_special_response.dart';
+import 'package:battery_music/models/v2/response/search_keywords_special.dart'
+    hide Theme;
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
@@ -222,9 +223,9 @@ class _SearchResultPageState extends State<SearchResultPage>
               final song = provider.songResults[index];
               return SongListItem(
                 index: index,
-                songName: song.songName ?? '未知歌曲',
+                songName: song.fileName ?? '未知歌曲',
                 singerName: song.singerName ?? '未知歌手',
-                coverUrl: song.image?.replaceAll('{size}', '100'),
+                coverUrl: song.getImageUrl(),
                 duration: song.duration,
                 isDurationInMs: false, // 搜索结果是秒
                 onTap: () {
@@ -260,7 +261,8 @@ class _SearchResultPageState extends State<SearchResultPage>
 
 /// 歌单列表项组件
 class _PlaylistItemWidget extends StatelessWidget {
-  final PlaylistItem playlist;
+  // final PlaylistItem playlist;
+  final SearchKeywordsSpecial playlist;
   const _PlaylistItemWidget({required this.playlist});
 
   @override
@@ -283,7 +285,7 @@ class _PlaylistItemWidget extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: Image.network(
-              playlist.getImageUrl(size: 100),
+              playlist.img ?? '',
               width: 48,
               height: 48,
               fit: BoxFit.cover,
@@ -297,7 +299,7 @@ class _PlaylistItemWidget extends StatelessWidget {
           ),
         ),
         title: Text(
-          playlist.specialName ?? '未知歌单',
+          playlist.specialname ?? '未知歌单',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
@@ -324,7 +326,7 @@ class _PlaylistItemWidget extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              playlist.formattedPlayCount,
+              playlist.totalPlayCount ?? '0',
               style: TextStyle(color: theme.disabledColor, fontSize: 12),
             ),
           ],

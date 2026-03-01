@@ -80,14 +80,6 @@ class _SideBarState extends State<SideBar> {
           ),
           _buildMenuItem(
             context,
-            5,
-            Icons.bookmark_rounded,
-            "收藏",
-            provider,
-            theme,
-          ),
-          _buildMenuItem(
-            context,
             6,
             Icons.computer_rounded,
             "本地",
@@ -132,7 +124,7 @@ class _SideBarState extends State<SideBar> {
       );
     }
 
-    final playlists = playlistProvider.customPlaylists;
+    final playlists = playlistProvider.minePlaylist;
 
     return ListView.builder(
       padding: EdgeInsets.zero,

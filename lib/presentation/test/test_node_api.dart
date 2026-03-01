@@ -10,6 +10,8 @@ import 'package:battery_music/models/v2/response/login_qr_check.dart';
 import 'package:battery_music/models/v2/response/login_qr_key.dart';
 import 'package:battery_music/models/v2/response/register_dev.dart';
 import 'package:battery_music/models/v2/response/search_hot.dart';
+import 'package:battery_music/models/v2/response/search_keywords_song.dart';
+import 'package:battery_music/models/v2/response/search_keywords_special.dart';
 import 'package:battery_music/models/v2/response/top_card.dart';
 import 'package:battery_music/models/v2/response/user_info.dart';
 import 'package:battery_music/models/v2/response/user_info_detail.dart';
@@ -123,10 +125,26 @@ class _TestNodeApiState extends State<TestNodeApi> {
   }
 
   Future<void> _searchKeyword() async {
-    final response = await _nodeApiService.searchKeywords(
+    final response = await _nodeApiService.searchKeywords<SearchKeywordsSong>(
       "HOYO-MIX",
+      type: 'song',
       pageSize: 2,
     );
+    log(response.data!.toJson());
+  }
+
+  Future<void> _searchSuggest() async {
+    final response = await _nodeApiService.searchSuggest("HOYO-MIX");
+    log(response.toJson());
+  }
+
+  Future<void> _searchKeywordsforPlayList() async {
+    final response = await _nodeApiService
+        .searchKeywords<SearchKeywordsSpecial>(
+          "睡觉",
+          type: 'special',
+          pageSize: 2,
+        );
     log(response.data!.toJson());
   }
 
@@ -173,7 +191,19 @@ class _TestNodeApiState extends State<TestNodeApi> {
           onPressed: () {
             _searchKeyword();
           },
-          child: Text("搜索关键词"),
+          child: Text("搜索关键词(音乐)"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _searchKeywordsforPlayList();
+          },
+          child: Text("搜索关键词(歌单)"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _searchSuggest();
+          },
+          child: Text("搜索建议"),
         ),
       ],
     );

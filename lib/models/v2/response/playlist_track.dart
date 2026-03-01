@@ -398,6 +398,10 @@ class SongTransParam {
   factory SongTransParam.fromJson(String source) =>
       SongTransParam.fromMap(json.decode(source));
   String toJson() => json.encode(toMap());
+
+  String getUnionCoverUrl({int size = 100}) {
+    return unionCover!.replaceAll('{size}', size.toString());
+  }
 }
 
 /// 专辑信息模型
@@ -768,6 +772,12 @@ class SongItem {
   factory SongItem.fromJson(String source) =>
       SongItem.fromMap(json.decode(source));
   String toJson() => json.encode(toMap());
+
+  /// 获取歌曲封面图片
+  /// [size] 封面大小，默认256
+  String getCoverUrl({int size = 256}) {
+    return cover!.replaceAll('{size}', size.toString());
+  }
 }
 
 /// 歌单标签模型

@@ -1,13 +1,18 @@
-import 'package:battery_music/core/services/node_service_api.dart';
-import 'package:battery_music/models/base_response.dart';
-import 'package:battery_music/models/playlist_track_new_response.dart';
+// import 'package:battery_music/core/services/node_service_api.dart';
+// import 'package:battery_music/models/base_response.dart';
+// import 'package:battery_music/models/playlist_track_new_response.dart';
+import 'package:battery_music/core/services/v2/node_api_service.dart';
+import 'package:battery_music/models/v2/response/base_api.dart';
+import 'package:battery_music/models/v2/response/playlist_track.dart';
 import 'package:flutter/material.dart';
 
 /// 歌单详情 Provider
 /// 负责获取和管理单个歌单的详细信息（包括歌曲列表）
 class PlaylistDetailProvider extends ChangeNotifier {
-  List<PlaylistSong> _songs = [];
-  PlaylistTrackDataNew? _playlistData;
+  final NodeApiService _nodeApiService = NodeApiService();
+
+  List<SongItem> _songs = [];
+  PlaylistTrack? _playlistData;
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -15,16 +20,16 @@ class PlaylistDetailProvider extends ChangeNotifier {
   static const int _pageSize = 30;
   String? _errorMessage;
 
-  List<PlaylistSong> get songs => _songs;
-  PlaylistTrackDataNew? get playlistData => _playlistData;
+  List<SongItem> get songs => _songs;
+  PlaylistTrack? get playlistData => _playlistData;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
   String? get errorMessage => _errorMessage;
 
   /// 获取歌单详情（第一页）
-  /// [listid] 歌单 ID
-  Future<void> fetchPlaylistDetail(int listid) async {
+  /// [globalId] 歌单 全局ID
+  Future<void> fetchPlaylistDetail(String globalId) async {
     _isLoading = true;
     _errorMessage = null;
     _songs.clear();
@@ -34,9 +39,11 @@ class PlaylistDetailProvider extends ChangeNotifier {
 
     try {
       _currentPage = 1;
-      final ApiResponse<PlaylistTrackDataNew> response = await NodeServiceApi
-          .instance
-          .playlistTrackNew(listid, _currentPage, _pageSize);
+      // final ApiResponse<PlaylistTrackDataNew> response = await NodeServiceApi
+      //     .instance
+      //     .playlistTrackNew(listid, _currentPage, _pageSize);
+      final BaseApi<PlaylistTrack> response = await _nodeApiService
+          .playlistTrack(globalId, page: _currentPage, pageSize: _pageSize);
       if (response.status == 1) {
         _playlistData = response.data;
         _songs = response.data!.songs ?? [];
@@ -55,7 +62,7 @@ class PlaylistDetailProvider extends ChangeNotifier {
   }
 
   /// 加载更多歌曲
-  Future<void> loadMoreSongs(int listid) async {
+  Future<void> loadMoreSongs(String globalId) async {
     if (_isLoadingMore || !_hasMore) return;
 
     _isLoadingMore = true;
@@ -63,11 +70,10 @@ class PlaylistDetailProvider extends ChangeNotifier {
 
     try {
       final nextPage = _currentPage + 1;
-      final ApiResponse<PlaylistTrackDataNew> response = await NodeServiceApi
-          .instance
-          .playlistTrackNew(listid, nextPage, _pageSize);
+      final BaseApi<PlaylistTrack> response = await _nodeApiService
+          .playlistTrack(globalId, page: nextPage, pageSize: _pageSize);
 
-      if (response.status == 1 && response.data!.songs != null) {
+      if (response.status == 1) {
         final newSongs = response.data!.songs!;
         _songs.addAll(newSongs);
         _currentPage = nextPage;

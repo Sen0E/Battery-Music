@@ -7,12 +7,12 @@ import 'package:provider/provider.dart';
 /// 歌单详情页面
 /// 展示指定歌单内的所有歌曲列表
 class PlaylistDetailPage extends StatefulWidget {
-  final int listId;
+  final String globalId;
   final String playlistName;
 
   const PlaylistDetailPage({
     super.key,
-    required this.listId,
+    required this.globalId,
     required this.playlistName,
   });
 
@@ -35,7 +35,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   void didUpdateWidget(covariant PlaylistDetailPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     // 如果 globalId 发生变化，重新获取数据
-    if (oldWidget.listId != widget.listId) {
+    if (oldWidget.globalId != widget.globalId) {
       _fetchData();
     }
   }
@@ -51,7 +51,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<PlaylistDetailProvider>();
       provider.clearData(); // 清除之前的数据
-      provider.fetchPlaylistDetail(widget.listId);
+      provider.fetchPlaylistDetail(widget.globalId);
     });
   }
 
@@ -74,7 +74,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   void _loadMore() {
     final provider = context.read<PlaylistDetailProvider>();
     if (!provider.isLoadingMore && provider.hasMore) {
-      provider.loadMoreSongs(widget.listId);
+      provider.loadMoreSongs(widget.globalId);
     }
   }
 
@@ -136,11 +136,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               final song = provider.songs[index];
               return SongListItem(
                 index: index,
-                songName: song.songNameOnly,
-                singerName: song.singerName,
-                musicpackAdvance: song.transParam!['musicpack_advance'],
-                coverUrl: song.getCoverUrl(size: 100),
-                duration: song.timeLen,
+                songName: song.name!.split('-').last,
+                singerName: song.name!.split('-').first,
+                musicpackAdvance: song.transParam!.musicpackAdvance,
+                coverUrl: song.getCoverUrl(),
+                duration: song.timelen,
                 isDurationInMs: true, // 歌单详情里的时长是毫秒
                 onTap: () {
                   // 播放逻辑

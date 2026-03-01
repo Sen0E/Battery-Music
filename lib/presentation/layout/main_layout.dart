@@ -1,10 +1,9 @@
 import 'package:battery_music/presentation/components/bottom_player_bar.dart';
 import 'package:battery_music/presentation/components/side_bar.dart';
 import 'package:battery_music/presentation/components/top_bar.dart';
-import 'package:battery_music/presentation/page/favorite_page.dart';
 import 'package:battery_music/presentation/page/liked_music_page.dart';
 import 'package:battery_music/presentation/page/music_library_page.dart';
-import 'package:battery_music/presentation/page/playlist_detail_page.dart';
+import 'package:battery_music/presentation/components/playlist_detail.dart';
 import 'package:battery_music/presentation/page/recommended_page.dart';
 import 'package:battery_music/presentation/page/search_result_page.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
@@ -66,18 +65,17 @@ Widget _buildContent(BuildContext context) {
       return const MusicLibraryPage();
     case 4:
       return const LikedMusicPage();
-    case 5:
-      return const FavoritePage();
     default:
       // 处理歌单列表的点击
       if (selectedIndex >= 8) {
         final playlistProvider = context.read<PlaylistProvider>();
         final playlistIndex = selectedIndex - 8;
-        if (playlistIndex < playlistProvider.customPlaylists.length) {
-          final playlist = playlistProvider.customPlaylists[playlistIndex];
+        if (playlistIndex < playlistProvider.minePlaylist.length) {
+          final playlist = playlistProvider.minePlaylist[playlistIndex];
           // 复用 PlaylistDetailPage 显示普通歌单详情
           return PlaylistDetailPage(
-            listId: playlist.listId ?? 0,
+            // listId: playlist.listid ?? 0,
+            globalId: playlist.globalCollectionId ?? "",
             playlistName: playlist.name ?? "歌单详情",
           );
         }

@@ -7,6 +7,7 @@ import 'package:battery_music/models/v2/response/playlist_track.dart';
 import 'package:battery_music/models/v2/response/register_dev.dart';
 import 'package:battery_music/models/v2/response/search_hot.dart';
 import 'package:battery_music/models/v2/response/search_keywords.dart';
+import 'package:battery_music/models/v2/response/search_suggest.dart';
 import 'package:battery_music/models/v2/response/song_data.dart';
 import 'package:battery_music/models/v2/response/top_card.dart';
 import 'package:battery_music/models/v2/response/user_info.dart';
@@ -218,7 +219,7 @@ class NodeApiService {
   /// [type] 搜索类型(默认为单曲，special：歌单，lyric：歌词，song：单曲，album：专辑，author：歌手，mv：mv)
   /// [page] 页码
   /// [pageSize] 每页数量
-  Future<BaseApi<SearchKeywords>> searchKeywords(
+  Future<BaseApi<SearchKeywords<T>>> searchKeywords<T>(
     String keywords, {
     String? type,
     int? page,
@@ -233,10 +234,35 @@ class NodeApiService {
         if (pageSize != null) 'pagesize': pageSize,
       },
     );
-    return BaseApi<SearchKeywords>.fromMap(
+    debugPrint("Search keywords response: ${response.data}");
+
+    return BaseApi<SearchKeywords<T>>.fromMap(
       response.data,
-      (map) => SearchKeywords.fromMap(map),
+      (map) => SearchKeywords<T>.fromMap(map),
     );
+  }
+
+  /// 搜索(测试)
+  /// [keywords] 关键字
+  /// [type] 搜索类型(默认为单曲，special：歌单，lyric：歌词，song：单曲，album：专辑，author：歌手，mv：mv)
+  /// [page] 页码
+  /// [pageSize] 每页数量
+  Future<Response> searchKeywordsTest(
+    String keywords, {
+    String? type,
+    int? page,
+    int? pageSize,
+  }) async {
+    Response response = await _nodeApiClient.post(
+      '/search',
+      queryParameters: {
+        'keywords': keywords,
+        if (type != null) 'type': type,
+        if (page != null) 'page': page,
+        if (pageSize != null) 'pagesize': pageSize,
+      },
+    );
+    return response;
   }
 
   /// 搜索建议
@@ -245,7 +271,7 @@ class NodeApiService {
   /// [correctTipCount] 不知道
   /// [mvTipCount] MV提示数量
   /// [musicTipCount] 音乐提示数量
-  Future<Response> searchSuggest(
+  Future<SearchSuggest> searchSuggest(
     String keywords, {
     int? albumTipCount,
     int? correctTipCount,
@@ -263,6 +289,6 @@ class NodeApiService {
       },
     );
     debugPrint(response.data.toString());
-    return response;
+    return SearchSuggest.fromMap(response.data);
   }
 }

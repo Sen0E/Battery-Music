@@ -1,4 +1,4 @@
-import 'package:battery_music/presentation/page/playlist_detail_page.dart';
+import 'package:battery_music/presentation/components/playlist_detail.dart';
 import 'package:battery_music/presentation/providers/playlist_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +19,8 @@ class LikedMusicPage extends StatelessWidget {
 
     // 复用 PlaylistDetailPage，传入 globalId
     return PlaylistDetailPage(
-      listId: likedPlaylist.listId ?? 0,
+      // listId: likedPlaylist.listid ?? 0,
+      globalId: likedPlaylist.globalCollectionId ?? "",
       playlistName: "喜欢音乐",
     );
   }

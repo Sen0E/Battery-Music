@@ -18,7 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 初始化音频支持
-  JustAudioMediaKit.ensureInitialized();
+  // JustAudioMediaKit.ensureInitialized();
 
   // await NodeServiceManager.instance.startNodeService(); // 启动 NodeService
   // await NodeApiClient.instance.init(); // 初始化 Cookie 管理
