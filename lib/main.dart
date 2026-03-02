@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/core/services/node_manager.dart';
+import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
@@ -25,6 +27,13 @@ void main() async {
     await windowManager.focus(); // 聚焦窗口
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden); // 隐藏标题栏
   });
+
+  UserService();
+  NodeManager();
+  if (!UserService.hasLogin) {
+    final response = await NodeApiService().registerDev();
+    UserService().saveUserInfo(registerDev: response.data);
+  }
 
   runApp(const BatteryMusicApp());
 }
