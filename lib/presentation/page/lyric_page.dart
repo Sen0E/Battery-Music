@@ -112,15 +112,15 @@ class _LyricsScreenState extends State<LyricsScreen>
       if (_scrollController.hasClients && _viewportHeight > 0) {
         double currentVelocity = 0.0;
 
-        // 【修改点】：加快主轴滚动速度
+        // 【核心大修复】：为列表主轴注入和 HTML 一模一样的弹簧阻尼模型！
+        // 彻底消灭原生动画“起步速度过快”造成的突变
         if (_isPhysicsScrolling) {
           double diffScroll = _scrollTargetY - _scrollCurrentY;
-          _scrollVelocityY += diffScroll * 0.005; // 张力提高 (0.0012 -> 0.005)，启动更快
-          _scrollVelocityY *= 0.90; // 摩擦力降低 (0.96 -> 0.90)，滑行更短，刹车更干脆
+          _scrollVelocityY += diffScroll * 0.0012; // 极缓的启动张力
+          _scrollVelocityY *= 0.96; // 巨大的阻尼摩擦力
           _scrollCurrentY += _scrollVelocityY;
 
-          // 放宽一点停止阈值，防止高频小幅抖动
-          if (_scrollVelocityY.abs() < 0.1 && diffScroll.abs() < 0.5) {
+          if (_scrollVelocityY.abs() < 0.05 && diffScroll.abs() < 0.5) {
             _scrollCurrentY = _scrollTargetY;
             _scrollVelocityY = 0.0;
             _isPhysicsScrolling = false;
@@ -135,7 +135,8 @@ class _LyricsScreenState extends State<LyricsScreen>
           _scrollCurrentY = offset;
         }
 
-        // 【修改点】：加快果冻回弹速度
+        // 【完美还原】：带距离系数的弹性形变，有了上面平缓的速度铺垫，
+        // 这里的拉伸会像缓慢呼吸一样展开，再柔和地收拢。
         for (int i = 0; i < lyrics.length; i++) {
           double itemOffset = i * _itemHeight;
           double distanceFromCenter = itemOffset - _scrollCurrentY;
@@ -150,9 +151,8 @@ class _LyricsScreenState extends State<LyricsScreen>
               );
 
           double jellyDiff = targetJellyY - _linePhysicsY[i];
-          _linePhysicsV[i] +=
-              jellyDiff * 0.05; // 回弹张力提高 (0.015 -> 0.05)，被扯开后回位更迅速
-          _linePhysicsV[i] *= 0.85; // 阻尼降低 (0.92 -> 0.85)，减少拖沓的回弹余震
+          _linePhysicsV[i] += jellyDiff * 0.015; // 张力
+          _linePhysicsV[i] *= 0.92; // 阻尼
 
           double newY = _linePhysicsY[i] + _linePhysicsV[i];
 
