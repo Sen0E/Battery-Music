@@ -97,9 +97,9 @@ class NodeManager {
       [],
       environment: {
         'API_TOKEN': _authToken!,
-        'PORT': '${generateRandomInt(min: 5000, max: 10000)}',
+        'PORT': '0',
         'HOST': '127.0.0.1',
-        'platform': 'lite',
+        // 'platform': 'lite',
       },
     );
     debugPrint("node service: started pid:${_nodeProcess!.pid}");

@@ -5,7 +5,6 @@ const decode = require('safe-decode-uri-component');
 const { cookieToJson, randomString, getGuid, calculateMid } = require('./util/util');
 const { cryptoMd5 } = require('./util/crypto');
 const { createRequest } = require('./util/request');
-const dotenv = require('dotenv');
 const cache = require('./util/apicache').middleware;
 
 /**
@@ -25,10 +24,7 @@ const cache = require('./util/apicache').middleware;
 const guid = cryptoMd5(getGuid());
 const serverDev = randomString(10).toUpperCase();
 
-const envPath = path.join(process.cwd(), '.env');
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath, quiet: true });
-}
+// Removed .env file loading code
 
 /**
  *  描述：动态获取模块定义
@@ -62,7 +58,25 @@ async function getModulesDefinitions(modulesPath, specificRoute, doRequire = tru
  */
 async function consturctServer(moduleDefs) {
   const app = express();
-  const { CORS_ALLOW_ORIGIN } = process.env;
+  // 获取 API_TOKEN 环境变量
+  const { API_TOKEN } = process.env;
+  
+  // 添加中间件来验证 API_TOKEN
+  app.use((req, res, next) => {
+    if (API_TOKEN) {
+      const authToken = req.headers['x-auth-token'];
+      if (!authToken || authToken !== API_TOKEN) {
+        return res.status(401).json({
+          error: 'Unauthorized: Invalid or missing x-auth-token header',
+          code: 401
+        });
+      }
+    }
+    next();
+  });
+  
+  // 获取 CORS_ALLOW_ORIGIN 环境变量，如果不存在则使用默认值
+  const CORS_ALLOW_ORIGIN = process.env.CORS_ALLOW_ORIGIN || '*';
   app.set('trust proxy', true);
 
   /**
@@ -73,7 +87,7 @@ async function consturctServer(moduleDefs) {
       res.set({
         'Access-Control-Allow-Credentials': true,
         'Access-Control-Allow-Origin': CORS_ALLOW_ORIGIN || req.headers.origin || '*',
-        'Access-Control-Allow-Headers': 'Authorization,X-Requested-With,Content-Type,Cache-Control',
+        'Access-Control-Allow-Headers': 'Authorization,X-Requested-With,Content-Type,Cache-Control,x-auth-token',
         'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
         'Content-Type': 'application/json; charset=utf-8',
       });
@@ -221,7 +235,9 @@ async function consturctServer(moduleDefs) {
  * @returns {Promise<import('express').Express & ExpressExtension>}
  */
 async function startService() {
-  const port = Number(process.env.PORT || '3000');
+  // 如果 PORT 环境变量设置为 0，或者 未设置，则使用随机端口
+  const portEnv = process.env.PORT;
+  const port = portEnv === undefined || portEnv === '' ? 0 : Number(portEnv);
   const host = process.env.HOST || '';
 
   const app = await consturctServer();
@@ -230,7 +246,8 @@ async function startService() {
   const appExt = app;
 
   appExt.service = app.listen(port, host, () => {
-    console.log(`server running @ http://${host || 'localhost'}:${port}`);
+    const actualPort = appExt.service.address().port;
+    console.log(`server running @ http://${host || 'localhost'}:${actualPort}`);
   });
 
   return appExt;
