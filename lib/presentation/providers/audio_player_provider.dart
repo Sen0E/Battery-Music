@@ -27,7 +27,7 @@ class AudioPlayerProvider extends ChangeNotifier {
       _audioPlayerService.playlist.map((e) => e).toList();
 
   String get currentSongName =>
-      _audioPlayerService.currentMusic?.songName ?? '';
+      _audioPlayerService.currentMusic?.songName.split(' - ').last ?? '';
   String get currentSinger =>
       _audioPlayerService.currentMusic?.singerName ?? '';
   String? get currentCoverUrl => _audioPlayerService.currentMusic?.coverImage;

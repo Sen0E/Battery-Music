@@ -38,18 +38,11 @@ dependencies:
 
   path_provider: ^2.0.15  #  获取文件路径
 
-  # uuid: ^4.5.2  #  生成uuid
-
   window_manager: ^0.5.1  #  窗口管理
   shared_preferences: ^2.5.4  #  本地数据存储
 
   provider: ^6.1.5+1  #  状态管理
 
-  just_audio: ^0.10.5 # 音频播放
-  just_audio_media_kit: ^2.1.0 
-  media_kit_libs_linux: ^1.1.0 # Linux平台原生库
-  media_kit_libs_windows_audio: ^1.0.9 # Windows平台原生库
-  media_kit_libs_macos_audio: ^1.1.4 # MacOS平台原生库
   uuid: ^4.5.3
 
   media_kit: ^1.2.6
