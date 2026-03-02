@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:battery_music/core/services/v2/node_manager.dart';
+import 'package:battery_music/presentation/page/lyric_page.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
@@ -82,7 +83,8 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.system,
-        home: SplashPage(),
+        // home: SplashPage(),
+        home: LyricsScreen(),
       ),
     );
   }

@@ -48,7 +48,7 @@ class BottomPlayerBar extends StatelessWidget {
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
             onTap: () {
-              // TODO: 跳转到歌曲详情页
+              // TODO 跳转到歌曲详情页
             },
             child: Container(
               width: 56, // 稍微缩小一点封面，让排版更透气
