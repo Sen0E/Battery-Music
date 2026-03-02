@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:battery_music/models/v2/response/search_keywords_song.dart';
-import 'package:battery_music/models/v2/response/search_keywords_special.dart';
+import 'package:battery_music/models/response/search_keywords_song.dart';
+import 'package:battery_music/models/response/search_keywords_special.dart';
 
 /// 顶层搜索结果数据模型（仅data部分）
 class SearchKeywords<T> {

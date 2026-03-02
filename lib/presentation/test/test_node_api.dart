@@ -1,21 +1,21 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:battery_music/core/services/v2/user_service.dart';
-import 'package:battery_music/core/services/v2/node_api_client.dart';
-import 'package:battery_music/core/services/v2/node_api_service.dart';
-import 'package:battery_music/models/v2/response/base_api.dart';
-import 'package:battery_music/models/v2/response/daily_recommend.dart';
-import 'package:battery_music/models/v2/response/login_qr_check.dart';
-import 'package:battery_music/models/v2/response/login_qr_key.dart';
-import 'package:battery_music/models/v2/response/register_dev.dart';
-import 'package:battery_music/models/v2/response/search_hot.dart';
-import 'package:battery_music/models/v2/response/search_keywords_song.dart';
-import 'package:battery_music/models/v2/response/search_keywords_special.dart';
-import 'package:battery_music/models/v2/response/top_card.dart';
-import 'package:battery_music/models/v2/response/user_info.dart';
-import 'package:battery_music/models/v2/response/user_info_detail.dart';
-import 'package:battery_music/models/v2/response/user_playlist.dart';
+import 'package:battery_music/core/services/user_service.dart';
+import 'package:battery_music/core/services/node_api_client.dart';
+import 'package:battery_music/core/services/node_api_service.dart';
+import 'package:battery_music/models/response/base_api.dart';
+import 'package:battery_music/models/response/daily_recommend.dart';
+import 'package:battery_music/models/response/login_qr_check.dart';
+import 'package:battery_music/models/response/login_qr_key.dart';
+import 'package:battery_music/models/response/register_dev.dart';
+import 'package:battery_music/models/response/search_hot.dart';
+import 'package:battery_music/models/response/search_keywords_song.dart';
+import 'package:battery_music/models/response/search_keywords_special.dart';
+import 'package:battery_music/models/response/top_card.dart';
+import 'package:battery_music/models/response/user_info.dart';
+import 'package:battery_music/models/response/user_info_detail.dart';
+import 'package:battery_music/models/response/user_playlist.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 

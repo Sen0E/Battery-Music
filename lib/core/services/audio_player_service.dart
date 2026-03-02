@@ -1,295 +1,167 @@
-import 'dart:async';
 import 'dart:developer';
-import 'package:just_audio/just_audio.dart';
-import 'package:battery_music/core/services/node_service_api.dart';
-import 'package:battery_music/models/song_url_response.dart';
 
-/// 音频播放服务类
-/// 负责实际的音频播放逻辑，包括播放控制、播放列表管理等
+import 'package:battery_music/core/services/node_api_service.dart';
+import 'package:battery_music/models/entity/music_item.dart';
+import 'package:battery_music/models/response/song_data.dart';
+import 'package:media_kit/media_kit.dart';
+
 class AudioPlayerService {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  final NodeServiceApi _api;
+  static final AudioPlayerService _audioPlayerService =
+      AudioPlayerService._internal();
+  factory AudioPlayerService() => _audioPlayerService;
 
-  // --- 播放列表 ---
-  List<dynamic> _playlist = []; // 存储歌曲对象 (SongItem 或 PlaylistSong)
+  late final Player player;
+
+  final NodeApiService _nodeApiService = NodeApiService();
+
+  final List<MusicItem> _playlist = [];
   int _currentIndex = -1;
 
-  // --- 播放状态 ---
-  bool _isPlaying = false;
-  Duration _position = Duration.zero;
-  Duration _duration = Duration.zero;
-  ProcessingState _processingState = ProcessingState.idle;
-  double _volume = 1.0;
+  AudioPlayerService._internal() {
+    MediaKit.ensureInitialized();
+    player = Player();
 
-  // --- 当前歌曲信息 ---
-  String _currentSongName = "未知歌曲";
-  String _currentSinger = "未知歌手";
-  String? _currentCoverUrl;
-
-  // --- 防重入标志 ---
-  bool _isLoadingNewSong = false;
-
-  // --- Stream controllers ---
-  final StreamController<bool> _isPlayingController =
-      StreamController.broadcast();
-  final StreamController<Duration> _positionController =
-      StreamController.broadcast();
-  final StreamController<Duration> _durationController =
-      StreamController.broadcast();
-  final StreamController<ProcessingState> _processingStateController =
-      StreamController.broadcast();
-  final StreamController<double> _volumeController =
-      StreamController.broadcast();
-  final StreamController<String> _currentSongNameController =
-      StreamController.broadcast();
-  final StreamController<String> _currentSingerController =
-      StreamController.broadcast();
-  final StreamController<String?> _currentCoverUrlController =
-      StreamController.broadcast();
-
-  // --- Getters ---
-  bool get isPlaying => _isPlaying;
-  Duration get position => _position;
-  Duration get duration => _duration;
-  ProcessingState get processingState => _processingState;
-  double get volume => _volume; // 添加volume getter
-  String get currentSongName => _currentSongName;
-  String get currentSinger => _currentSinger;
-  String? get currentCoverUrl => _currentCoverUrl;
-  bool get hasCurrentSong => _currentIndex != -1 && _playlist.isNotEmpty;
-  List<dynamic> get playlist => _playlist;
-  int get currentIndex => _currentIndex;
-
-  // --- Streams ---
-  Stream<bool> get isPlayingStream => _isPlayingController.stream;
-  Stream<Duration> get positionStream => _positionController.stream;
-  Stream<Duration> get durationStream => _durationController.stream;
-  Stream<ProcessingState> get processingStateStream =>
-      _processingStateController.stream;
-  Stream<double> get volumeStream =>
-      _volumeController.stream; // 添加volume stream
-  Stream<String> get currentSongNameStream => _currentSongNameController.stream;
-  Stream<String> get currentSingerStream => _currentSingerController.stream;
-  Stream<String?> get currentCoverUrlStream =>
-      _currentCoverUrlController.stream;
-
-  AudioPlayerService(this._api) {
-    _initAudioPlayer();
-  }
-
-  void _initAudioPlayer() {
-    // 监听播放状态
-    _audioPlayer.playerStateStream.listen((state) {
-      _isPlaying = state.playing;
-      _processingState = state.processingState;
-      _isPlayingController.add(_isPlaying);
-
-      if (state.processingState == ProcessingState.completed) {
-        // 自动播放下一首
+    player.stream.completed.listen((completed) {
+      if (completed) {
+        log("当前歌曲播放完毕，自动切歌...");
         playNext();
       }
     });
-
-    // 监听进度
-    _audioPlayer.positionStream.listen((pos) {
-      _position = pos;
-      _positionController.add(pos);
-    });
-
-    // 监听总时长
-    _audioPlayer.durationStream.listen((d) {
-      _duration = d ?? Duration.zero;
-      _durationController.add(_duration);
-    });
-
-    // 监听音量变化
-    _audioPlayer.volumeStream.listen((vol) {
-      _volume = vol;
-      _volumeController.add(vol);
-    });
   }
 
-  /// 播放指定歌曲
-  /// [song] 歌曲对象 (SongItem 或 PlaylistSong)
-  /// [playlist] 可选，如果提供了播放列表，则替换当前播放列表
-  /// [index] 可选，如果提供了播放列表，指定播放的索引
-  Future<void> playSong(
-    dynamic song, {
-    List<dynamic>? playlist,
-    int? index,
-  }) async {
-    if (playlist != null) {
-      _playlist = playlist;
-    }
+  // --- 状态获取 (提供给外部只读) ---
 
-    if (index != null) {
-      _currentIndex = index;
-    } else {
-      // 如果没有提供 index，尝试在当前列表中查找或添加
-      int idx = _playlist.indexOf(song);
-      if (idx != -1) {
-        _currentIndex = idx;
-      } else {
-        _playlist.add(song);
-        _currentIndex = _playlist.length - 1;
-      }
-    }
-    await _playCurrent();
-  }
+  List<MusicItem> get playlist => List.unmodifiable(_playlist);
 
-  /// 播放当前索引的歌曲
-  Future<void> _playCurrent() async {
-    // 防止重复加载
-    if (_isLoadingNewSong) return;
-    _isLoadingNewSong = true;
+  MusicItem? get currentMusic =>
+      (_currentIndex >= 0 && _currentIndex < _playlist.length)
+      ? _playlist[_currentIndex]
+      : null;
+
+  int get currentIndex => _currentIndex;
+
+  /// 内部通用播放方法：处理哈希值解析并丢给 media_kit
+  Future<void> _playInternal(int index) async {
+    if (index < 0 || index >= _playlist.length) return;
+
+    _currentIndex = index;
+    final targetMusic = _playlist[_currentIndex];
 
     try {
-      if (_currentIndex < 0 || _currentIndex >= _playlist.length) return;
-
-      final song = _playlist[_currentIndex];
-      _updateCurrentSongInfo(song);
-
-      try {
-        // 适配不同类型的歌曲对象
-        String? hash;
-        if (song is Map<String, dynamic>) {
-          // 如果是Map类型，尝试从中提取hash
-          hash = song['fileHash'] ?? song['hash'];
-        } else if (song.runtimeType.toString().contains('SongItem')) {
-          // 处理SongItem类型
-          hash = song.fileHash;
-        } else if (song.runtimeType.toString().contains('PlaylistSong')) {
-          // 处理PlaylistSong类型
-          hash = song.hash;
-        }
-
-        if (hash == null || hash.isEmpty) {
-          log("歌曲 Hash 为空，无法播放");
-          playNext(); // 跳过无效歌曲
-          return;
-        }
-
-        final SongUrlResponse response = await _api.songUrl(hash);
-        final String? url = response.playUrl;
-
-        if (url != null && url.isNotEmpty) {
-          try {
-            // 确保播放器处于正确的初始状态
-            if (_audioPlayer.playerState.processingState !=
-                ProcessingState.idle) {
-              await _audioPlayer.stop();
-              // 添加延时确保停止完成
-              await Future.delayed(const Duration(milliseconds: 50));
-            }
-
-            await _audioPlayer.setUrl(url);
-            await _audioPlayer.play();
-          } catch (e, stack) {
-            log("JustAudio 播放异常: $e");
-            log("详细堆栈: $stack");
-          }
-        } else {
-          log("获取播放链接失败 (URL 为空)");
-          // 记录错误但继续播放下一首
-          await _audioPlayer.stop();
-          // 短暂延迟后再尝试播放下一首
-          await Future.delayed(const Duration(milliseconds: 100));
-          playNext();
-        }
-      } catch (e) {
-        log("播放流程出错: $e");
+      log("正在解析哈希值... 歌曲: ${targetMusic.songName} (Hash: ${targetMusic.hash})");
+      final realUrl = await _fetchRealUrlFromHash(targetMusic.hash);
+      if (realUrl != null) {
+        // 解析成功，交给 media_kit 播放
+        await player.open(Media(realUrl));
+        await player.play();
+      } else {
+        log("当前音乐无法播放，正在切换下一首");
+        playNext();
       }
-    } finally {
-      // 重置标志位，使用延时确保不会过早重置
-      await Future.delayed(const Duration(milliseconds: 100));
-      _isLoadingNewSong = false;
+    } catch (e) {
+      log("获取播放链接失败: $e");
+      // 解析失败策略：可以自动跳过当前歌曲播放下一首
+      playNext();
     }
   }
 
-  /// 更新当前歌曲显示的元数据
-  void _updateCurrentSongInfo(dynamic song) {
-    if (song is Map<String, dynamic>) {
-      // 如果是Map类型
-      _currentSongName = song['songName'] ?? song['songNameOnly'] ?? "未知歌曲";
-      _currentSinger = song['singerName'] ?? "未知歌手";
-      _currentCoverUrl =
-          song['image']?.replaceAll('{size}', '400') ?? song['cover'];
-    } else if (song.runtimeType.toString().contains('SongItem')) {
-      _currentSongName = song.songName ?? "未知歌曲";
-      _currentSinger = song.singerName ?? "未知歌手";
-      _currentCoverUrl = song.image?.replaceAll('{size}', '400');
-    } else if (song.runtimeType.toString().contains('PlaylistSong')) {
-      _currentSongName = song.songNameOnly;
-      _currentSinger = song.singerName;
-      _currentCoverUrl = song.getCoverUrl(size: 400);
+  /// 将 hash 转换为真实 URL
+  Future<String?> _fetchRealUrlFromHash(String hash) async {
+    SongData res = await _nodeApiService.songUrl(hash);
+    if (res.status == 1 && res.url != null && res.url!.isNotEmpty) {
+      return res.url!.first;
     }
-
-    // 添加到控制器中，供外部监听
-    _currentSongNameController.add(_currentSongName);
-    _currentSingerController.add(_currentSinger);
-    _currentCoverUrlController.add(_currentCoverUrl);
+    return null;
   }
 
-  /// 暂停/恢复
-  void togglePlay() {
-    if (_isPlaying) {
-      _audioPlayer.pause();
+  /// 播放音乐 (继续播放)
+  Future<void> play() async {
+    if (_currentIndex == -1 && _playlist.isNotEmpty) {
+      await _playInternal(0); // 列表有歌但还没开始播，默认播第一首
     } else {
-      _audioPlayer.play();
+      await player.play(); // 继续播放当前暂停的歌
     }
   }
 
-  /// 上一首
-  void playPrevious() {
+  /// 暂停音乐
+  Future<void> pause() async {
+    await player.pause();
+  }
+
+  /// 播放上一首
+  Future<void> playPrevious() async {
     if (_playlist.isEmpty) return;
-    if (_currentIndex > 0) {
-      _currentIndex--;
-      _playCurrent();
-    } else {
-      // 已经是第一首，循环到最后一首或停止
-      _currentIndex = _playlist.length - 1;
-      _playCurrent();
+    int prevIndex = _currentIndex - 1;
+    // 列表循环播放逻辑
+    if (prevIndex < 0) {
+      prevIndex = _playlist.length - 1;
     }
+    await _playInternal(prevIndex);
   }
 
-  /// 下一首
-  void playNext() {
+  /// 播放下一首
+  Future<void> playNext() async {
     if (_playlist.isEmpty) return;
-    if (_currentIndex < _playlist.length - 1) {
-      _currentIndex++;
-      _playCurrent();
+    int nextIndex = _currentIndex + 1;
+    // 列表循环播放逻辑
+    if (nextIndex >= _playlist.length) {
+      nextIndex = 0;
+    }
+    await _playInternal(nextIndex);
+  }
+
+  /// 清空播放列表
+  Future<void> clearPlaylist() async {
+    _playlist.clear();
+    _currentIndex = -1;
+    await player.stop();
+  }
+
+  /// 添加多个音乐到播放列表
+  void addMultiple(List<MusicItem> items) {
+    _playlist.addAll(items);
+  }
+
+  /// 添加单个音乐
+  void addSingle(MusicItem item) {
+    _playlist.add(item);
+  }
+
+  /// 添加一首音乐并立即播放
+  Future<void> addAndPlay(MusicItem item) async {
+    _playlist.add(item);
+    // 播放刚刚加入到队尾的那首歌
+    await _playInternal(_playlist.length - 1);
+  }
+
+  /// 添加一首音乐为下一首播放 (插队功能)
+  void addNext(MusicItem item) {
+    if (_playlist.isEmpty || _currentIndex == -1) {
+      // 如果列表本来就是空的，或者还没开始播放，直接加进去
+      _playlist.add(item);
     } else {
-      // 已经是最后一首，循环到第一首
-      _currentIndex = 0;
-      _playCurrent();
+      // 插入到当前播放索引的正后方
+      _playlist.insert(_currentIndex + 1, item);
     }
   }
 
-  /// 跳转进度
-  Future<void> seek(Duration position) async {
-    await _audioPlayer.seek(position);
+  /// 播放指定音乐 (按索引播放)
+  Future<void> playSpecific(int index) async {
+    await _playInternal(index);
   }
 
-  /// 设置音量
+  /// 设置音量 (接收0.0-100.0范围的值)
   Future<void> setVolume(double volume) async {
-    _volume = volume;
-    await _audioPlayer.setVolume(volume);
-    _volumeController.add(volume);
+    // 确保音量在有效范围内
+    double clampedVolume = volume.clamp(0.0, 100.0);
+    await player.setVolume(clampedVolume);
   }
 
-  /// 获取音频播放器实例
-  AudioPlayer get audioPlayer => _audioPlayer;
+  /// 获取当前音量
+  double get volume => player.state.volume;
 
-  /// 释放资源
+  /// 销毁释放资源 (通常在 App 退出时调用)
   void dispose() {
-    _audioPlayer.dispose();
-    _isPlayingController.close();
-    _positionController.close();
-    _durationController.close();
-    _processingStateController.close();
-    _volumeController.close();
-    _currentSongNameController.close();
-    _currentSingerController.close();
-    _currentCoverUrlController.close();
+    player.dispose();
   }
 }

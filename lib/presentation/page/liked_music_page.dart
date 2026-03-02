@@ -19,7 +19,6 @@ class LikedMusicPage extends StatelessWidget {
 
     // 复用 PlaylistDetailPage，传入 globalId
     return PlaylistDetailPage(
-      // listId: likedPlaylist.listid ?? 0,
       globalId: likedPlaylist.globalCollectionId ?? "",
       playlistName: "喜欢音乐",
     );

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 // import 'package:battery_music/core/services/user_service.dart';
-import 'package:battery_music/core/services/v2/user_service.dart';
-import 'package:battery_music/models/v2/response/search_suggest.dart';
+import 'package:battery_music/core/services/user_service.dart';
+import 'package:battery_music/models/response/search_suggest.dart';
 import 'package:battery_music/presentation/components/window_controls.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
 import 'package:flutter/material.dart';

@@ -1,6 +1,4 @@
-import 'dart:developer';
-
-import 'package:battery_music/models/v2/response/user_playlist.dart';
+import 'package:battery_music/models/response/user_playlist.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_provider.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
@@ -118,8 +116,6 @@ class _SideBarState extends State<SideBar> {
     ThemeData theme,
   ) {
     final playlistProvider = context.watch<PlaylistProvider>();
-
-    // 适配点 1：加载动画使用主色（柠檬绿），并调细线条显得更精致
     if (playlistProvider.isLoading) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -157,21 +153,19 @@ class _SideBarState extends State<SideBar> {
     // 计算索引偏移量，前7个是固定的菜单项，所以歌单从索引7开始
     int currentIndex = 7;
 
-    // 适配点 2：Theme 覆盖。
-    // ExpansionPanelList 默认会有背景色，我们通过 Theme 将其彻底透明化
     return Theme(
       data: theme.copyWith(
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
       ),
       child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(), // 桌面端推荐使用 Clamping 物理效果
+        physics: const ClampingScrollPhysics(),
         child: ExpansionPanelList(
           expandedHeaderPadding: EdgeInsets.zero,
           elevation: 0, // 去除阴影
           materialGapSize: 0, // 去除面板之间的缝隙
           dividerColor: Colors.transparent, // 去除分割线
-          expandIconColor: theme.colorScheme.onSurfaceVariant, // 折叠箭头的颜色调暗
+          expandIconColor: theme.colorScheme.onSurfaceVariant,
           expansionCallback: (int panelIndex, bool isExpanded) {
             setState(() {
               switch (panelIndex) {
@@ -267,13 +261,12 @@ class _SideBarState extends State<SideBar> {
     ThemeData theme,
   ) {
     if (playlists.isEmpty) {
-      return const SizedBox.shrink(); // 使用 SizedBox.shrink() 替代 Container() 性能更好
+      return const SizedBox.shrink();
     }
 
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      // 减小上下 padding，让列表更紧凑
       padding: const EdgeInsets.only(bottom: 8),
       itemCount: playlists.length,
       itemBuilder: (context, index) {
@@ -294,7 +287,6 @@ class _SideBarState extends State<SideBar> {
         return _buildMenuItem(
           context,
           menuIndex,
-          // 适配点 4：图标使用更现代的 rounded 风格
           Icons.queue_music_rounded,
           name,
           provider,
@@ -304,169 +296,11 @@ class _SideBarState extends State<SideBar> {
       },
     );
   }
-  // Widget _buildPlaylistSections(
-  //   BuildContext context,
-  //   SidebarProvider provider,
-  //   ThemeData theme,
-  // ) {
-  //   final playlistProvider = context.watch<PlaylistProvider>();
-
-  //   if (playlistProvider.isLoading) {
-  //     return const Center(child: CircularProgressIndicator());
-  //   }
-
-  //   if (playlistProvider.errorMessage != null) {
-  //     return Center(
-  //       child: Text(
-  //         "加载失败:${playlistProvider.errorMessage}",
-  //         style: TextStyle(color: theme.colorScheme.error),
-  //       ),
-  //     );
-  //   }
-
-  //   // 获取各种类型的歌单
-  //   final minePlaylists = playlistProvider.minePlaylist;
-  //   final likedPlaylists = playlistProvider.likePlaylist;
-  //   final albums = playlistProvider.albumslist;
-
-  //   // 计算索引偏移量，前7个是固定的菜单项，所以歌单从索引7开始
-  //   int currentIndex = 7;
-
-  //   return SingleChildScrollView(
-  //     child: ExpansionPanelList(
-  //       expandedHeaderPadding: EdgeInsets.zero,
-  //       elevation: 0,
-  //       materialGapSize: 0,
-  //       dividerColor: Colors.transparent,
-  //       expansionCallback: (int panelIndex, bool isExpanded) {
-  //         setState(() {
-  //           switch (panelIndex) {
-  //             case 0:
-  //               _minePlaylistsExpanded = isExpanded;
-  //               break;
-  //             case 1:
-  //               _likedPlaylistsExpanded = isExpanded;
-  //               break;
-  //             case 2:
-  //               _albumsExpanded = isExpanded;
-  //               break;
-  //           }
-  //         });
-  //       },
-  //       children: [
-  //         // 我的歌单部分
-  //         ExpansionPanel(
-  //           canTapOnHeader: true,
-  //           headerBuilder: (BuildContext context, bool isExpanded) {
-  //             return _buildSectionHeader("我的歌单", isExpanded, theme);
-  //           },
-  //           body: _buildPlaylistItems(
-  //             minePlaylists,
-  //             currentIndex,
-  //             provider,
-  //             theme,
-  //           ),
-  //           isExpanded: _minePlaylistsExpanded,
-  //         ),
-
-  //         // 收藏的歌单部分
-  //         ExpansionPanel(
-  //           canTapOnHeader: true,
-  //           headerBuilder: (BuildContext context, bool isExpanded) {
-  //             return _buildSectionHeader("收藏歌单", isExpanded, theme);
-  //           },
-  //           body: _buildPlaylistItems(
-  //             likedPlaylists,
-  //             currentIndex + minePlaylists.length,
-  //             provider,
-  //             theme,
-  //           ),
-  //           isExpanded: _likedPlaylistsExpanded,
-  //         ),
-
-  //         // 收藏的专辑部分
-  //         ExpansionPanel(
-  //           canTapOnHeader: true,
-  //           headerBuilder: (BuildContext context, bool isExpanded) {
-  //             return _buildSectionHeader("收藏专辑", isExpanded, theme);
-  //           },
-  //           body: _buildPlaylistItems(
-  //             albums,
-  //             currentIndex + minePlaylists.length + likedPlaylists.length,
-  //             provider,
-  //             theme,
-  //           ),
-  //           isExpanded: _albumsExpanded,
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildSectionHeader(String title, bool isExpanded, ThemeData theme) {
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-  //     child: Row(
-  //       children: [
-  //         Text(
-  //           title,
-  //           style: TextStyle(
-  //             fontSize: 14,
-  //             fontWeight: FontWeight.bold,
-  //             color: theme.colorScheme.onSurface,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildPlaylistItems(
-  //   List<dynamic> playlists,
-  //   int startIndex,
-  //   SidebarProvider provider,
-  //   ThemeData theme,
-  // ) {
-  //   if (playlists.isEmpty) {
-  //     return Container(); // 如果没有项目，则显示空容器
-  //   }
-
-  //   return ListView.builder(
-  //     shrinkWrap: true,
-  //     physics: const NeverScrollableScrollPhysics(),
-  //     itemCount: playlists.length,
-  //     itemBuilder: (context, index) {
-  //       final playlist = playlists[index];
-  //       final menuIndex = startIndex + index;
-
-  //       String name;
-  //       String? imageUrl;
-
-  //       if (playlist is SongListInfo) {
-  //         name = playlist.name ?? "未知歌单";
-  //         imageUrl = playlist.getCoverUrl(size: 60);
-  //       } else {
-  //         name = playlist.toString();
-  //         imageUrl = null;
-  //       }
-
-  //       return _buildMenuItem(
-  //         context,
-  //         menuIndex,
-  //         Icons.queue_music_rounded,
-  //         name,
-  //         provider,
-  //         theme,
-  //         imageUrl: imageUrl,
-  //       );
-  //     },
-  //   );
-  // }
 
   Widget _buildLogo(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 30),
-      alignment: Alignment.centerLeft, // 桌面端通常左对齐看起来更整齐
+      alignment: Alignment.centerLeft,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -481,7 +315,7 @@ class _SideBarState extends State<SideBar> {
             'Battery',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.w900, // 更粗的字体更有质感
+              fontWeight: FontWeight.w900,
               color: theme.colorScheme.onSurface,
               letterSpacing: -0.5,
             ),

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:battery_music/core/services/v2/node_api_service.dart';
-import 'package:battery_music/core/services/v2/user_service.dart';
+import 'package:battery_music/core/services/node_api_service.dart';
+import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/presentation/components/window_controls.dart';
 import 'package:battery_music/presentation/layout/main_layout.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,6 @@ class LoginPage extends StatefulWidget {
 enum _LoginType { phone, qrCode }
 
 class _LoginPageState extends State<LoginPage> {
-  // final NodeServiceApi _nodeServiceApi = NodeServiceApi();
   final NodeApiService _nodeApiService = NodeApiService();
   final UserService _userService = UserService();
 
@@ -88,8 +87,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      // final ApiResponse<LoginQrKey> response = await _nodeServiceApi
-      //     .loginQrKey();
       final response = await _nodeApiService.loginQrKey();
       if (!mounted) return;
 
@@ -129,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 开始轮询检查二维码状态
   void _startPolling(String key) {
-    _pollingTimer?.cancel(); // Ensure only one poller is running
+    _pollingTimer?.cancel();
     _pollingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (!mounted || _loginType != _LoginType.qrCode) {
         timer.cancel();
@@ -137,7 +134,6 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       try {
-        // final response = await _nodeServiceApi.loginQrCheck(key);
         final response = await _nodeApiService.loginQrCheck(key);
         if (!mounted) return;
 
@@ -145,7 +141,6 @@ class _LoginPageState extends State<LoginPage> {
         if (qrCheck == null) return;
 
         if (qrCheck.isSuccess) {
-          // Stop timers to prevent further checks.
           timer.cancel();
           _qrRefreshTimer?.cancel();
           _userService.saveUserInfo(loginQrCheck: qrCheck);
@@ -198,9 +193,6 @@ class _LoginPageState extends State<LoginPage> {
     // 校验手机号
     if (_phoneController.text.isEmpty ||
         !RegExp(r'^1\d{10}$').hasMatch(_phoneController.text)) {
-      // ScaffoldMessenger.of(
-      //   context,
-      // ).showSnackBar(const SnackBar(content: Text('请输入有效的11位手机号')));
       return;
     }
 
@@ -209,20 +201,11 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // await _nodeServiceApi.captchaSent(_phoneController.text);
       await _nodeApiService.captchaSent(_phoneController.text);
       if (!mounted) return;
-      // ScaffoldMessenger.of(
-      //   context,
-      // ).showSnackBar(const SnackBar(content: Text('验证码已发送')));
       _startCountdown();
     } catch (e) {
       log('发送验证码失败: $e');
-      // if (mounted) {
-      //   ScaffoldMessenger.of(
-      //     context,
-      //   ).showSnackBar(SnackBar(content: Text('发送验证码失败: $e')));
-      // }
     } finally {
       if (mounted) {
         setState(() {
@@ -235,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
   /// 开始倒计时
   void _startCountdown() {
     _countdownSeconds = 60;
-    _countdownTimer?.cancel(); // Cancel any existing timer
+    _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
@@ -262,8 +245,6 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // final ApiResponse<LoginResponse> response = await _nodeServiceApi
-      //     .loginForCellPhone(_phoneController.text, _codeController.text);
       final response = await _nodeApiService.loginForCellPhone(
         _phoneController.text,
         _codeController.text,
@@ -276,19 +257,6 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(builder: (context) => const MainLayout()),
         );
-        // final userDetailResponse = await NodeServiceApi.instance.userDetial();
-        // final userDetailResponse = await _nodeApiService.userDetail();
-        // if (userDetailResponse.data != null) {
-        //   await UserService.instance.saveUserInfo(userDetailResponse.data!);
-        //   if (!mounted) return;
-        //   // ScaffoldMessenger.of(
-        //   //   context,
-        //   // ).showSnackBar(const SnackBar(content: Text('登录成功！')));
-        // } else {
-        //   setState(() {
-        //     _phoneLoginErrorText = '获取用户信息失败，请重试';
-        //   });
-        // }
       } else {
         setState(() {
           _phoneLoginErrorText = '登录失败，请检查验证码或手机号';

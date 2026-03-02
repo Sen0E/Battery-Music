@@ -1,4 +1,4 @@
-import 'package:battery_music/models/v2/response/search_keywords_special.dart'
+import 'package:battery_music/models/response/search_keywords_special.dart'
     hide Theme;
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';

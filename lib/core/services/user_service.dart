@@ -1,106 +1,105 @@
 import 'package:battery_music/core/services/node_api_client.dart';
-import 'package:battery_music/models/user_detial_response.dart';
+import 'package:battery_music/models/response/login_qr_check.dart';
+import 'package:battery_music/models/response/register_dev.dart';
+import 'package:battery_music/models/response/user_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 用户服务类
 /// 负责管理用户登录状态和持久化UI所需的用户信息
 class UserService {
-  static final UserService instance = UserService._();
-  factory UserService() => instance;
-  UserService._();
+  static final UserService _userService = UserService._internal();
+  factory UserService() => _userService;
 
-  // SharedPreferences keys
-  static const String _kUserId = 'user_id'; // 使用 'iden' 字段
-  static const String _kNickname = 'nickname';
-  static const String _kAvatar = 'avatar_pic'; // 存储 'pic' 字段
-  static const String _kVipType = 'vip_type';
-  static const String _kSvipLevel = 'svip_level';
-  static const String _kSvipEndTime = 'svip_end_time';
+  late SharedPreferences _prefs;
+  final NodeApiClient _nodeApiClient = NodeApiClient();
 
-  /// 保存用户信息 (基于 UserDetial 模型)
-  /// 仅存储UI展示所需的关键信息
-  Future<void> saveUserInfo(UserDetial user) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_kUserId, user.iden ?? 0);
-    await prefs.setString(_kNickname, user.nickname ?? '');
-    await prefs.setString(_kAvatar, user.pic ?? ''); // 存储头像URL模板
-    await prefs.setInt(_kVipType, user.vipType ?? 0);
-    await prefs.setInt(_kSvipLevel, user.svipLevel ?? 0);
-    await prefs.setString(_kSvipEndTime, user.suVipEndTime ?? '');
+  static int userId = 0;
+  static String nickname = '';
+  static String avatarUrl = '';
+  static int vipType = 0;
+  static String token = '';
+  static String vipBeginTime = ''; // 月会员结束时间(yyyy-mm-dd hh:mm:ss)
+  static String vipEndTime = ''; // 月会员开始时间(yyyy-mm-dd hh:mm:ss)
+  static String birthday = ''; // 生日(yyyy-mm-dd)
+  static String dfid = '';
+
+  static int get getUserId => userId;
+  static String get getNickname => nickname;
+  static String get getAvatarUrl => avatarUrl;
+  static int get getVipType => vipType;
+  static String get getToken => token;
+  static String get getVipBeginTime => vipBeginTime;
+  static String get getVipEndTime => vipEndTime;
+  static String get getBirthday => birthday;
+  static String get getDfid => dfid;
+
+  static bool get hasLogin => userId != '' && token != '';
+
+  UserService._internal() {
+    _initUserService();
   }
 
-  /// 检查用户是否已登录
-  /// 通过检查是否存在用户ID来判断
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    // 如果 userId 存在且不为0，则视为已登录
-    return prefs.containsKey(_kUserId) && (prefs.getInt(_kUserId) ?? 0) != 0;
+  Future<void> _initUserService() async {
+    _prefs = await SharedPreferences.getInstance();
+    userId = _prefs.getInt('userId') ?? 0;
+    nickname = _prefs.getString('nickname') ?? '';
+    avatarUrl = _prefs.getString('avatarUrl') ?? '';
+    vipType = _prefs.getInt('vipType') ?? 0;
+    token = _prefs.getString('token') ?? '';
+    vipBeginTime = _prefs.getString('vipBeginTime') ?? '';
+    vipEndTime = _prefs.getString('vipEndTime') ?? '';
+    birthday = _prefs.getString('birthday') ?? '';
+    dfid = _prefs.getString('dfid') ?? '';
+  }
+
+  Future<void> saveUserInfo({
+    UserInfo? userInfo,
+    LoginQrCheck? loginQrCheck,
+    RegisterDev? registerDev,
+  }) async {
+    if (userInfo != null) {
+      userId = userInfo.userId;
+      nickname = userInfo.nickname;
+      avatarUrl = userInfo.pic;
+      vipType = userInfo.vipType;
+      token = userInfo.token;
+      vipBeginTime = userInfo.vipBeginTime;
+      vipEndTime = userInfo.vipEndTime;
+      birthday = userInfo.birthday;
+      await _prefs.setInt('userId', userId);
+      await _prefs.setString('nickname', nickname);
+      await _prefs.setString('avatarUrl', avatarUrl);
+      await _prefs.setInt('vipType', vipType);
+      await _prefs.setString('token', token);
+      await _prefs.setString('vipBeginTime', vipBeginTime);
+      await _prefs.setString('vipEndTime', vipEndTime);
+      await _prefs.setString('birthday', birthday);
+    }
+    if (loginQrCheck != null) {
+      nickname = loginQrCheck.nickname!;
+      avatarUrl = loginQrCheck.pic!;
+      token = loginQrCheck.token!;
+      userId = loginQrCheck.userId!;
+      await _prefs.setString('nickname', nickname);
+      await _prefs.setString('avatarUrl', avatarUrl);
+      await _prefs.setString('token', token);
+    }
+    if (registerDev != null) {
+      dfid = registerDev.dfid;
+      await _prefs.setString('dfid', dfid);
+    }
   }
 
   /// 退出登录
-  /// 清除所有本地用户信息和网络请求的 Cookies
-  Future<void> logout() async {
-    // 1. 清除网络 Cookies
-    await NodeApiClient.instance.clearCookies();
-
-    // 2. 清除 SharedPreferences 中的用户信息
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_kUserId);
-    await prefs.remove(_kNickname);
-    await prefs.remove(_kAvatar);
-    await prefs.remove(_kVipType);
-    await prefs.remove(_kSvipLevel);
-    await prefs.remove(_kSvipEndTime);
-  }
-
-  // --- Getters for UI ---
-
-  /// 获取用户ID
-  Future<int?> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_kUserId);
-  }
-
-  /// 获取用户昵称
-  Future<String?> getNickname() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_kNickname);
-  }
-
-  /// 获取用户头像URL
-  /// [size] - 期望的图片尺寸
-  Future<String> getAvatarUrl({int size = 200}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final picTemplate = prefs.getString(_kAvatar);
-    if (picTemplate == null || picTemplate.isEmpty) {
-      // 可以返回一个默认头像URL
-      return '';
-    }
-    return picTemplate.replaceAll('{size}', size.toString());
-  }
-
-  /// 获取VIP类型
-  Future<int> getVipType() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_kVipType) ?? 0;
-  }
-
-  /// 获取超级VIP等级
-  Future<int> getSvipLevel() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_kSvipLevel) ?? 0;
-  }
-
-  /// 判断是否是VIP（普通或超级）
-  Future<bool> isVip() async {
-    final vipType = await getVipType();
-    final svipLevel = await getSvipLevel();
-    return vipType > 0 || svipLevel > 0;
-  }
-
-  /// 获取VIP到期时间
-  Future<String?> getVipEndTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_kSvipEndTime);
+  Future<void> logOut() async {
+    await _nodeApiClient.clearCookies();
+    await _prefs.remove('userId');
+    await _prefs.remove('nickname');
+    await _prefs.remove('avatarUrl');
+    await _prefs.remove('vipType');
+    await _prefs.remove('token');
+    await _prefs.remove('vipBeginTime');
+    await _prefs.remove('vipEndTime');
+    await _prefs.remove('birthday');
   }
 }

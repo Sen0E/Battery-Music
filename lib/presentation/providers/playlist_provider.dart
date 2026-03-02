@@ -1,8 +1,8 @@
-import 'package:battery_music/core/services/v2/node_api_service.dart';
-import 'package:battery_music/models/v2/response/base_api.dart';
+import 'package:battery_music/core/services/node_api_service.dart';
+import 'package:battery_music/models/response/base_api.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/v2/response/user_playlist.dart';
+import '../../models/response/user_playlist.dart';
 
 /// 歌单列表 Provider
 /// 负责获取和管理用户的所有歌单，并分类

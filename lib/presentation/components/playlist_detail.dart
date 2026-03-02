@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
@@ -85,10 +83,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final provider = context.watch<PlaylistDetailProvider>();
     final theme = Theme.of(context);
 
-    return Scaffold(
-      // appBar: AppBar(title: Text(widget.playlistName)),
-      body: _buildBody(provider, theme),
-    );
+    return Scaffold(body: _buildBody(provider, theme));
   }
 
   /// 构建页面主体内容

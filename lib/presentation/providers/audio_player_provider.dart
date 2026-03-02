@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'package:battery_music/core/services/v2/node_api_service.dart';
-import 'package:battery_music/core/services/v2/audio_player_service.dart';
-import 'package:battery_music/models/v2/entity/music_item.dart';
-import 'package:battery_music/models/v2/response/playlist_track.dart';
+import 'package:battery_music/core/services/audio_player_service.dart';
+import 'package:battery_music/models/entity/music_item.dart';
+import 'package:battery_music/models/response/playlist_track.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 
@@ -17,7 +16,6 @@ abstract class SongItemBase {
 /// 负责实际的音频播放逻辑，包括获取播放链接、播放控制、播放列表管理等
 class AudioPlayerProvider extends ChangeNotifier {
   late final AudioPlayerService _audioPlayerService;
-  final NodeApiService _api = NodeApiService();
 
   // --- 播放状态 ---
   bool get isPlaying => _audioPlayerService.player.state.playing;
@@ -130,7 +128,7 @@ class AudioPlayerProvider extends ChangeNotifier {
           index ??
           musicItems.indexOf(
             musicItems.firstWhere(
-              (item) => (item?.hash == song.hash) ?? false,
+              (item) => (item.hash == song.hash),
               orElse: () => musicItems[0],
             ),
           );

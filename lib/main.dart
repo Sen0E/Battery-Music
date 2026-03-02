@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'package:battery_music/core/services/node_manager.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_provider.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
 import 'package:battery_music/presentation/theme/app_theme.dart';
-import 'package:battery_music/core/services/node_service_manager.dart';
 import 'package:battery_music/presentation/page/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,12 +13,6 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 初始化音频支持
-  // JustAudioMediaKit.ensureInitialized();
-
-  // await NodeServiceManager.instance.startNodeService(); // 启动 NodeService
-  // await NodeApiClient.instance.init(); // 初始化 Cookie 管理
 
   await windowManager.ensureInitialized(); // 初始化窗口管理器
 
@@ -57,7 +51,7 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
     await windowManager.hide();
 
     // 停止 Node 服务
-    await NodeServiceManager.instance.stopNodeService();
+    await NodeManager().stopNodeService();
 
     // 销毁窗口并退出进程
     await windowManager.destroy();

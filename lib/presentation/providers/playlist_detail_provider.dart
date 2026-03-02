@@ -1,9 +1,9 @@
 // import 'package:battery_music/core/services/node_service_api.dart';
 // import 'package:battery_music/models/base_response.dart';
 // import 'package:battery_music/models/playlist_track_new_response.dart';
-import 'package:battery_music/core/services/v2/node_api_service.dart';
-import 'package:battery_music/models/v2/response/base_api.dart';
-import 'package:battery_music/models/v2/response/playlist_track.dart';
+import 'package:battery_music/core/services/node_api_service.dart';
+import 'package:battery_music/models/response/base_api.dart';
+import 'package:battery_music/models/response/playlist_track.dart';
 import 'package:flutter/material.dart';
 
 /// 歌单详情 Provider
