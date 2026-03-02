@@ -30,10 +30,8 @@ void main() async {
 
   UserService();
   NodeManager();
-  if (!UserService.hasLogin) {
-    final response = await NodeApiService().registerDev();
-    UserService().saveUserInfo(registerDev: response.data);
-  }
+  final response = await NodeApiService().registerDev();
+  UserService().saveUserInfo(registerDev: response.data);
 
   runApp(const BatteryMusicApp());
 }
