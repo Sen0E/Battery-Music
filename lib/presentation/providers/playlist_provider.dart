@@ -9,16 +9,18 @@ import '../../models/v2/response/user_playlist.dart';
 class PlaylistProvider extends ChangeNotifier {
   final NodeApiService _nodeApiService = NodeApiService();
   List<SongListInfo> _allPlaylists = [];
-  SongListInfo? _likedPlaylist;
   List<SongListInfo> _minePlaylist = [];
   List<SongListInfo> _albumslist = [];
+  List<SongListInfo> _likedPlaylist = [];
+  SongListInfo? _likeMusic;
 
   bool _isLoading = false;
   String? _errorMessage;
 
   List<SongListInfo> get minePlaylist => _minePlaylist;
   List<SongListInfo> get albumslist => _albumslist;
-  SongListInfo? get likedPlaylist => _likedPlaylist;
+  List<SongListInfo> get likePlaylist => _likedPlaylist;
+  SongListInfo? get likeMusic => _likeMusic;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -51,9 +53,9 @@ class PlaylistProvider extends ChangeNotifier {
   void _filterPlaylists() {
     // 筛选 喜欢音乐
     try {
-      _likedPlaylist = _allPlaylists.firstWhere((p) => p.isDef == 2);
+      _likeMusic = _allPlaylists.firstWhere((p) => p.isDef == 2);
     } catch (_) {
-      _likedPlaylist = null;
+      _likeMusic = null;
     }
 
     // 筛选 专辑
@@ -64,6 +66,11 @@ class PlaylistProvider extends ChangeNotifier {
     // 筛选 自建歌单
     _minePlaylist = _allPlaylists.where((p) {
       return p.type == 0 && p.isDef == null;
+    }).toList();
+
+    // 筛选 收藏的歌单
+    _likedPlaylist = _allPlaylists.where((p) {
+      return p.type == 1 && p.isDef == null && p.source == 1;
     }).toList();
   }
 }

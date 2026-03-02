@@ -1,17 +1,13 @@
 import 'dart:io';
-import 'package:battery_music/core/services/v2/node_manager.dart';
-import 'package:battery_music/presentation/page/lyric_page.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_provider.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
 import 'package:battery_music/presentation/theme/app_theme.dart';
-import 'package:battery_music/core/services/node_api_client.dart';
 import 'package:battery_music/core/services/node_service_manager.dart';
 import 'package:battery_music/presentation/page/splash_page.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -83,8 +79,8 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.system,
-        // home: SplashPage(),
-        home: LyricsScreen(),
+        home: SplashPage(),
+        // home: LyricsScreen(),
       ),
     );
   }

@@ -11,7 +11,7 @@ class LikedMusicPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final playlistProvider = context.watch<PlaylistProvider>();
-    final likedPlaylist = playlistProvider.likedPlaylist;
+    final likedPlaylist = playlistProvider.likeMusic;
 
     if (likedPlaylist == null) {
       return const Center(child: Text("未找到喜欢音乐歌单"));

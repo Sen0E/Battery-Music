@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:developer';
+
+import 'package:battery_music/utils/safe_convert.dart';
 
 /// 歌曲MV数据模型
 class Mvdata {
@@ -1061,7 +1064,8 @@ class ListInfo {
       isEdit: map['is_edit'] as int?,
       updateTime: map['update_time'] as int?,
       perNum: map['per_num'] as int?,
-      count: map['count'] as int?,
+      // count: map['count'] as int?,
+      count: SafeConvert.toInt(map['count']),
       sort: map['sort'] as int?,
       isMine: map['is_mine'] as int?,
       listid: map['listid'] as int?,

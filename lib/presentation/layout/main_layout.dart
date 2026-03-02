@@ -67,16 +67,44 @@ Widget _buildContent(BuildContext context) {
       return const LikedMusicPage();
     default:
       // 处理歌单列表的点击
-      if (selectedIndex >= 8) {
+      // 前面的菜单项占用了 0-6 的索引，所以歌单项从索引 8 开始
+      if (selectedIndex >= 7) {
         final playlistProvider = context.read<PlaylistProvider>();
-        final playlistIndex = selectedIndex - 8;
-        if (playlistIndex < playlistProvider.minePlaylist.length) {
-          final playlist = playlistProvider.minePlaylist[playlistIndex];
-          // 复用 PlaylistDetailPage 显示普通歌单详情
+
+        // 计算在歌单区域内的索引
+        int playlistIndex = selectedIndex - 7;
+
+        // 获取各个类型的歌单
+        final minePlaylist = playlistProvider.minePlaylist;
+        final likePlaylist = playlistProvider.likePlaylist;
+        final albums = playlistProvider.albumslist;
+
+        // 检查是否在我的歌单范围内
+        if (playlistIndex < minePlaylist.length) {
+          final playlist = minePlaylist[playlistIndex];
           return PlaylistDetailPage(
-            // listId: playlist.listid ?? 0,
             globalId: playlist.globalCollectionId ?? "",
             playlistName: playlist.name ?? "歌单详情",
+          );
+        }
+
+        // 检查是否在收藏的歌单范围内
+        playlistIndex -= minePlaylist.length;
+        if (playlistIndex < likePlaylist.length) {
+          final playlist = likePlaylist[playlistIndex];
+          return PlaylistDetailPage(
+            globalId: playlist.globalCollectionId ?? "",
+            playlistName: playlist.name ?? "歌单详情",
+          );
+        }
+
+        // 检查是否在收藏的专辑范围内
+        playlistIndex -= likePlaylist.length;
+        if (playlistIndex < albums.length) {
+          final album = albums[playlistIndex];
+          return PlaylistDetailPage(
+            globalId: album.globalCollectionId ?? "",
+            playlistName: album.name ?? "专辑详情",
           );
         }
       }

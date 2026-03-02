@@ -45,8 +45,15 @@ class PlaylistDetailProvider extends ChangeNotifier {
       final BaseApi<PlaylistTrack> response = await _nodeApiService
           .playlistTrack(globalId, page: _currentPage, pageSize: _pageSize);
       if (response.status == 1) {
+        // 筛选数据(songs中的song 中name不为为空的数据)
+
         _playlistData = response.data;
         _songs = response.data!.songs ?? [];
+
+        // 筛选掉name为空的歌曲
+        _songs = _songs
+            .where((song) => song.name != null && song.name!.isNotEmpty)
+            .toList();
 
         // 检查是否还有更多数据
         _hasMore = _songs.length >= _pageSize;
@@ -75,11 +82,15 @@ class PlaylistDetailProvider extends ChangeNotifier {
 
       if (response.status == 1) {
         final newSongs = response.data!.songs!;
-        _songs.addAll(newSongs);
+        // 筛选掉name为空的歌曲
+        final filteredSongs = newSongs
+            .where((song) => song.name != null && song.name!.isNotEmpty)
+            .toList();
+        _songs.addAll(filteredSongs);
         _currentPage = nextPage;
 
         // 检查是否还有更多数据
-        _hasMore = newSongs.length >= _pageSize;
+        _hasMore = filteredSongs.length >= _pageSize;
       } else {
         _hasMore = false;
       }

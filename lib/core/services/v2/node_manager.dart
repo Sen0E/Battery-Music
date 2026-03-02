@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:math';
 
 class NodeManager {
   static final NodeManager _nodeManager = NodeManager._internal();
@@ -66,6 +67,13 @@ class NodeManager {
     return _nodeExecPath;
   }
 
+  int generateRandomInt({required int min, required int max}) {
+    // 初始化随机数生成器（推荐复用同一个实例，避免重复初始化）
+    final random = Random();
+    // nextInt(n) 生成 0 ~ n-1 的整数，所以要 +1 来包含 max
+    return min + random.nextInt(max - min + 1);
+  }
+
   /// 启动node服务
   /// 返回值为node服务地址
   Future<String> startNodeService() async {
@@ -89,7 +97,7 @@ class NodeManager {
       [],
       environment: {
         'API_TOKEN': _authToken!,
-        'PORT': '10086',
+        'PORT': '${generateRandomInt(min: 5000, max: 10000)}',
         'HOST': '127.0.0.1',
         'platform': 'lite',
       },

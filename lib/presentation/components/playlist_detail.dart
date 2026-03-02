@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
@@ -134,6 +136,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               }
 
               final song = provider.songs[index];
+              if (song.name != null) {}
               return SongListItem(
                 index: index,
                 songName: song.name!.split('-').last,

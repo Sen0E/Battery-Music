@@ -70,7 +70,6 @@ class NodeServiceManager {
     final Completer<String> completer = Completer();
 
     _authToken = Uuid().v4();
-
     _nodeProcess = await Process.start(
       _nodeExecPath!,
       [],
