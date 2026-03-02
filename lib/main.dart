@@ -3,6 +3,7 @@ import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/core/services/node_manager.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
+import 'package:battery_music/presentation/providers/daily_recommendation_provider.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_provider.dart';
@@ -75,6 +76,9 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
         ChangeNotifierProvider(create: (_) => PlaylistProvider()), // 歌单列表
         ChangeNotifierProvider(create: (_) => PlaylistDetailProvider()), // 歌单详情
         ChangeNotifierProvider(create: (_) => AudioPlayerProvider()), // 音频播放器
+        ChangeNotifierProvider(
+          create: (_) => DailyRecommendationProvider(),
+        ), // 每日推荐
       ],
       child: MaterialApp(
         theme: AppTheme.light,

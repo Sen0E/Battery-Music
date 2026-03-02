@@ -219,7 +219,6 @@ class _SearchResultPageState extends State<SearchResultPage>
                   ),
                 );
               }
-
               final song = provider.songResults[index];
               return SongListItem(
                 index: index,

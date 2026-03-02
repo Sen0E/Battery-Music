@@ -97,7 +97,7 @@ class NodeManager {
       [],
       environment: {
         'API_TOKEN': _authToken!,
-        'PORT': '0',
+        // 'PORT': '0',
         'HOST': '127.0.0.1',
         // 'platform': 'lite',
       },

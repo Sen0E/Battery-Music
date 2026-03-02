@@ -53,7 +53,7 @@ class _SideBarState extends State<SideBar> {
             context,
             1,
             Icons.library_music_rounded,
-            "乐库",
+            "每日推荐",
             provider,
             theme,
           ),

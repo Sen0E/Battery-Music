@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 class PlaylistDetailProvider extends ChangeNotifier {
   final NodeApiService _nodeApiService = NodeApiService();
 
-  List<SongItem> _songs = [];
+  List<PlaylistTrackSongItem> _songs = [];
   PlaylistTrack? _playlistData;
   bool _isLoading = false;
   bool _isLoadingMore = false;
@@ -20,7 +20,7 @@ class PlaylistDetailProvider extends ChangeNotifier {
   static const int _pageSize = 30;
   String? _errorMessage;
 
-  List<SongItem> get songs => _songs;
+  List<PlaylistTrackSongItem> get songs => _songs;
   PlaylistTrack? get playlistData => _playlistData;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;

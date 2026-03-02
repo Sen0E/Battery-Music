@@ -2,7 +2,7 @@ import 'package:battery_music/presentation/components/bottom_player_bar.dart';
 import 'package:battery_music/presentation/components/side_bar.dart';
 import 'package:battery_music/presentation/components/top_bar.dart';
 import 'package:battery_music/presentation/page/liked_music_page.dart';
-import 'package:battery_music/presentation/page/music_library_page.dart';
+import 'package:battery_music/presentation/page/daily_recommendations_page.dart';
 import 'package:battery_music/presentation/components/playlist_detail.dart';
 import 'package:battery_music/presentation/page/recommended_page.dart';
 import 'package:battery_music/presentation/page/search_result_page.dart';
@@ -62,7 +62,7 @@ Widget _buildContent(BuildContext context) {
     case 0:
       return const RecommendedPage();
     case 1:
-      return const MusicLibraryPage();
+      return const DailyRecommendationsPage();
     case 4:
       return const LikedMusicPage();
     default:

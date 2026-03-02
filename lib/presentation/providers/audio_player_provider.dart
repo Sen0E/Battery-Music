@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:battery_music/core/services/audio_player_service.dart';
 import 'package:battery_music/models/entity/music_item.dart';
 import 'package:battery_music/models/response/playlist_track.dart';
+import 'package:battery_music/models/response/search_keywords_song.dart';
+import 'package:battery_music/models/response/daily_recommend.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 
@@ -89,33 +91,31 @@ class AudioPlayerProvider extends ChangeNotifier {
       final musicItems = playlist
           .whereType<dynamic>()
           .map((item) {
-            // 确保item是MusicItem类型或可以转换为MusicItem
-            log(item.toString());
-            if (item is Map<String, dynamic>) {
+            if (item is SearchKeywordsSong) {
               return MusicItem(
-                hash: item['hash'] ?? '',
-                songName: item['songName'] ?? item['name'] ?? '',
-                singerName:
-                    item['singerName'] ??
-                    item['singer'] ??
-                    item['artist'] ??
-                    '',
-                coverImage:
-                    item['coverImage'] ??
-                    item['albumCover'] ??
-                    item['coverUrl'] ??
-                    '',
+                hash: item.fileHash ?? '',
+                songName: item.fileName ?? item.oriSongName ?? '',
+                singerName: item.singerName ?? '',
+                coverImage: item.image ?? '',
               );
-            } else if (item is SongItem) {
-              // 如果item已经是MusicItem类型，直接使用
+            } else if (item is PlaylistTrackSongItem) {
               return MusicItem(
                 hash: item.hash ?? '',
                 songName: item.name!,
                 singerName: item.name!.split('-').first,
                 coverImage: item.getCoverUrl(),
               );
+            } else if (item is DailyRecommendSongItem) {
+              return MusicItem(
+                hash: item.hash ?? '',
+                songName: item.albumName!,
+                singerName: item.authorName!,
+                coverImage: item.getSizableCoverUrl(),
+              );
+            } else {
+              debugPrint("无法处理此歌曲类型：${item.runtimeType}");
+              return null;
             }
-            return null;
           })
           .where((item) => item != null)
           .cast<MusicItem>()
@@ -128,7 +128,9 @@ class AudioPlayerProvider extends ChangeNotifier {
           index ??
           musicItems.indexOf(
             musicItems.firstWhere(
-              (item) => (item.hash == song.hash),
+              (item) =>
+                  (item.hash ==
+                  (song is SearchKeywordsSong ? song.fileHash : song.hash)),
               orElse: () => musicItems[0],
             ),
           );
@@ -138,17 +140,28 @@ class AudioPlayerProvider extends ChangeNotifier {
       }
     } else {
       // 单曲播放
-      if (song is! MusicItem) {
+      MusicItem musicItem;
+      if (song is SearchKeywordsSong) {
+        // 处理搜索结果中的歌曲类型
+        musicItem = MusicItem(
+          hash: song.fileHash ?? '',
+          songName: song.fileName ?? song.oriSongName ?? '',
+          singerName: song.singerName ?? '',
+          coverImage: song.image ?? '',
+        );
+      } else if (song is! MusicItem) {
         // 转换为MusicItem
-        song = MusicItem(
+        musicItem = MusicItem(
           hash: song.hash ?? '',
           songName: song.name ?? song.songName ?? '',
           singerName: song.singer ?? song.singerName ?? song.artist ?? '',
           coverImage: song.coverImage ?? song.albumCover ?? song.coverUrl ?? '',
         );
+      } else {
+        musicItem = song;
       }
 
-      await _audioPlayerService.addAndPlay(song);
+      await _audioPlayerService.addAndPlay(musicItem);
     }
 
     notifyListeners();

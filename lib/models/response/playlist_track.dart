@@ -481,7 +481,7 @@ class Singerinfo {
 }
 
 /// 单首歌曲信息模型
-class SongItem {
+class PlaylistTrackSongItem {
   /// MV数据列表
   final List<Mvdata>? mvdata;
 
@@ -605,7 +605,7 @@ class SongItem {
   /// 歌手信息列表
   final List<Singerinfo>? singerinfo;
 
-  SongItem({
+  PlaylistTrackSongItem({
     this.mvdata,
     this.hash,
     this.brief,
@@ -649,8 +649,8 @@ class SongItem {
     this.singerinfo,
   });
 
-  factory SongItem.fromMap(Map<String, dynamic> map) {
-    return SongItem(
+  factory PlaylistTrackSongItem.fromMap(Map<String, dynamic> map) {
+    return PlaylistTrackSongItem(
       mvdata: map['mvdata'] != null
           ? List<Mvdata>.from(
               (map['mvdata'] as List).map(
@@ -771,8 +771,8 @@ class SongItem {
     };
   }
 
-  factory SongItem.fromJson(String source) =>
-      SongItem.fromMap(json.decode(source));
+  factory PlaylistTrackSongItem.fromJson(String source) =>
+      PlaylistTrackSongItem.fromMap(json.decode(source));
   String toJson() => json.encode(toMap());
 
   /// 获取歌曲封面图片
@@ -1155,7 +1155,7 @@ class PlaylistTrack {
   final int? userid;
 
   /// 歌曲列表
-  final List<SongItem>? songs;
+  final List<PlaylistTrackSongItem>? songs;
 
   /// 歌单基础信息
   final ListInfo? listInfo;
@@ -1178,9 +1178,9 @@ class PlaylistTrack {
       popularization: map['popularization'] as Map<String, dynamic>?,
       userid: map['userid'] as int?,
       songs: map['songs'] != null
-          ? List<SongItem>.from(
+          ? List<PlaylistTrackSongItem>.from(
               (map['songs'] as List).map(
-                (x) => SongItem.fromMap(x as Map<String, dynamic>),
+                (x) => PlaylistTrackSongItem.fromMap(x as Map<String, dynamic>),
               ),
             )
           : null,

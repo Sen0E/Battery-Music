@@ -26,7 +26,7 @@ class DailyRecommend {
   final int? isGuaranteeRec;
 
   /// 歌曲列表详情
-  final List<SongItem>? songList;
+  final List<DailyRecommendSongItem>? songList;
 
   /// 副标题
   final String? subTitle;
@@ -59,8 +59,10 @@ class DailyRecommend {
       clientPlaylistFlag: map['client_playlist_flag'],
       isGuaranteeRec: map['is_guarantee_rec'],
       songList: map['song_list'] != null
-          ? List<SongItem>.from(
-              (map['song_list'] as List).map((x) => SongItem.fromMap(x)),
+          ? List<DailyRecommendSongItem>.from(
+              (map['song_list'] as List).map(
+                (x) => DailyRecommendSongItem.fromMap(x),
+              ),
             )
           : null,
       subTitle: map['sub_title'],
@@ -92,7 +94,7 @@ class DailyRecommend {
 
 /// Song_list 类 (重命名为 SongItem)：单曲详情
 
-class SongItem {
+class DailyRecommendSongItem {
   /// 无损 FLAC 格式的文件大小 (字节)
   final int? filesizeFlac;
 
@@ -306,7 +308,7 @@ class SongItem {
   /// 是否已发布
   final int? isPublish;
 
-  const SongItem({
+  const DailyRecommendSongItem({
     required this.filesizeFlac,
     required this.officialSongname,
     required this.oriAudioName,
@@ -380,8 +382,8 @@ class SongItem {
     required this.isPublish,
   });
 
-  factory SongItem.fromMap(Map<String, dynamic> map) {
-    return SongItem(
+  factory DailyRecommendSongItem.fromMap(Map<String, dynamic> map) {
+    return DailyRecommendSongItem(
       filesizeFlac: map['filesize_flac'],
       officialSongname: map['official_songname'],
       oriAudioName: map['ori_audio_name'],
@@ -474,7 +476,8 @@ class SongItem {
     );
   }
 
-  factory SongItem.fromJson(String str) => SongItem.fromMap(json.decode(str));
+  factory DailyRecommendSongItem.fromJson(String str) =>
+      DailyRecommendSongItem.fromMap(json.decode(str));
 
   Map<String, dynamic> toMap() {
     return {
