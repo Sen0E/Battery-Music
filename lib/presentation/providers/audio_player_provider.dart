@@ -91,6 +91,7 @@ class AudioPlayerProvider extends ChangeNotifier {
       final musicItems = playlist
           .whereType<dynamic>()
           .map((item) {
+            // 处理搜索结果中的歌曲类型
             if (item is SearchKeywordsSong) {
               return MusicItem(
                 hash: item.fileHash ?? '',
@@ -98,17 +99,21 @@ class AudioPlayerProvider extends ChangeNotifier {
                 singerName: item.singerName ?? '',
                 coverImage: item.image ?? '',
               );
-            } else if (item is PlaylistTrackSongItem) {
+            } else
+            // 处理歌单中的歌曲类型
+            if (item is PlaylistTrackSongItem) {
               return MusicItem(
                 hash: item.hash ?? '',
                 songName: item.name!,
                 singerName: item.name!.split('-').first,
                 coverImage: item.getCoverUrl(),
               );
-            } else if (item is DailyRecommendSongItem) {
+            } else
+            // 处理每日推荐中的歌曲类型
+            if (item is DailyRecommendSongItem) {
               return MusicItem(
                 hash: item.hash ?? '',
-                songName: item.albumName!,
+                songName: item.songname!,
                 singerName: item.authorName!,
                 coverImage: item.getSizableCoverUrl(),
               );
