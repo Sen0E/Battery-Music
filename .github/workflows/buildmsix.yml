@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build Windows MSIX
 
 on:
   # 当推送到 main 分支时触发
