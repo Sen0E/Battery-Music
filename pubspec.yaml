@@ -61,6 +61,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  msix: ^3.16.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -110,3 +111,8 @@ flutter:
     - family: HarmonyOS Sans SC
       fonts:
         - asset: assets/fonts/HarmonyOS_Sans_SC_Regular.ttf
+msix_config:
+  display_name: "Battery Music"
+  publisher_display_name: "Battery Music"
+  msix_version: "1.0.0.0"
+  logo_path: "assets/images/logo/round.png"
