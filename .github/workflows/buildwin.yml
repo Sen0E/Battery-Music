@@ -1,0 +1,51 @@
+name: Build Windows
+
+on:
+  # 当推送到 main 分支时触发
+  push:
+    branches: [ "main" ]
+  # 手动点击 "Run workflow"
+  workflow_dispatch:
+
+jobs:
+  build_and_upload:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false # 如果一个平台失败，不要取消其他平台的任务
+      matrix:
+        include:
+          - os: windows-latest
+            target: windows
+            build_target: windows
+            asset_name: battery_music-windows.zip
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.1'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Pub dependencies
+        run: flutter pub get
+
+      # --- 编译步骤 ---
+      - name: Build Application
+        run: |
+          flutter config --enable-windows-desktop
+          flutter build ${{ matrix.build_target }} --release
+
+      # --- 上传产物到 GitHub Actions 页面 ---
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          # 在下载页面显示的名称
+          name: battery_music-${{ matrix.target }}
+          # 要上传的文件路径
+          path: build/windows/x64/runner/Release
+          # 文件保留天数
+          retention-days: 1
