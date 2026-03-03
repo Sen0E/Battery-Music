@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/core/services/node_manager.dart';
@@ -29,10 +30,11 @@ void main() async {
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden); // 隐藏标题栏
   });
 
-  UserService();
+  await UserService.initialize();
   NodeManager();
+  log(UserService.getUserId.toString());
   final response = await NodeApiService().registerDev();
-  UserService().saveUserInfo(registerDev: response.data);
+  await UserService().saveUserInfo(registerDev: response.data);
 
   runApp(const BatteryMusicApp());
 }

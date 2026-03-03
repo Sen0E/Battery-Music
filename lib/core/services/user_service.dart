@@ -10,7 +10,7 @@ class UserService {
   static final UserService _userService = UserService._internal();
   factory UserService() => _userService;
 
-  late SharedPreferences _prefs;
+  static SharedPreferences? _prefs;
   final NodeApiClient _nodeApiClient = NodeApiClient();
 
   static int userId = 0;
@@ -33,23 +33,22 @@ class UserService {
   static String get getBirthday => birthday;
   static String get getDfid => dfid;
 
-  static bool get hasLogin => userId != '' && token != '';
+  static bool get hasLogin => userId != 0 && token != '';
 
-  UserService._internal() {
-    _initUserService();
-  }
+  UserService._internal();
 
-  Future<void> _initUserService() async {
+  /// 异步初始化方法，必须在使用UserService前调用
+  static Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
-    userId = _prefs.getInt('userId') ?? 0;
-    nickname = _prefs.getString('nickname') ?? '';
-    avatarUrl = _prefs.getString('avatarUrl') ?? '';
-    vipType = _prefs.getInt('vipType') ?? 0;
-    token = _prefs.getString('token') ?? '';
-    vipBeginTime = _prefs.getString('vipBeginTime') ?? '';
-    vipEndTime = _prefs.getString('vipEndTime') ?? '';
-    birthday = _prefs.getString('birthday') ?? '';
-    dfid = _prefs.getString('dfid') ?? '';
+    userId = _prefs!.getInt('userId') ?? 0;
+    nickname = _prefs!.getString('nickname') ?? '';
+    avatarUrl = _prefs!.getString('avatarUrl') ?? '';
+    vipType = _prefs!.getInt('vipType') ?? 0;
+    token = _prefs!.getString('token') ?? '';
+    vipBeginTime = _prefs!.getString('vipBeginTime') ?? '';
+    vipEndTime = _prefs!.getString('vipEndTime') ?? '';
+    birthday = _prefs!.getString('birthday') ?? '';
+    dfid = _prefs!.getString('dfid') ?? '';
   }
 
   Future<void> saveUserInfo({
@@ -66,40 +65,41 @@ class UserService {
       vipBeginTime = userInfo.vipBeginTime;
       vipEndTime = userInfo.vipEndTime;
       birthday = userInfo.birthday;
-      await _prefs.setInt('userId', userId);
-      await _prefs.setString('nickname', nickname);
-      await _prefs.setString('avatarUrl', avatarUrl);
-      await _prefs.setInt('vipType', vipType);
-      await _prefs.setString('token', token);
-      await _prefs.setString('vipBeginTime', vipBeginTime);
-      await _prefs.setString('vipEndTime', vipEndTime);
-      await _prefs.setString('birthday', birthday);
+      await _prefs!.setInt('userId', userId);
+      await _prefs!.setString('nickname', nickname);
+      await _prefs!.setString('avatarUrl', avatarUrl);
+      await _prefs!.setInt('vipType', vipType);
+      await _prefs!.setString('token', token);
+      await _prefs!.setString('vipBeginTime', vipBeginTime);
+      await _prefs!.setString('vipEndTime', vipEndTime);
+      await _prefs!.setString('birthday', birthday);
     }
     if (loginQrCheck != null) {
       nickname = loginQrCheck.nickname!;
       avatarUrl = loginQrCheck.pic!;
       token = loginQrCheck.token!;
       userId = loginQrCheck.userId!;
-      await _prefs.setString('nickname', nickname);
-      await _prefs.setString('avatarUrl', avatarUrl);
-      await _prefs.setString('token', token);
+      await _prefs!.setString('nickname', nickname);
+      await _prefs!.setString('avatarUrl', avatarUrl);
+      await _prefs!.setString('token', token);
+      await _prefs!.setInt('userId', userId);
     }
     if (registerDev != null) {
       dfid = registerDev.dfid;
-      await _prefs.setString('dfid', dfid);
+      await _prefs!.setString('dfid', dfid);
     }
   }
 
   /// 退出登录
   Future<void> logOut() async {
     await _nodeApiClient.clearCookies();
-    await _prefs.remove('userId');
-    await _prefs.remove('nickname');
-    await _prefs.remove('avatarUrl');
-    await _prefs.remove('vipType');
-    await _prefs.remove('token');
-    await _prefs.remove('vipBeginTime');
-    await _prefs.remove('vipEndTime');
-    await _prefs.remove('birthday');
+    await _prefs!.remove('userId');
+    await _prefs!.remove('nickname');
+    await _prefs!.remove('avatarUrl');
+    await _prefs!.remove('vipType');
+    await _prefs!.remove('token');
+    await _prefs!.remove('vipBeginTime');
+    await _prefs!.remove('vipEndTime');
+    await _prefs!.remove('birthday');
   }
 }

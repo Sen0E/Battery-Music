@@ -134,8 +134,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               if (song.name != null) {}
               return SongListItem(
                 index: index,
-                songName: song.name!.split('-').last,
-                singerName: song.name!.split('-').first,
+                songName: song.name!.split(' - ').last,
+                singerName: song.name!.split(' - ').first,
                 musicpackAdvance: song.transParam!.musicpackAdvance,
                 coverUrl: song.getCoverUrl(),
                 duration: song.timelen,

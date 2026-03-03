@@ -22,7 +22,7 @@ class LoginQrCheck {
       nickname: json['nickname'],
       pic: json['pic'],
       token: json['token'],
-      userId: json['userId'],
+      userId: json['userid'],
     );
   }
   factory LoginQrCheck.fromJson(String str) =>

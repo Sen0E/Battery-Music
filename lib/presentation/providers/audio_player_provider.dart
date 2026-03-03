@@ -105,7 +105,7 @@ class AudioPlayerProvider extends ChangeNotifier {
               return MusicItem(
                 hash: item.hash!,
                 songName: item.name!.split(' - ').last,
-                singerName: item.name!.split('-').first,
+                singerName: item.name!.split(' - ').first,
                 coverImage: item.getCoverUrl(),
               );
             } else
