@@ -168,7 +168,7 @@
 import 'dart:developer';
 
 import 'package:battery_music/core/services/node_api_service.dart';
-import 'package:battery_music/core/services/smtc_service.dart'; // 引入新增的 SMTC 服务
+import 'package:battery_music/core/services/smtc_service.dart';
 import 'package:battery_music/models/entity/music_item.dart';
 import 'package:battery_music/models/response/song_data.dart';
 import 'package:media_kit/media_kit.dart';
@@ -181,7 +181,7 @@ class AudioPlayerService {
   late final Player player;
 
   final NodeApiService _nodeApiService = NodeApiService();
-  final SmtcService _smtcService = SmtcService(); // 实例化 SmtcService
+  final SmtcService _smtcService = SmtcService();
 
   final List<MusicItem> _playlist = [];
   int _currentIndex = -1;
@@ -190,13 +190,13 @@ class AudioPlayerService {
     MediaKit.ensureInitialized();
     player = Player();
 
-    // --- 1. 绑定 SMTC 到播放器的操作 ---
+    // 绑定 SMTC 到播放器的操作
     _smtcService.onPlay = play;
     _smtcService.onPause = pause;
     _smtcService.onNext = playNext;
     _smtcService.onPrevious = playPrevious;
 
-    // --- 2. 同步播放器状态给 SMTC ---
+    // 同步播放器状态给 SMTC
     // 监听播放状态
     player.stream.playing.listen((isPlaying) {
       _smtcService.updatePlaybackStatus(isPlaying);
@@ -215,7 +215,7 @@ class AudioPlayerService {
     });
   }
 
-  // --- 状态获取 (提供给外部只读) ---
+  // 状态获取 (提供给外部只读)
 
   List<MusicItem> get playlist => List.unmodifiable(_playlist);
 
@@ -233,7 +233,7 @@ class AudioPlayerService {
     _currentIndex = index;
     final targetMusic = _playlist[_currentIndex];
 
-    // --- 3. 更新 SMTC 的歌曲元数据(封面/歌名等) ---
+    // 更新 SMTC 的歌曲元数据(封面/歌名等)
     _smtcService.updateMetadata(targetMusic);
 
     try {

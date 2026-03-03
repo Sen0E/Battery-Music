@@ -94,17 +94,17 @@ class AudioPlayerProvider extends ChangeNotifier {
             // 处理搜索结果中的歌曲类型
             if (item is SearchKeywordsSong) {
               return MusicItem(
-                hash: item.fileHash ?? '',
-                songName: item.fileName ?? item.oriSongName ?? '',
+                hash: item.fileHash!,
+                songName: item.fileName!.split(' - ').last,
                 singerName: item.singerName ?? '',
-                coverImage: item.image ?? '',
+                coverImage: item.getImageUrl(),
               );
             } else
             // 处理歌单中的歌曲类型
             if (item is PlaylistTrackSongItem) {
               return MusicItem(
-                hash: item.hash ?? '',
-                songName: item.name!,
+                hash: item.hash!,
+                songName: item.name!.split(' - ').last,
                 singerName: item.name!.split('-').first,
                 coverImage: item.getCoverUrl(),
               );
