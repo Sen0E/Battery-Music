@@ -1,5 +1,4 @@
-import 'package:battery_music/models/response/search_keywords_special.dart'
-    hide Theme;
+import 'package:battery_music/models/response/search_keywords_special.dart';
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
@@ -222,7 +221,7 @@ class _SearchResultPageState extends State<SearchResultPage>
               final song = provider.songResults[index];
               return SongListItem(
                 index: index,
-                songName: song.fileName ?? '未知歌曲',
+                songName: song.fileName!.split(' - ').last,
                 singerName: song.singerName ?? '未知歌手',
                 coverUrl: song.getImageUrl(),
                 duration: song.duration,

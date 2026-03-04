@@ -3,21 +3,22 @@ import 'dart:convert';
 // ===================== 嵌套子模型 =====================
 
 /// 主题信息模型（当前无有效内容）
-class Theme {
+class SearchTheme {
   /// 主题是否有效（false=无效）
   final bool? valid;
 
-  Theme({this.valid});
+  SearchTheme({this.valid});
 
-  factory Theme.fromMap(Map<String, dynamic> map) {
-    return Theme(valid: map['valid'] as bool?);
+  factory SearchTheme.fromMap(Map<String, dynamic> map) {
+    return SearchTheme(valid: map['valid'] as bool?);
   }
 
   Map<String, dynamic> toMap() {
     return {'valid': valid};
   }
 
-  factory Theme.fromJson(String source) => Theme.fromMap(json.decode(source));
+  factory SearchTheme.fromJson(String source) =>
+      SearchTheme.fromMap(json.decode(source));
   String toJson() => json.encode(toMap());
 }
 
