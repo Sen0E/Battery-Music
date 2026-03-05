@@ -117,6 +117,14 @@ const createRequest = (options) => {
       requestOptions.url = `${url}?${_params}`;
       requestOptions.params = {};
     }
+        // 添加请求日志
+    console.log('--- Request Details ---');
+    console.log('Method:', requestOptions.method.toUpperCase());
+    console.log('URL:', requestOptions.baseURL + requestOptions.url);
+    console.log('Params:', requestOptions.params);
+    console.log('Data:', requestOptions.data);
+    console.log('Headers:', requestOptions.headers);
+    console.log('-----------------------');
 
     const answer = { status: 500, body: {}, cookie: [], headers: {} };
     try {

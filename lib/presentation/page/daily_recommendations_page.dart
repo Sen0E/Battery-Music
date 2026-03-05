@@ -73,11 +73,11 @@ class _DailyRecommendationsPageState extends State<DailyRecommendationsPage> {
 
         return SongListItem(
           index: index,
-          songName: song.songname ?? '未知歌曲',
-          singerName: song.authorName ?? '未知歌手',
+          songName: song.songname!,
+          singerName: song.authorName!,
           coverUrl: song.getSizableCoverUrl(size: 120),
           duration: song.timeLength,
-          musicpackAdvance: song.payType == 3 ? 1 : 0,
+          musicpackAdvance: song.payType != 1 ? 1 : 0,
           onTap: () {
             // 播放歌曲的逻辑可以在这里实现
             // debugPrint('点击播放歌曲: ${song.songname}');

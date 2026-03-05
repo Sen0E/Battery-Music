@@ -214,6 +214,25 @@ class NodeApiService {
     return SongData.fromMap(response.data);
   }
 
+  ///获取音乐URL（新版）
+  ///[hash] 歌曲hash
+  ///[albumAudioId] 专辑音频id
+  ///[freePart] 是否返回试听部分（仅部分歌曲）(0：否, 1：是)
+  Future<Response> songUrlNew(
+    String hash, {
+    String? albumAudioId,
+    int? freePart,
+  }) async {
+    return _nodeApiClient.post(
+      '/song/url/new',
+      queryParameters: {
+        'hash': hash,
+        if (albumAudioId != null) 'album_audio_id': albumAudioId,
+        if (freePart != null) 'free_part': freePart,
+      },
+    );
+  }
+
   /// 搜索
   /// [keywords] 关键字
   /// [type] 搜索类型(默认为单曲，special：歌单，lyric：歌词，song：单曲，album：专辑，author：歌手，mv：mv)

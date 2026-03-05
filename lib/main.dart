@@ -87,7 +87,6 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.system,
         home: SplashPage(),
-        // home: LyricsScreen(),
       ),
     );
   }

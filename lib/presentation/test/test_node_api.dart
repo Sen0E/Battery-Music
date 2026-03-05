@@ -148,6 +148,13 @@ class _TestNodeApiState extends State<TestNodeApi> {
     log(response.data!.toJson());
   }
 
+  Future<void> _getMusicUrlNew() async {
+    final response = await _nodeApiService.songUrlNew(
+      "B142F5845EF337449F6110CE34131A65",
+    );
+    log(response.toString());
+  }
+
   Widget _buildMusicApi() {
     return Column(
       children: [
@@ -204,6 +211,12 @@ class _TestNodeApiState extends State<TestNodeApi> {
             _searchSuggest();
           },
           child: Text("搜索建议"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _getMusicUrlNew();
+          },
+          child: Text("获取音乐URL(新)"),
         ),
       ],
     );
