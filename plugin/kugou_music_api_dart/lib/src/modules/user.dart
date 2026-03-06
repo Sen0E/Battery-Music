@@ -233,7 +233,7 @@ class User {
     try {
       final int clienttime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-      // 1. AES 加密业务参数
+      // AES 加密业务参数
       final Map<String, dynamic> dataMap = {
         'page': page,
         'pagesize': pagesize,
@@ -243,14 +243,14 @@ class User {
         dataMap,
       );
 
-      // 2. RSA 加密 AES 的 Key、UID 和 Token
+      // RSA 加密 AES 的 Key、UID 和 Token
       final String p = EncryptUtil.rsaEncrypt2({
         'aes': aesEncrypt['key'],
         'uid': _userid,
         'token': _token,
       }).toUpperCase();
 
-      // 3. 组装请求参数 (带签名)
+      // 组装请求参数 (带签名)
       final Map<String, dynamic> paramsMap = {
         'clienttime': clienttime,
         'mid': _mid,
@@ -263,7 +263,7 @@ class User {
         'p': p,
       };
 
-      // 4. 发起纯二进制请求
+      // 发起纯二进制请求
       final Dio dio = Dio();
       final String cookieStr = ApiClient().currentCookies.entries
           .map((e) => '${e.key}=${e.value}')
@@ -284,7 +284,7 @@ class User {
         ),
       );
 
-      // 5. 对返回的二进制流进行 AES 解密
+      // 对返回的二进制流进行 AES 解密
       final List<int> responseBytes = response.data as List<int>;
       final String base64Resp = base64Encode(responseBytes);
       final dynamic decryptedBody = EncryptUtil.playlistAesDecrypt(

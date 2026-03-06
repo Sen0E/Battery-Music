@@ -30,7 +30,7 @@ void main() async {
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden); // 隐藏标题栏
   });
 
-  await UserService.initialize();
+  await UserService.initialize(false);
   NodeManager();
   log(UserService.getUserId.toString());
   final response = await NodeApiService().registerDev();

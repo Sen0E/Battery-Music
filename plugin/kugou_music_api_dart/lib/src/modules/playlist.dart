@@ -91,7 +91,7 @@ class Playlist {
   static Future<Map<String, dynamic>> playlistDel(int listid) async {
     final int clienttime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    // 1. AES 加密业务数据
+    // AES 加密业务数据
     final Map<String, dynamic> dataMap = {
       'listid': listid,
       'total_ver': 0,
@@ -101,14 +101,14 @@ class Playlist {
       dataMap,
     );
 
-    // 2. RSA 加密安全信息
+    // RSA 加密安全信息
     final String p = EncryptUtil.rsaEncrypt2({
       'aes': aesEncrypt['key'],
       'uid': _userid,
       'token': _token,
     }).toUpperCase();
 
-    // 3. 组装请求参数
+    // 组装请求参数
     final Map<String, dynamic> paramsMap = {
       'clienttime': clienttime,
       'key': HelperUtil.signParamsKey(

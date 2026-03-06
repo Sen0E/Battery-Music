@@ -30,14 +30,15 @@ class _SplashPageState extends State<SplashPage> {
   /// 检查登录状态
   Future<void> _checkLoginStatus() async {
     // 测试用
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (mounted) {
-    //     // 检查widget是否仍在界面上
-    //     Navigator.of(context).pushReplacement(
-    //       MaterialPageRoute(builder: (_) => const TestNodeApi()),
-    //     );
-    //   }
-    // }); // 确保在当前帧绘制完成后跳转
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        // 检查widget是否仍在界面上
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const TestNodeApi()),
+        );
+      }
+    }); // 确保在当前帧绘制完成后跳转
+    return;
 
     if (!UserService.hasLogin) {
       _navigateToLogin();

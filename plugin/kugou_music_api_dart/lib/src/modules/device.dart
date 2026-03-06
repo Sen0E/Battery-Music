@@ -44,7 +44,7 @@ class Device {
     bool temperature = false,
     String temperatureValue = '',
   }) async {
-    // 1. 组装极其详细的硬件探针数据
+    // 组装极其详细的硬件探针数据
     final Map<String, dynamic> dataMap = {
       'availableRamSize': availableRamSize,
       'availableRomSize': availableRomSize,
@@ -79,19 +79,19 @@ class Device {
       'temperatureValue': temperatureValue,
     };
 
-    // 2. 核心：使用播放列表级别的 AES 加密业务数据
+    // 核心：使用播放列表级别的 AES 加密业务数据
     final Map<String, String> aesEncrypt = EncryptUtil.playlistAesEncrypt(
       dataMap,
     );
 
-    // 3. 使用标准 PKCS1_v1_5 RSA 加密包含动态 AES Key 的防伪信息
+    // 使用标准 PKCS1_v1_5 RSA 加密包含动态 AES Key 的防伪信息
     final String p = EncryptUtil.rsaEncrypt2({
       'aes': aesEncrypt['key'],
       'uid': _userid,
       'token': _token,
     }); // ⚠️ 注意：原 JS 这里没有 .toUpperCase()
 
-    // 4. 发起强验证的风控底层请求
+    // 发起强验证的风控底层请求
     try {
       final dio = Dio();
       final String cookieStr = ApiClient().currentCookies.entries
@@ -114,7 +114,7 @@ class Device {
         ),
       );
 
-      // 5. 将二进制流转为 Base64 并解密
+      // 将二进制流转为 Base64 并解密
       final List<int> responseBytes = response.data as List<int>;
       final String base64Resp = base64Encode(responseBytes);
       final dynamic decryptedBody = EncryptUtil.playlistAesDecrypt(
@@ -122,7 +122,7 @@ class Device {
         aesEncrypt['key']!,
       );
 
-      // 6. ✨ 灵魂注入：拦截 dfid 并更新到全局引擎
+      // ✨ 灵魂注入：拦截 dfid 并更新到全局引擎
       if (decryptedBody is Map &&
           decryptedBody['status'] == 1 &&
           decryptedBody['data'] != null) {

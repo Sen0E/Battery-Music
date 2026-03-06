@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:battery_music/core/services/node_api_client.dart';
 import 'package:battery_music/models/response/login_qr_check.dart';
 import 'package:battery_music/models/response/register_dev.dart';
 import 'package:battery_music/models/response/user_info.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:kugou_music_api_dart/kugou_music_api_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 用户服务类
@@ -38,7 +43,7 @@ class UserService {
   UserService._internal();
 
   /// 异步初始化方法，必须在使用UserService前调用
-  static Future<void> initialize() async {
+  static Future<void> initialize(bool isLiteVersion) async {
     _prefs = await SharedPreferences.getInstance();
     userId = _prefs!.getInt('userId') ?? 0;
     nickname = _prefs!.getString('nickname') ?? '';
@@ -49,6 +54,19 @@ class UserService {
     vipEndTime = _prefs!.getString('vipEndTime') ?? '';
     birthday = _prefs!.getString('birthday') ?? '';
     dfid = _prefs!.getString('dfid') ?? '';
+
+    Map<String, String> savedCookies = {};
+    final String cookieStr = _prefs!.getString('cookie') ?? '{}';
+    savedCookies = Map<String, String>.from(jsonDecode(cookieStr));
+
+    ApiClient().init(isLiteVersion: isLiteVersion, savedCookies: savedCookies);
+
+    // 监听cookie并保存
+    ApiClient().onCookieUpdated = (cookie) async {
+      log('🍪 ApiClient 触发更新，正在保存新 Cookie...');
+      log('Cookie: $cookie');
+      await _prefs!.setString('cookie', jsonEncode(cookie));
+    };
   }
 
   Future<void> saveUserInfo({

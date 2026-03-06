@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/core/services/node_api_client.dart';
 import 'package:battery_music/core/services/node_api_service.dart';
@@ -30,6 +31,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
   final _nodeApiService = NodeApiService();
+  final _musicApiService = MusicApiService();
   final _nodeApiClient = NodeApiClient();
   final _userService = UserService();
   Uint8List? _qrCode;
@@ -40,7 +42,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Node API 测试')),
-      body: Center(child: _buildMusicApi()),
+      body: Center(child: _buildPhoneLogin()),
     );
   }
 
@@ -223,7 +225,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
   }
 
   Future<void> _login() async {
-    final BaseApi<UserInfo> result = await _nodeApiService.loginForCellPhone(
+    final BaseApi<UserInfo> result = await _musicApiService.loginForCellPhone(
       _phoneController.text,
       _codeController.text,
     );
@@ -235,21 +237,21 @@ class _TestNodeApiState extends State<TestNodeApi> {
   }
 
   Future<void> _captchaSent() async {
-    final r = await _nodeApiService.registerDev();
+    final r = await _musicApiService.registerDev();
     _userService.saveUserInfo(registerDev: r.data);
-    final BaseApi result = await _nodeApiService.captchaSent(
+    final BaseApi result = await _musicApiService.captchaSent(
       _phoneController.text,
     );
     debugPrint(result.toString());
   }
 
   Future<void> _getUserDetail() async {
-    final BaseApi<UserInfoDetail> result = await _nodeApiService.userDetail();
+    final BaseApi<UserInfoDetail> result = await _musicApiService.userDetail();
     debugPrint(result.data?.toJson().toString());
   }
 
   Future<void> _getQrCode() async {
-    final BaseApi<LoginQrKey> result = await _nodeApiService.loginQrKey();
+    final BaseApi<LoginQrKey> result = await _musicApiService.loginQrKey();
     debugPrint(result.data?.toJson().toString());
     setState(() {
       _qrCode = result.data?.qrImage;
@@ -258,15 +260,16 @@ class _TestNodeApiState extends State<TestNodeApi> {
   }
 
   Future<void> _qrCodeCheck() async {
-    final BaseApi<LoginQrCheck> result = await _nodeApiService.loginQrCheck(
+    final BaseApi<LoginQrCheck> result = await _musicApiService.loginQrCheck(
       _qrCodeKey!,
     );
     debugPrint(result.data?.toJson().toString());
+    _userService.saveUserInfo(loginQrCheck: result.data);
   }
 
   Future<void> _loginToken() async {
     String? token = await _nodeApiClient.getToken();
-    final BaseApi<UserInfo> result = await _nodeApiService.loginToken();
+    final BaseApi<UserInfo> result = await _musicApiService.loginToken();
     debugPrint(result.data?.toJson().toString());
   }
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 class LoginQrKey {
@@ -7,6 +8,11 @@ class LoginQrKey {
   const LoginQrKey({required this.qrcode, required this.qrcodeImg});
 
   factory LoginQrKey.fromMap(Map<String, dynamic> map) {
+    try {
+      LoginQrKey(qrcode: map['qrcode'], qrcodeImg: map['qrcode_img']);
+    } catch (e) {
+      log("找到了");
+    }
     return LoginQrKey(qrcode: map['qrcode'], qrcodeImg: map['qrcode_img']);
   }
   factory LoginQrKey.fromJson(String str) =>

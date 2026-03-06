@@ -29,27 +29,27 @@ class Login {
     String code, {
     Map<String, String>? cookie,
   }) async {
-    // 1. 获取毫秒级时间戳
+    // 获取毫秒级时间戳
     final int dateTime = DateTime.now().millisecondsSinceEpoch;
 
-    // 2. AES 加密手机号和验证码，生成一个临时的动态 key
+    // AES 加密手机号和验证码，生成一个临时的动态 key
     final Map<String, String> encrypt = EncryptUtil.cryptoAesEncrypt({
       'mobile': mobile,
       'code': code,
     });
 
-    // 3. 手机号脱敏掩码 (例如 19982903369 -> 19*9)
+    // 手机号脱敏掩码 (例如 19982903369 -> 19*9)
     final String maskedMobile = mobile.length >= 11
         ? '${mobile.substring(0, 2)}*${mobile.substring(10, 11)}'
         : mobile;
 
-    // 4. 准备 dfid
+    // 准备 dfid
     final String dfid = cookie?['dfid'] ?? EncryptUtil.randomString(24);
 
     dynamic t2 = 0;
     dynamic t1 = 0;
 
-    // 5. 概念版特殊的 AES 加密逻辑
+    // 概念版特殊的 AES 加密逻辑
     if (ApiClient().isLite) {
       final String guid = cookie?['KUGOU_API_GUID'] ?? '';
       final String mac = cookie?['KUGOU_API_MAC'] ?? '';
@@ -68,7 +68,7 @@ class Login {
       )['str'];
     }
 
-    // 6. 组装请求 Payload，应用 RSA 和 MD5 签名
+    // 组装请求 Payload，应用 RSA 和 MD5 签名
     final Map<String, dynamic> dataMap = {
       'plat': 1,
       'support_multi': 1,
@@ -96,7 +96,7 @@ class Login {
       dataMap['t3'] = 'MCwwLDAsMCwwLDAsMCwwLDA=';
     }
 
-    // 7. 发起底层网络请求
+    // 发起底层网络请求
     final response = await ApiClient().createRequest(
       baseURL: 'https://loginserviceretry.kugou.com',
       url: '/v7/login_by_verifycode',
@@ -110,7 +110,7 @@ class Login {
       cookie: cookie,
     );
 
-    // 8. 核心后处理：解密服务器返回的真实 Token
+    // 核心后处理：解密服务器返回的真实 Token
     if (response['status'] == 200) {
       final body = response['body'];
       if (body != null && body['status'] == 1) {
@@ -135,13 +135,38 @@ class Login {
             }
           }
 
-          // 最终将所有登录态存入响应的 Cookie 列表
+          // 准备自动注入底层引擎的凭证字典
+          final Map<String, String> newCredentials = {};
           final List<String> cookies = response['cookie'] as List<String>;
-          cookies.add('t1=${data['t1']}');
-          cookies.add('token=${data['token']}');
-          cookies.add('userid=${data['userid'] ?? 0}');
-          cookies.add('vip_type=${data['vip_type'] ?? 0}');
-          cookies.add('vip_token=${data['vip_token'] ?? ''}');
+
+          // 提取极其核心的资产凭证（兼容向 List 插入以及塞进 Map）
+          if (data['t1'] != null) {
+            cookies.add('t1=${data['t1']}');
+            newCredentials['t1'] = data['t1'].toString();
+          }
+          if (data['token'] != null) {
+            cookies.add('token=${data['token']}');
+            newCredentials['token'] = data['token'].toString();
+          }
+          if (data['userid'] != null) {
+            cookies.add('userid=${data['userid']}');
+            newCredentials['userid'] = data['userid'].toString();
+          }
+          if (data['vip_type'] != null) {
+            cookies.add('vip_type=${data['vip_type']}');
+            newCredentials['vip_type'] = data['vip_type'].toString();
+          }
+          if (data['vip_token'] != null &&
+              data['vip_token'].toString().isNotEmpty) {
+            cookies.add('vip_token=${data['vip_token']}');
+            newCredentials['vip_token'] = data['vip_token'].toString();
+          }
+
+          // ⚡️ 灵魂注入：全自动更新到底层引擎并触发 UserService 落盘！
+          if (newCredentials.isNotEmpty) {
+            ApiClient().updateCookies(newCredentials);
+            print('📱 手机号/密码登录成功！已成功解密并注入核心凭证：${newCredentials.keys.toList()}');
+          }
         }
       }
     }
@@ -262,7 +287,7 @@ class Login {
       final Map<String, dynamic> dataMap = {
         'dev': cookie?['KUGOU_API_DEV'] ?? '',
         'force_login': 1,
-        'partnerid': 36, // 36 应该代表微信渠道
+        'partnerid': 36, //6 应该代表微信渠道
         'clienttime_ms': dateNow,
         't1': t1,
         't2': t2,
@@ -288,26 +313,56 @@ class Login {
         final body = response['body'];
         if (body != null && body['status'] == 1) {
           final data = body['data'];
-          if (data != null && data['secu_params'] != null) {
-            final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
-              data['secu_params'],
-              encrypt['key']!,
-            );
-
+          if (data != null) {
             final List<String> cookies = response['cookie'] as List<String>;
+            final Map<String, String> newCredentials = {};
 
-            if (getToken is Map) {
-              data.addAll(getToken);
-              getToken.forEach((k, v) => cookies.add('$k=$v'));
-            } else {
-              data['token'] = getToken;
-              cookies.add('token=$getToken');
+            // 解密核心 secu_params
+            if (data['secu_params'] != null) {
+              final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
+                data['secu_params'],
+                encrypt['key']!,
+              );
+
+              if (getToken is Map) {
+                data.addAll(getToken);
+                getToken.forEach((k, v) {
+                  cookies.add('$k=$v');
+                  newCredentials[k.toString()] = v.toString();
+                });
+              } else {
+                data['token'] = getToken;
+                cookies.add('token=$getToken');
+                newCredentials['token'] = getToken.toString();
+              }
             }
 
-            cookies.add('t1=${data['t1'] ?? ''}');
-            cookies.add('userid=${data['userid'] ?? 0}');
-            cookies.add('vip_type=${data['vip_type'] ?? 0}');
-            cookies.add('vip_token=${data['vip_token'] ?? ''}');
+            // 提取极其核心的资产凭证（不管有没有 secu_params 都尝试提取）
+            if (data['t1'] != null) {
+              cookies.add('t1=${data['t1']}');
+              newCredentials['t1'] = data['t1'].toString();
+            }
+            if (data['userid'] != null) {
+              cookies.add('userid=${data['userid']}');
+              newCredentials['userid'] = data['userid'].toString();
+            }
+            if (data['vip_type'] != null) {
+              cookies.add('vip_type=${data['vip_type']}');
+              newCredentials['vip_type'] = data['vip_type'].toString();
+            }
+            if (data['vip_token'] != null &&
+                data['vip_token'].toString().isNotEmpty) {
+              cookies.add('vip_token=${data['vip_token']}');
+              newCredentials['vip_token'] = data['vip_token'].toString();
+            }
+
+            // ⚡️ 灵魂注入：全自动更新到底层引擎并触发 UserService 落盘！
+            if (newCredentials.isNotEmpty) {
+              ApiClient().updateCookies(newCredentials);
+              print(
+                '🌐 开放平台(微信/QQ)登录成功！已成功解密并注入核心凭证：${newCredentials.keys.toList()}',
+              );
+            }
           }
         }
       }
@@ -370,10 +425,19 @@ class Login {
       if (body != null && body['data'] != null && body['data']['status'] == 4) {
         final data = body['data'];
         final List<String> cookies = response['cookie'] as List<String>;
-
-        // 将成功获取的 Token 和 UserID 注入到 Cookie 列表
-        if (data['token'] != null) cookies.add('token=${data['token']}');
-        if (data['userid'] != null) cookies.add('userid=${data['userid']}');
+        final Map<String, String> newCredentials = {};
+        if (data['token'] != null) {
+          cookies.add('token=${data['token']}');
+          newCredentials['token'] = data['token'].toString();
+        }
+        if (data['userid'] != null) {
+          cookies.add('userid=${data['userid']}');
+          newCredentials['userid'] = data['userid'].toString();
+        }
+        if (newCredentials.isNotEmpty) {
+          ApiClient().updateCookies(newCredentials);
+          print('🔑 登录成功！已自动拦截 Token 并注入全局引擎。');
+        }
       }
     }
 
@@ -417,7 +481,7 @@ class Login {
     final int dateNow = DateTime.now().millisecondsSinceEpoch;
     final int clientTime = dateNow ~/ 1000;
 
-    // 1. 固定的 AES 密钥
+    // 固定的 AES 密钥
     const String key = '90b8382a1bb4ccdcf063102053fd75b8';
     const String iv = 'f063102053fd75b8';
     const String liteKey = 'c24f74ca2820225badc01946dba4fdf7';
@@ -426,17 +490,17 @@ class Login {
     token = ApiClient().currentCookies['token'];
     userid = ApiClient().currentCookies['userid'];
 
-    // 2. 加密现有的 token 和 clienttime 作为 p3 参数
+    // 加密现有的 token 和 clienttime 作为 p3 参数
     final Map<String, String> encrypt = EncryptUtil.cryptoAesEncrypt(
       {'clienttime': clientTime, 'token': token},
       key: ApiClient().isLite ? liteKey : key,
       iv: ApiClient().isLite ? liteIv : iv,
     );
 
-    // 3. 极其巧妙的设计：生成一个空的 AES 加密，主要目的是白嫖它的随机 Key
+    // 极其巧妙的设计：生成一个空的 AES 加密，主要目的是白嫖它的随机 Key
     final Map<String, String> encryptParams = EncryptUtil.cryptoAesEncrypt({});
 
-    // 4. 用 RSA 加密刚才生成的随机 Key
+    // 用 RSA 加密刚才生成的随机 Key
     final String pk = EncryptUtil.cryptoRSAEncrypt({
       'clienttime_ms': dateNow,
       'key': encryptParams['key'],
@@ -465,7 +529,7 @@ class Login {
       )['str'];
     }
 
-    // 5. 拼装 Payload
+    // 拼装 Payload
     final Map<String, dynamic> dataMap = {
       'dfid': cookie?['dfid'] ?? '-',
       'p3': encrypt['str'], // 传入加密后的 token 串
@@ -483,7 +547,7 @@ class Login {
       dataMap['dev'] = cookie?['KUGOU_API_DEV'];
     }
 
-    // 6. 发起请求
+    // 发起请求
     final response = await ApiClient().createRequest(
       baseURL: 'http://login.user.kugou.com',
       url: '/v5/login_by_token',
@@ -493,35 +557,62 @@ class Login {
       encryptType: EncryptType.android,
     );
 
-    // 7. 解密服务器下发的新 Token (与前面的验证码登录一模一样)
     if (response['status'] == 200) {
       final body = response['body'];
       if (body != null && body['status'] == 1) {
         final data = body['data'];
-        if (data != null && data['secu_params'] != null) {
-          final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
-            data['secu_params'],
-            encryptParams['key']!,
-          );
-
+        if (data != null) {
           final List<String> cookies = response['cookie'] as List<String>;
+          final Map<String, String> newCredentials = {};
 
-          if (getToken is Map) {
-            data.addAll(getToken);
-            getToken.forEach((k, v) => cookies.add('$k=$v'));
-          } else {
-            data['token'] = getToken;
-            cookies.add('token=$getToken');
+          // 解密核心 secu_params
+          if (data['secu_params'] != null) {
+            final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
+              data['secu_params'],
+              encrypt['key']!,
+            );
+
+            if (getToken is Map) {
+              data.addAll(getToken);
+              getToken.forEach((k, v) {
+                cookies.add('$k=$v');
+                newCredentials[k.toString()] = v.toString();
+              });
+            } else {
+              data['token'] = getToken;
+              cookies.add('token=$getToken');
+              newCredentials['token'] = getToken.toString();
+            }
           }
 
-          cookies.add('t1=${data['t1'] ?? ''}');
-          cookies.add('userid=${data['userid'] ?? 0}');
-          cookies.add('vip_type=${data['vip_type'] ?? 0}');
-          cookies.add('vip_token=${data['vip_token'] ?? ''}');
+          if (data['t1'] != null) {
+            cookies.add('t1=${data['t1']}');
+            newCredentials['t1'] = data['t1'].toString();
+          }
+          if (data['userid'] != null) {
+            cookies.add('userid=${data['userid']}');
+            newCredentials['userid'] = data['userid'].toString();
+          }
+          if (data['vip_type'] != null) {
+            cookies.add('vip_type=${data['vip_type']}');
+            newCredentials['vip_type'] = data['vip_type'].toString();
+          }
+          if (data['vip_token'] != null &&
+              data['vip_token'].toString().isNotEmpty) {
+            cookies.add('vip_token=${data['vip_token']}');
+            newCredentials['vip_token'] = data['vip_token'].toString();
+          }
+
+          // ⚡️ 灵魂注入：全自动更新到底层引擎并触发 UserService 落盘！
+          if (newCredentials.isNotEmpty) {
+            ApiClient().updateCookies(newCredentials);
+            print(
+              '🌐 开放平台(微信/QQ)登录成功！已成功解密并注入核心凭证：${newCredentials.keys.toList()}',
+            );
+          }
         }
       }
     }
-
     return response;
   }
 
@@ -536,7 +627,7 @@ class Login {
     final dio = Dio();
 
     try {
-      // 1. 获取 WeChat Access Token
+      // 获取 WeChat Access Token
       final tokenResp = await dio.get(
         'https://api.weixin.qq.com/cgi-bin/token',
         queryParameters: {
@@ -557,7 +648,7 @@ class Login {
         };
       }
 
-      // 2. 获取 WeChat Ticket
+      // 获取 WeChat Ticket
       final ticketResp = await dio.get(
         'https://api.weixin.qq.com/cgi-bin/ticket/getticket',
         queryParameters: {'access_token': accessToken, 'type': 2},
@@ -577,7 +668,7 @@ class Login {
       final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       final String noncestr = EncryptUtil.cryptoMd5(EncryptUtil.randomString());
 
-      // 3. 生成签名并请求二维码 uuid
+      // 生成签名并请求二维码 uuid
       final String signaturePrams =
           'appid=$wxAppid&noncestr=$noncestr&sdk_ticket=$ticket&timestamp=$timestamp';
       final String signature = EncryptUtil.cryptoSha1(signaturePrams);
@@ -641,14 +732,14 @@ class Login {
   }) async {
     final int dateNow = DateTime.now().millisecondsSinceEpoch;
 
-    // 1. AES 加密密码
+    // AES 加密密码
     final Map<String, String> encrypt = EncryptUtil.cryptoAesEncrypt({
       'pwd': password,
       'code': '',
       'clienttime_ms': dateNow,
     });
 
-    // 2. 组装写死的 Payload (保留了 JS 作者找出的可用长特征码)
+    // 组装写死的 Payload (保留了 JS 作者找出的可用长特征码)
     final Map<String, dynamic> dataMap = {
       'plat': 1,
       'support_multi': 1,
@@ -666,40 +757,61 @@ class Login {
       }).toUpperCase(),
     };
 
-    // 3. 发起请求
     final response = await ApiClient().createRequest(
-      url: '/v9/login_by_pwd', // 注意 baseURL 是网关，这里只传 path
+      url: '/v9/login_by_pwd',
       method: 'POST',
       data: dataMap,
       encryptType: EncryptType.android,
       cookie: cookie,
-      headers: {'x-router': 'login.user.kugou.com'}, // 网关路由头部
+      headers: {'x-router': 'login.user.kugou.com'},
     );
 
-    // 4. 解密真实 Token (标准套路)
     if (response['status'] == 200) {
       final body = response['body'];
       if (body != null && body['status'] == 1) {
         final data = body['data'];
-        if (data != null && data['secu_params'] != null) {
-          final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
-            data['secu_params'],
-            encrypt['key']!,
-          );
-
+        if (data != null) {
           final List<String> cookies = response['cookie'] as List<String>;
+          final Map<String, String> newCredentials = {};
 
-          if (getToken is Map) {
-            data.addAll(getToken);
-            getToken.forEach((k, v) => cookies.add('$k=$v'));
-          } else {
-            data['token'] = getToken;
-            cookies.add('token=$getToken');
+          // 解密核心 secu_params 提取真·Token
+          if (data['secu_params'] != null) {
+            final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
+              data['secu_params'],
+              encrypt['key']!,
+            );
+
+            if (getToken is Map) {
+              data.addAll(getToken);
+              getToken.forEach((k, v) {
+                cookies.add('$k=$v');
+                newCredentials[k.toString()] = v.toString();
+              });
+            } else {
+              data['token'] = getToken;
+              cookies.add('token=$getToken');
+              newCredentials['token'] = getToken.toString();
+            }
           }
 
-          cookies.add('userid=${data['userid'] ?? 0}');
-          cookies.add('vip_type=${data['vip_type'] ?? 0}');
-          cookies.add('vip_token=${data['vip_token'] ?? ''}');
+          if (data['userid'] != null) {
+            cookies.add('userid=${data['userid']}');
+            newCredentials['userid'] = data['userid'].toString();
+          }
+          if (data['vip_type'] != null) {
+            cookies.add('vip_type=${data['vip_type']}');
+            newCredentials['vip_type'] = data['vip_type'].toString();
+          }
+          if (data['vip_token'] != null &&
+              data['vip_token'].toString().isNotEmpty) {
+            cookies.add('vip_token=${data['vip_token']}');
+            newCredentials['vip_token'] = data['vip_token'].toString();
+          }
+
+          if (newCredentials.isNotEmpty) {
+            ApiClient().updateCookies(newCredentials);
+            print('🔐 密码登录成功！已成功解密并注入核心凭证：${newCredentials.keys.toList()}');
+          }
         }
       }
     }
