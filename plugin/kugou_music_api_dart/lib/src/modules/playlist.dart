@@ -195,15 +195,15 @@ class Playlist {
   /// [id] global_collection_id
   static Future<Map<String, dynamic>> playlistTrackAll({
     required dynamic id,
-    int page = 1,
-    int pagesize = 30,
+    int? page = 1,
+    int? pagesize = 30,
   }) async {
     return ApiClient().createRequest(
       url: '/pubsongs/v2/get_other_list_file_nofilt',
       method: 'GET',
       params: {
         'area_code': 1,
-        'begin_idx': (page - 1) * pagesize,
+        'begin_idx': (page! - 1) * pagesize!,
         'plat': 1,
         'type': 1,
         'mode': 1,

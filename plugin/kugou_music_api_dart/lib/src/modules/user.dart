@@ -62,8 +62,8 @@ class User {
 
   /// 获取用户自建/收藏歌单 (user_playlist.js)
   static Future<Map<String, dynamic>> userPlaylist({
-    int page = 1,
-    int pagesize = 30,
+    int? page = 1,
+    int? pagesize = 30,
   }) async {
     return ApiClient().createRequest(
       url: '/v7/get_all_list',

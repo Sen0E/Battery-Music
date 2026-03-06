@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:battery_music/core/services/node_api_client.dart';
 import 'package:battery_music/models/response/login_qr_check.dart';
 import 'package:battery_music/models/response/register_dev.dart';
 import 'package:battery_music/models/response/user_info.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:kugou_music_api_dart/kugou_music_api_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,7 +14,6 @@ class UserService {
   factory UserService() => _userService;
 
   static SharedPreferences? _prefs;
-  final NodeApiClient _nodeApiClient = NodeApiClient();
 
   static int userId = 0;
   static String nickname = '';
@@ -110,7 +107,7 @@ class UserService {
 
   /// 退出登录
   Future<void> logOut() async {
-    await _nodeApiClient.clearCookies();
+    await _prefs!.remove('cookie');
     await _prefs!.remove('userId');
     await _prefs!.remove('nickname');
     await _prefs!.remove('avatarUrl');

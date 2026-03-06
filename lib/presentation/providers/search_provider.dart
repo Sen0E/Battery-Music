@@ -1,3 +1,4 @@
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/models/response/search_hot.dart';
 // import 'package:battery_music/models/search_hot_response.dart';
@@ -17,7 +18,7 @@ enum SearchType { songs, playlists }
 /// 负责管理搜索关键词、搜索结果（单曲/歌单）、热搜榜、搜索建议及分页加载状态
 class SearchProvider extends ChangeNotifier {
   // final NodeServiceApi _api = NodeServiceApi.instance;
-  final NodeApiService _nodeApiService = NodeApiService();
+  final MusicApiService _musicApiService = MusicApiService();
 
   // --- 状态 ---
   String _currentKeyword = '';
@@ -74,11 +75,12 @@ class SearchProvider extends ChangeNotifier {
       //   type: 'song',
       //   fromJson: SearchSongResponse.fromJson,
       // );
-      final response = await _nodeApiService.searchKeywords<SearchKeywordsSong>(
-        _currentKeyword,
-        page: _songPage,
-        pageSize: _pageSize,
-      );
+      final response = await _musicApiService
+          .searchKeywords<SearchKeywordsSong>(
+            _currentKeyword,
+            page: _songPage,
+            pageSize: _pageSize,
+          );
       // if (response.data != null) {
       //   final newItems = response.data!.lists ?? [];
       //   _songResults = newItems;
@@ -149,11 +151,12 @@ class SearchProvider extends ChangeNotifier {
       //   _songPage++;
       // }
 
-      final response = await _nodeApiService.searchKeywords<SearchKeywordsSong>(
-        _currentKeyword,
-        page: _songPage,
-        pageSize: _pageSize,
-      );
+      final response = await _musicApiService
+          .searchKeywords<SearchKeywordsSong>(
+            _currentKeyword,
+            page: _songPage,
+            pageSize: _pageSize,
+          );
       if (response.data != null) {
         final newItems = response.data!.lists ?? [];
         if (isLoadMore) {
@@ -204,7 +207,7 @@ class SearchProvider extends ChangeNotifier {
       //   _playlistPage++;
       // }
 
-      final response = await _nodeApiService
+      final response = await _musicApiService
           .searchKeywords<SearchKeywordsSpecial>(
             _currentKeyword,
             type: 'special',
@@ -239,7 +242,7 @@ class SearchProvider extends ChangeNotifier {
       // if (response.data != null) {
       //   _hotSearchCategories = response.data!.list ?? [];
       // }
-      final response = await _nodeApiService.searchHot();
+      final response = await _musicApiService.searchHot();
       if (response.status == 1) {
         _hotSearchCategories = response.data!.list ?? [];
       }
@@ -261,7 +264,7 @@ class SearchProvider extends ChangeNotifier {
     }
     try {
       // _searchSuggestions = await _api.searchSuggest(keyword);
-      final response = await _nodeApiService.searchSuggest(keyword);
+      final response = await _musicApiService.searchSuggest(keyword);
       if (response.status == 1) {
         _searchSuggestions = response.data!.first.recordDatas!;
       } else {

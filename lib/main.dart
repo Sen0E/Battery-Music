@@ -1,7 +1,5 @@
-import 'dart:developer';
 import 'dart:io';
-import 'package:battery_music/core/services/node_api_service.dart';
-import 'package:battery_music/core/services/node_manager.dart';
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/daily_recommendation_provider.dart';
@@ -31,10 +29,10 @@ void main() async {
   });
 
   await UserService.initialize(false);
-  NodeManager();
-  log(UserService.getUserId.toString());
-  final response = await NodeApiService().registerDev();
-  await UserService().saveUserInfo(registerDev: response.data);
+  if (!UserService.hasLogin) {
+    final res = await MusicApiService().registerDev();
+    await UserService().saveUserInfo(registerDev: res.data);
+  }
 
   runApp(const BatteryMusicApp());
 }
@@ -59,9 +57,6 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
   void onWindowClose() async {
     // 先隐藏窗口
     await windowManager.hide();
-
-    // 停止 Node 服务
-    await NodeManager().stopNodeService();
 
     // 销毁窗口并退出进程
     await windowManager.destroy();

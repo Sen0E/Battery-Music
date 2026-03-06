@@ -1,6 +1,7 @@
 // import 'package:battery_music/core/services/node_service_api.dart';
 // import 'package:battery_music/models/base_response.dart';
 // import 'package:battery_music/models/playlist_track_new_response.dart';
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/models/response/base_api.dart';
 import 'package:battery_music/models/response/playlist_track.dart';
@@ -9,7 +10,7 @@ import 'package:flutter/material.dart';
 /// 歌单详情 Provider
 /// 负责获取和管理单个歌单的详细信息（包括歌曲列表）
 class PlaylistDetailProvider extends ChangeNotifier {
-  final NodeApiService _nodeApiService = NodeApiService();
+  final MusicApiService _musicApiService = MusicApiService();
 
   List<PlaylistTrackSongItem> _songs = [];
   PlaylistTrack? _playlistData;
@@ -42,7 +43,7 @@ class PlaylistDetailProvider extends ChangeNotifier {
       // final ApiResponse<PlaylistTrackDataNew> response = await NodeServiceApi
       //     .instance
       //     .playlistTrackNew(listid, _currentPage, _pageSize);
-      final BaseApi<PlaylistTrack> response = await _nodeApiService
+      final BaseApi<PlaylistTrack> response = await _musicApiService
           .playlistTrack(globalId, page: _currentPage, pageSize: _pageSize);
       if (response.status == 1) {
         // 筛选数据(songs中的song 中name不为为空的数据)
@@ -77,7 +78,7 @@ class PlaylistDetailProvider extends ChangeNotifier {
 
     try {
       final nextPage = _currentPage + 1;
-      final BaseApi<PlaylistTrack> response = await _nodeApiService
+      final BaseApi<PlaylistTrack> response = await _musicApiService
           .playlistTrack(globalId, page: nextPage, pageSize: _pageSize);
 
       if (response.status == 1) {

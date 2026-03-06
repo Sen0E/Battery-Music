@@ -1,3 +1,4 @@
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/models/response/base_api.dart';
@@ -17,7 +18,7 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  final NodeApiService _nodeApiService = NodeApiService();
+  final MusicApiService _musicApiService = MusicApiService();
   final UserService _userService = UserService();
   @override
   void initState() {
@@ -30,22 +31,22 @@ class _SplashPageState extends State<SplashPage> {
   /// 检查登录状态
   Future<void> _checkLoginStatus() async {
     // 测试用
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        // 检查widget是否仍在界面上
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const TestNodeApi()),
-        );
-      }
-    }); // 确保在当前帧绘制完成后跳转
-    return;
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (mounted) {
+    //     // 检查widget是否仍在界面上
+    //     Navigator.of(context).pushReplacement(
+    //       MaterialPageRoute(builder: (_) => const TestNodeApi()),
+    //     );
+    //   }
+    // }); // 确保在当前帧绘制完成后跳转
+    // return;
 
     if (!UserService.hasLogin) {
       _navigateToLogin();
       return;
     }
 
-    BaseApi<UserInfo> result = await _nodeApiService.loginToken();
+    BaseApi<UserInfo> result = await _musicApiService.loginToken();
     if (result.status == 1) {
       _userService.saveUserInfo(userInfo: result.data);
       _navigateToHome();

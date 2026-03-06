@@ -16,7 +16,7 @@ class Top {
 
   /// 热门好歌精选 (经典版推荐卡片 - top_card.js)
   /// [cardId] 1: 精选好歌随心听/私人专属, 2: 经典怀旧, 3: 热门好歌, 4: 小众宝藏, 6: vip专属
-  static Future<Map<String, dynamic>> topCard({int cardId = 1}) async {
+  static Future<Map<String, dynamic>> topCard({int? cardId = 1}) async {
     const String fakem = '60f7ebf1f812edbac3c63a7310001701760f';
     final int dateTime = DateTime.now().millisecondsSinceEpoch;
 

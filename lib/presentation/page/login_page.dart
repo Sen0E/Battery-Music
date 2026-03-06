@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:battery_music/core/services/node_api_service.dart';
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/presentation/components/window_controls.dart';
 import 'package:battery_music/presentation/layout/main_layout.dart';
@@ -21,7 +21,7 @@ class LoginPage extends StatefulWidget {
 enum _LoginType { phone, qrCode }
 
 class _LoginPageState extends State<LoginPage> {
-  final NodeApiService _nodeApiService = NodeApiService();
+  final MusicApiService _musicApiService = MusicApiService();
   final UserService _userService = UserService();
 
   // 二维码登录相关状态
@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final response = await _nodeApiService.loginQrKey();
+      final response = await _musicApiService.loginQrKey();
       if (!mounted) return;
 
       if (response.data?.qrcode != null) {
@@ -134,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       try {
-        final response = await _nodeApiService.loginQrCheck(key);
+        final response = await _musicApiService.loginQrCheck(key);
         if (!mounted) return;
 
         final qrCheck = response.data;
@@ -201,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await _nodeApiService.captchaSent(_phoneController.text);
+      await _musicApiService.captchaSent(_phoneController.text);
       if (!mounted) return;
       _startCountdown();
     } catch (e) {
@@ -245,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final response = await _nodeApiService.loginForCellPhone(
+      final response = await _musicApiService.loginForCellPhone(
         _phoneController.text,
         _codeController.text,
       );

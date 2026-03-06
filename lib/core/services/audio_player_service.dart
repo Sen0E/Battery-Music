@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/core/services/smtc_service.dart';
 import 'package:battery_music/models/entity/music_item.dart';
@@ -13,7 +14,7 @@ class AudioPlayerService {
 
   late final Player player;
 
-  final NodeApiService _nodeApiService = NodeApiService();
+  final MusicApiService _musicApiService = MusicApiService();
   final SmtcService _smtcService = SmtcService();
 
   final List<MusicItem> _playlist = [];
@@ -89,7 +90,7 @@ class AudioPlayerService {
 
   /// 将 hash 转换为真实 URL
   Future<String?> _fetchRealUrlFromHash(String hash) async {
-    SongData res = await _nodeApiService.songUrl(hash);
+    SongData res = await _musicApiService.songUrl(hash);
     if (res.status == 1 && res.url != null && res.url!.isNotEmpty) {
       return res.url!.first;
     }

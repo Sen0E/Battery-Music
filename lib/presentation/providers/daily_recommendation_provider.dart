@@ -1,3 +1,4 @@
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/models/response/daily_recommend.dart';
@@ -17,7 +18,7 @@ class DailyRecommendationProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final apiService = NodeApiService();
+      final apiService = MusicApiService();
       final response = await apiService.everydayRecommend();
 
       if (response.status == 1) {

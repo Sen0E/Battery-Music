@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import '../utils/config.dart';
 import '../utils/helper_util.dart';
@@ -35,8 +36,8 @@ class ApiClient {
       _globalCookies.addAll(savedCookies);
     }
 
-    print(
-      '⚙️ ApiClient 初始化完成 | isLite: $isLite | 注入 Cookie 数量: ${_globalCookies.length}',
+    log(
+      'ApiClient 初始化完成 | isLite: $isLite | 注入 Cookie 数量: ${_globalCookies.length}',
     );
   }
 
@@ -58,6 +59,9 @@ class ApiClient {
         hasChanged = true;
       }
     });
+    log(
+      'ApiClient 更新 Cookie | 新 Cookie 数量: ${newCookies.length} | 合并后 Cookie 数量: ${_globalCookies.length}',
+    );
 
     // 只有当 Cookie 真的发生改变时，才触发回调通知外部落盘
     if (hasChanged && onCookieUpdated != null) {
@@ -82,7 +86,6 @@ class ApiClient {
     bool clearDefaultParams = false,
     bool notSignature = false,
     String? ip,
-    // bool isLiteRequest = false,  // 添加单独的请求级别 isLite 参数
   }) async {
     final Map<String, String> mergedCookie = {
       ..._globalCookies,
@@ -171,7 +174,6 @@ class ApiClient {
           finalParams['signature'] = HelperUtil.signatureWebParams(finalParams);
           break;
         case EncryptType.android:
-        default:
           finalParams['signature'] = HelperUtil.signatureAndroidParams(
             finalParams,
             data: dataString,
@@ -217,10 +219,10 @@ class ApiClient {
 
     // 9. 发送真实请求并处理响应
     try {
-      print("🚀 发起请求: $method $url");
-      print("请求参数: $finalParams");
-      print("请求数据: $dataString");
-      print("请求头: ${options.headers}");
+      // print("🚀 发起请求: $method $url");
+      // print("请求参数: $finalParams");
+      // print("请求数据: $dataString");
+      // print("请求头: ${options.headers}");
       final response = await _dio.request(
         finalBaseUrl + reqUrl,
         queryParameters: finalParams.isNotEmpty ? finalParams : null,

@@ -1,3 +1,4 @@
+import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/models/response/base_api.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import '../../models/response/user_playlist.dart';
 /// 歌单列表 Provider
 /// 负责获取和管理用户的所有歌单，并分类
 class PlaylistProvider extends ChangeNotifier {
-  final NodeApiService _nodeApiService = NodeApiService();
+  final MusicApiService _musicApiService = MusicApiService();
   List<SongListInfo> _allPlaylists = [];
   List<SongListInfo> _minePlaylist = [];
   List<SongListInfo> _albumslist = [];
@@ -33,7 +34,7 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final BaseApi<UserPlaylist> response = await _nodeApiService
+      final BaseApi<UserPlaylist> response = await _musicApiService
           .userPlaylist();
       if (response.status == 1) {
         _allPlaylists = response.data!.info ?? [];
