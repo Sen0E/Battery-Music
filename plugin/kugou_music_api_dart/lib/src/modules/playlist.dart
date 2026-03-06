@@ -113,11 +113,11 @@ class Playlist {
       'clienttime': clienttime,
       'key': HelperUtil.signParamsKey(
         clienttime.toString(),
-        appid: KugouConfig.appid,
+        appid: Config.appid,
       ),
       'last_area': 'gztx',
-      'clientver': KugouConfig.clientver,
-      'appid': KugouConfig.appid,
+      'clientver': Config.clientver,
+      'appid': Config.appid,
       'last_time': clienttime,
       'p': p,
     };
@@ -323,10 +323,10 @@ class Playlist {
       url: '/pubsongs/v1/kmr_get_similar_lists',
       method: 'POST',
       data: {
-        'appid': KugouConfig.appid,
-        'clientver': KugouConfig.clientver,
+        'appid': Config.appid,
+        'clientver': Config.clientver,
         'clienttime': clienttime,
-        'key': HelperUtil.signParamsKey(clienttime, appid: KugouConfig.appid),
+        'key': HelperUtil.signParamsKey(clienttime, appid: Config.appid),
         'userid': _userid,
         'ugc': 1,
         'show_list': 1,

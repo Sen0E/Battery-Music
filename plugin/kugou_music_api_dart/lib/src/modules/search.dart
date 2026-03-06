@@ -191,8 +191,8 @@ class Search {
       method: 'GET',
       params: {
         'album_audio_id': albumAudioId,
-        'appid': KugouConfig.appid,
-        'clientver': KugouConfig.clientver,
+        'appid': Config.appid,
+        'clientver': Config.clientver,
         'duration': 0,
         'hash': hash,
         'keyword': keywords,

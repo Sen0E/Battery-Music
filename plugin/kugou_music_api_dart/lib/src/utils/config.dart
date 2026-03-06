@@ -1,7 +1,7 @@
 // lib/src/utils/config.dart
 
 /// 酷狗 API 全局静态配置
-class KugouConfig {
+class Config {
   static const String wxAppid = "wx79f2c4418704b4f8";
   static const String wxLiteAppid = "wx72b795aca60ad321";
   static const String wxSecret = "4efcab88b700769e376e3f6087b8abc9";

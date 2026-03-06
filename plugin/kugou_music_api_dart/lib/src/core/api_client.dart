@@ -127,8 +127,8 @@ class ApiClient {
       'dfid': dfid,
       'mid': mid,
       'uuid': uuid,
-      'appid': isLite ? KugouConfig.liteAppid : KugouConfig.appid,
-      'clientver': isLite ? KugouConfig.liteClientver : KugouConfig.clientver,
+      'appid': isLite ? Config.liteAppid : Config.appid,
+      'clientver': isLite ? Config.liteClientver : Config.clientver,
       'clienttime': clienttime,
     };
 

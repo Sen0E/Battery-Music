@@ -90,8 +90,7 @@ class HelperUtil {
         : '57ae12eb6890223e355ccfcb74edf70d';
     // 使用真实的 KugouConfig.liteAppid 和 KugouConfig.appid
     final String finalAppid =
-        (appid ?? (isLite ? KugouConfig.liteAppid : KugouConfig.appid))
-            .toString();
+        (appid ?? (isLite ? Config.liteAppid : Config.appid)).toString();
     final String finalUserid = (userid ?? 0).toString();
 
     return EncryptUtil.cryptoMd5('$hash$str$finalAppid$mid$finalUserid');
@@ -115,11 +114,9 @@ class HelperUtil {
         : 'OIlwieks28dk2k092lksi2UIkp';
 
     final String finalAppid =
-        (appid ?? (isLite ? KugouConfig.liteAppid : KugouConfig.appid))
-            .toString();
+        (appid ?? (isLite ? Config.liteAppid : Config.appid)).toString();
     final String finalClientver =
-        (clientver ??
-                (isLite ? KugouConfig.liteClientver : KugouConfig.clientver))
+        (clientver ?? (isLite ? Config.liteClientver : Config.clientver))
             .toString();
 
     return EncryptUtil.cryptoMd5(

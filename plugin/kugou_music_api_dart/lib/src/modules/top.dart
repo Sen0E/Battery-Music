@@ -30,12 +30,12 @@ class Top {
         'platform': 'ios',
       },
       data: {
-        'appid': KugouConfig.appid,
-        'clientver': KugouConfig.clientver,
+        'appid': Config.appid,
+        'clientver': Config.clientver,
         'platform': 'android',
         'clienttime': dateTime,
         'userid': _userid,
-        'key': HelperUtil.signParamsKey(dateTime, appid: KugouConfig.appid),
+        'key': HelperUtil.signParamsKey(dateTime, appid: Config.appid),
         'fakem': fakem,
         'area_code': 1,
         'mid': _mid,
@@ -91,9 +91,9 @@ class Top {
       url: '/v2/special_recommend',
       method: 'POST',
       data: {
-        'appid': KugouConfig.appid,
+        'appid': Config.appid,
         'mid': _mid,
-        'clientver': KugouConfig.clientver,
+        'clientver': Config.clientver,
         'platform': 'android',
         'clienttime': dateTime,
         'userid': _userid,
@@ -102,7 +102,7 @@ class Top {
         'pagesize': pagesize,
         'key': HelperUtil.signParamsKey(
           dateTime.toString(),
-          appid: KugouConfig.appid,
+          appid: Config.appid,
         ),
         'special_recommend': {
           'withtag': withtag,
@@ -153,7 +153,7 @@ class Top {
       url: '/musicadservice/v1/mobile_newalbum_sp',
       method: 'POST',
       data: {
-        'apiver': KugouConfig.apiver,
+        'apiver': Config.apiver,
         'token': _token,
         'page': page,
         'pagesize': pagesize,
@@ -173,7 +173,7 @@ class Top {
       baseURL: 'http://musicadservice.kugou.com',
       url: '/v1/daily_recommend',
       method: 'POST',
-      params: {'clientver': KugouConfig.clientver, 'area_code': 1},
+      params: {'clientver': Config.clientver, 'area_code': 1},
       data: {'tags': {}},
       encryptType: EncryptType.android,
     );

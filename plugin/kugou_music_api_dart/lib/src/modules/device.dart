@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:kugou_music_api_dart/src/utils/config.dart';
 import '../core/api_client.dart';
 import '../utils/encrypt_util.dart';
+import '../utils/helper_util.dart';
 
 class Device {
   static String get _token => ApiClient().currentCookies['token'] ?? '';
@@ -90,31 +92,55 @@ class Device {
       'uid': _userid,
       'token': _token,
     }); // ⚠️ 注意：原 JS 这里没有 .toUpperCase()
-
-    // 发起强验证的风控底层请求
     try {
       final dio = Dio();
+      final int clienttime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final String cookieStr = ApiClient().currentCookies.entries
           .map((e) => '${e.key}=${e.value}')
           .join('; ');
 
+      // 1. 手动拼装底层缺失的公共查询参数
+      final Map<String, dynamic> queryParams = {
+        'part': 1,
+        'platid': 1,
+        'p': p,
+        'dfid': ApiClient().currentCookies['dfid'] ?? '-',
+        'mid': ApiClient().currentCookies['KUGOU_API_MID'] ?? '-',
+        'uuid': '-',
+        'appid': ApiClient().isLite ? Config.liteAppid : Config.appid,
+        'clientver': ApiClient().isLite
+            ? Config.liteClientver
+            : Config.clientver,
+        'clienttime': clienttime,
+      };
+
+      // 2. ⚡️ 手动调用工具类生成安卓防伪签名 (连同加密的 body 字符串一起签名)
+      queryParams['signature'] = HelperUtil.signatureAndroidParams(
+        queryParams,
+        data: aesEncrypt['str'] ?? '',
+        isLite: ApiClient().isLite,
+      );
+
+      // 3. 发送补全后的合法请求
       final response = await dio.post(
         'https://userservice.kugou.com/risk/v2/r_register_dev',
-        queryParameters: {'part': 1, 'platid': 1, 'p': p},
-        // 发送加密后的 Base64 字符串
+        queryParameters: queryParams,
         data: aesEncrypt['str'],
         options: Options(
           headers: {
             'Cookie': cookieStr,
             'User-Agent':
                 'Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi',
+            'dfid': queryParams['dfid'],
+            'clienttime': clienttime,
+            'mid': queryParams['mid'],
           },
           // ⚠️ 接收强加密的二进制流
           responseType: ResponseType.bytes,
         ),
       );
 
-      // 将二进制流转为 Base64 并解密
+      // 4. 将二进制流转为 Base64 并解密
       final List<int> responseBytes = response.data as List<int>;
       final String base64Resp = base64Encode(responseBytes);
       final dynamic decryptedBody = EncryptUtil.playlistAesDecrypt(
@@ -129,15 +155,9 @@ class Device {
         final String? newDfid = decryptedBody['data']['dfid'];
 
         if (newDfid != null && newDfid.isNotEmpty) {
-          // 修改全局 Cookie 字典
-          final current = Map<String, String>.from(ApiClient().currentCookies);
-          current['dfid'] = newDfid;
+          // 只需调用 updateCookies，底层单例会自动触发 UserService 落盘，极度优雅！
           ApiClient().updateCookies({'dfid': newDfid});
-
-          // 触发回调，通知你的 UserService 将新 dfid 存入手机硬盘
-          if (ApiClient().onCookieUpdated != null) {
-            ApiClient().onCookieUpdated!(current);
-          }
+          print('🛡️ 成功突破风控！获取并注入设备硬件指纹 dfid: $newDfid');
         }
       }
 

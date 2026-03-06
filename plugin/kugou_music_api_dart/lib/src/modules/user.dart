@@ -256,10 +256,10 @@ class User {
         'mid': _mid,
         'key': HelperUtil.signParamsKey(
           clienttime.toString(),
-          appid: KugouConfig.appid,
+          appid: Config.appid,
         ),
-        'clientver': KugouConfig.clientver,
-        'appid': KugouConfig.appid,
+        'clientver': Config.clientver,
+        'appid': Config.appid,
         'p': p,
       };
 

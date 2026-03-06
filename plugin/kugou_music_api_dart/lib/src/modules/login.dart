@@ -221,11 +221,11 @@ class Login {
     // Step 1: 拿 code 去微信服务器换取 access_token
     // ----------------------------------------
     final String wxAppid = ApiClient().isLite
-        ? KugouConfig.wxLiteAppid
-        : KugouConfig.wxAppid;
+        ? Config.wxLiteAppid
+        : Config.wxAppid;
     final String wxSecret = ApiClient().isLite
-        ? KugouConfig.wxLiteSecret
-        : KugouConfig.wxSecret;
+        ? Config.wxLiteSecret
+        : Config.wxSecret;
 
     try {
       final wxResponse = await Dio().post(
@@ -409,8 +409,8 @@ class Login {
       method: 'GET',
       params: {
         'plat': 4,
-        'appid': KugouConfig.appid,
-        'srcappid': KugouConfig.srcappid,
+        'appid': Config.appid,
+        'srcappid': Config.srcappid,
         'qrcode': key,
       },
       encryptType: EncryptType.web, // 注意：这个接口用的是 web 端的签名算法！
@@ -462,8 +462,8 @@ class Login {
         'type': 1,
         'plat': 4,
         'qrcode_txt':
-            'https://h5.kugou.com/apps/loginQRCode/html/index.html?appid=${KugouConfig.appid}&',
-        'srcappid': KugouConfig.srcappid,
+            'https://h5.kugou.com/apps/loginQRCode/html/index.html?appid=${Config.appid}&',
+        'srcappid': Config.srcappid,
       },
       encryptType: EncryptType.web,
       cookie: cookie,
@@ -486,21 +486,22 @@ class Login {
     const String iv = 'f063102053fd75b8';
     const String liteKey = 'c24f74ca2820225badc01946dba4fdf7';
     const String liteIv = 'adc01946dba4fdf7';
-    // 从cookie中获取token和userid
-    token = ApiClient().currentCookies['token'];
-    userid = ApiClient().currentCookies['userid'];
 
-    // 加密现有的 token 和 clienttime 作为 p3 参数
+    // 修复：保留入参，为空时才从内存/Cookie读取，并提供默认值防空指针
+    token ??= cookie?['token'] ?? ApiClient().currentCookies['token'] ?? '';
+    userid ??= cookie?['userid'] ?? ApiClient().currentCookies['userid'] ?? '0';
+
+    // 1. 加密现有的 token 和 clienttime 作为 p3 参数 (使用固定 Key)
     final Map<String, String> encrypt = EncryptUtil.cryptoAesEncrypt(
       {'clienttime': clientTime, 'token': token},
       key: ApiClient().isLite ? liteKey : key,
       iv: ApiClient().isLite ? liteIv : iv,
     );
 
-    // 极其巧妙的设计：生成一个空的 AES 加密，主要目的是白嫖它的随机 Key
+    // 2. 极其巧妙的设计：生成一个空的 AES 加密，主要目的是白嫖它的随机 Key
     final Map<String, String> encryptParams = EncryptUtil.cryptoAesEncrypt({});
 
-    // 用 RSA 加密刚才生成的随机 Key
+    // 3. 用 RSA 加密刚才生成的随机 Key
     final String pk = EncryptUtil.cryptoRSAEncrypt({
       'clienttime_ms': dateNow,
       'key': encryptParams['key'],
@@ -531,8 +532,8 @@ class Login {
 
     // 拼装 Payload
     final Map<String, dynamic> dataMap = {
-      'dfid': cookie?['dfid'] ?? '-',
-      'p3': encrypt['str'], // 传入加密后的 token 串
+      'dfid': cookie?['dfid'] ?? ApiClient().currentCookies['dfid'] ?? '-',
+      'p3': encrypt['str'],
       'plat': 1,
       't1': t1,
       't2': t2,
@@ -544,7 +545,9 @@ class Login {
     };
 
     if (ApiClient().isLite) {
-      dataMap['dev'] = cookie?['KUGOU_API_DEV'];
+      dataMap['dev'] =
+          cookie?['KUGOU_API_DEV'] ??
+          ApiClient().currentCookies['KUGOU_API_DEV'];
     }
 
     // 发起请求
@@ -557,6 +560,9 @@ class Login {
       encryptType: EncryptType.android,
     );
 
+    // ----------------------------------------
+    // 后处理：解密 secu_params 并自动注入
+    // ----------------------------------------
     if (response['status'] == 200) {
       final body = response['body'];
       if (body != null && body['status'] == 1) {
@@ -565,11 +571,11 @@ class Login {
           final List<String> cookies = response['cookie'] as List<String>;
           final Map<String, String> newCredentials = {};
 
-          // 解密核心 secu_params
+          // ⚡️ 修复点：必须使用 encryptParams['key'] 去解密！
           if (data['secu_params'] != null) {
             final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
               data['secu_params'],
-              encrypt['key']!,
+              encryptParams['key']!, // <--- 这里是关键！
             );
 
             if (getToken is Map) {
@@ -603,27 +609,166 @@ class Login {
             newCredentials['vip_token'] = data['vip_token'].toString();
           }
 
-          // ⚡️ 灵魂注入：全自动更新到底层引擎并触发 UserService 落盘！
+          // ⚡️ 灵魂注入
           if (newCredentials.isNotEmpty) {
             ApiClient().updateCookies(newCredentials);
-            print(
-              '🌐 开放平台(微信/QQ)登录成功！已成功解密并注入核心凭证：${newCredentials.keys.toList()}',
-            );
+            print('🌐 刷新登录成功！已解密并注入核心凭证：${newCredentials.keys.toList()}');
           }
         }
       }
     }
     return response;
   }
+  // static Future<Map<String, dynamic>> loginToken({
+  //   String? token,
+  //   String? userid,
+  //   Map<String, String>? cookie,
+  // }) async {
+  //   final int dateNow = DateTime.now().millisecondsSinceEpoch;
+  //   final int clientTime = dateNow ~/ 1000;
+
+  //   // 固定的 AES 密钥
+  //   const String key = '90b8382a1bb4ccdcf063102053fd75b8';
+  //   const String iv = 'f063102053fd75b8';
+  //   const String liteKey = 'c24f74ca2820225badc01946dba4fdf7';
+  //   const String liteIv = 'adc01946dba4fdf7';
+  //   // 从cookie中获取token和userid
+  //   token = ApiClient().currentCookies['token'];
+  //   userid = ApiClient().currentCookies['userid'];
+
+  //   // 加密现有的 token 和 clienttime 作为 p3 参数
+  //   final Map<String, String> encrypt = EncryptUtil.cryptoAesEncrypt(
+  //     {'clienttime': clientTime, 'token': token},
+  //     key: ApiClient().isLite ? liteKey : key,
+  //     iv: ApiClient().isLite ? liteIv : iv,
+  //   );
+
+  //   // 极其巧妙的设计：生成一个空的 AES 加密，主要目的是白嫖它的随机 Key
+  //   final Map<String, String> encryptParams = EncryptUtil.cryptoAesEncrypt({});
+
+  //   // 用 RSA 加密刚才生成的随机 Key
+  //   final String pk = EncryptUtil.cryptoRSAEncrypt({
+  //     'clienttime_ms': dateNow,
+  //     'key': encryptParams['key'],
+  //   }).toUpperCase();
+
+  //   dynamic t2 = 0;
+  //   dynamic t1 = 0;
+
+  //   // 概念版特殊参数
+  //   if (ApiClient().isLite) {
+  //     final String guid = cookie?['KUGOU_API_GUID'] ?? '';
+  //     final String mac = cookie?['KUGOU_API_MAC'] ?? '';
+  //     final String dev = cookie?['KUGOU_API_DEV'] ?? '';
+  //     final String t1Cookie = cookie?['t1'] ?? '';
+
+  //     t2 = EncryptUtil.cryptoAesEncrypt(
+  //       '$guid|0f607264fc6318a92b9e13c65db7cd3c|$mac|$dev|$dateNow',
+  //       key: 'fd14b35e3f81af3817a20ae7adae7020',
+  //       iv: '17a20ae7adae7020',
+  //     )['str'];
+
+  //     t1 = EncryptUtil.cryptoAesEncrypt(
+  //       t1Cookie.isNotEmpty ? '$t1Cookie|$dateNow' : '|$dateNow',
+  //       key: '5e4ef500e9597fe004bd09a46d8add98',
+  //       iv: '04bd09a46d8add98',
+  //     )['str'];
+  //   }
+
+  //   // 拼装 Payload
+  //   final Map<String, dynamic> dataMap = {
+  //     'dfid': cookie?['dfid'] ?? '-',
+  //     'p3': encrypt['str'], // 传入加密后的 token 串
+  //     'plat': 1,
+  //     't1': t1,
+  //     't2': t2,
+  //     't3': 'MCwwLDAsMCwwLDAsMCwwLDA=',
+  //     'pk': pk,
+  //     'params': encryptParams['str'],
+  //     'userid': userid,
+  //     'clienttime_ms': dateNow,
+  //   };
+
+  //   if (ApiClient().isLite) {
+  //     dataMap['dev'] = cookie?['KUGOU_API_DEV'];
+  //   }
+
+  //   // 发起请求
+  //   final response = await ApiClient().createRequest(
+  //     baseURL: 'http://login.user.kugou.com',
+  //     url: '/v5/login_by_token',
+  //     method: 'POST',
+  //     data: dataMap,
+  //     cookie: cookie,
+  //     encryptType: EncryptType.android,
+  //   );
+
+  //   if (response['status'] == 200) {
+  //     final body = response['body'];
+  //     if (body != null && body['status'] == 1) {
+  //       final data = body['data'];
+  //       if (data != null) {
+  //         final List<String> cookies = response['cookie'] as List<String>;
+  //         final Map<String, String> newCredentials = {};
+  //         print(data);
+
+  //         // 解密核心 secu_params
+  //         if (data['secu_params'] != null) {
+  //           final dynamic getToken = EncryptUtil.cryptoAesDecrypt(
+  //             data['secu_params'],
+  //             encrypt['key']!,
+  //           );
+
+  //           if (getToken is Map) {
+  //             data.addAll(getToken);
+  //             getToken.forEach((k, v) {
+  //               cookies.add('$k=$v');
+  //               newCredentials[k.toString()] = v.toString();
+  //             });
+  //           } else {
+  //             data['token'] = getToken;
+  //             cookies.add('token=$getToken');
+  //             newCredentials['token'] = getToken.toString();
+  //           }
+  //         }
+
+  //         if (data['t1'] != null) {
+  //           cookies.add('t1=${data['t1']}');
+  //           newCredentials['t1'] = data['t1'].toString();
+  //         }
+  //         if (data['userid'] != null) {
+  //           cookies.add('userid=${data['userid']}');
+  //           newCredentials['userid'] = data['userid'].toString();
+  //         }
+  //         if (data['vip_type'] != null) {
+  //           cookies.add('vip_type=${data['vip_type']}');
+  //           newCredentials['vip_type'] = data['vip_type'].toString();
+  //         }
+  //         if (data['vip_token'] != null &&
+  //             data['vip_token'].toString().isNotEmpty) {
+  //           cookies.add('vip_token=${data['vip_token']}');
+  //           newCredentials['vip_token'] = data['vip_token'].toString();
+  //         }
+
+  //         // ⚡️ 灵魂注入：全自动更新到底层引擎并触发 UserService 落盘！
+  //         if (newCredentials.isNotEmpty) {
+  //           ApiClient().updateCookies(newCredentials);
+  //           print('🌐 刷新登录成功！已成功解密并注入核心凭证：${newCredentials.keys.toList()}');
+  //         }
+  //       }
+  //     }
+  //   }
+  //   return response;
+  // }
 
   /// 生成微信扫码登录信息 (login_wx_create.js)
   static Future<Map<String, dynamic>> loginWxCreate() async {
     final String wxAppid = ApiClient().isLite
-        ? KugouConfig.wxLiteAppid
-        : KugouConfig.wxAppid;
+        ? Config.wxLiteAppid
+        : Config.wxAppid;
     final String wxSecret = ApiClient().isLite
-        ? KugouConfig.wxLiteSecret
-        : KugouConfig.wxSecret;
+        ? Config.wxLiteSecret
+        : Config.wxSecret;
     final dio = Dio();
 
     try {

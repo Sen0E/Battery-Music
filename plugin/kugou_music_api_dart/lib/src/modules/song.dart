@@ -33,7 +33,7 @@ class Song {
     const String salt = '185672dd44712f60bb1736df5a377e82';
     // 核心 MD5 防盗链签名
     final String trackerKey = EncryptUtil.cryptoMd5(
-      '$hash$salt${KugouConfig.appid}$_mid$_userid',
+      '$hash$salt${Config.appid}$_mid$_userid',
     );
 
     return ApiClient().createRequest(

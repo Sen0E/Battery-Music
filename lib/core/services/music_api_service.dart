@@ -79,7 +79,7 @@ class MusicApiService {
   /// dfid获取
   Future<BaseApi<RegisterDev>> registerDev() async {
     final res = await Device.registerDev();
-    debugPrint("registerDev response: ${res['body']}");
+    debugPrint("registerDev response: $res");
     return BaseApi<RegisterDev>.fromMap(res, (map) => RegisterDev.fromMap(map));
   }
 
