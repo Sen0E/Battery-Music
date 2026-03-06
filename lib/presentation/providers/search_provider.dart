@@ -1,15 +1,9 @@
 import 'package:battery_music/core/services/music_api_service.dart';
-import 'package:battery_music/core/services/node_api_service.dart';
 import 'package:battery_music/models/response/search_hot.dart';
-// import 'package:battery_music/models/search_hot_response.dart';
-// import 'package:battery_music/models/search_special_response.dart';
-// import 'package:battery_music/models/search_suggest_response.dart';
 import 'package:battery_music/models/response/search_keywords_song.dart';
 import 'package:battery_music/models/response/search_keywords_special.dart';
 import 'package:battery_music/models/response/search_suggest.dart';
 import 'package:flutter/foundation.dart';
-// import 'package:battery_music/models/search_song_response.dart';
-// import 'package:battery_music/core/services/node_service_api.dart';
 
 /// 搜索类型枚举
 enum SearchType { songs, playlists }
