@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:kugou_music_api_dart/src/utils/encrypt_util.dart';
 import '../utils/config.dart';
 import '../utils/helper_util.dart';
 import '../utils/crypto_util.dart';
@@ -32,6 +33,15 @@ class ApiClient {
     isLite = isLiteVersion;
 
     if (savedCookies != null) {
+      // 追加参数
+      final guid = EncryptUtil.cryptoMd5(CryptoUtil.getGuid());
+      savedCookies['KUGOU_API_MID'] = CryptoUtil.calculateMid(guid);
+      savedCookies['KUGOU_API_GUID'] = guid;
+      savedCookies['KUGOU_API_DEV'] = EncryptUtil.randomString(
+        10,
+      ).toUpperCase();
+      savedCookies['KUGOU_API_MAC'] = '02:00:00:00:00:00';
+
       _globalCookies.clear();
       _globalCookies.addAll(savedCookies);
     }
