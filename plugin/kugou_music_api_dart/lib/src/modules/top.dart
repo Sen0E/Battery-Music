@@ -8,7 +8,6 @@ class Top {
   static int get _userid =>
       int.tryParse(ApiClient().currentCookies['userid'] ?? '0') ?? 0;
   static String get _mid => ApiClient().currentCookies['KUGOU_API_MID'] ?? '';
-  static String get _dfid => ApiClient().currentCookies['dfid'] ?? '-';
 
   // ==========================================
   // 卡片流推荐 (首页/发现页信息流)

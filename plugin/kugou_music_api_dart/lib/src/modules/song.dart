@@ -13,8 +13,6 @@ class Song {
   static int get _vipType =>
       int.tryParse(ApiClient().currentCookies['vip_type'] ?? '0') ?? 0;
   static String get _mid => ApiClient().currentCookies['KUGOU_API_MID'] ?? '';
-  static String get _dfid =>
-      ApiClient().currentCookies['dfid'] ?? EncryptUtil.randomString(24);
 
   // ==========================================
   // 获取核心音频播放链接 (全网最硬核部分)
