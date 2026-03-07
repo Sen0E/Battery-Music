@@ -4,7 +4,7 @@ import 'package:battery_music/presentation/components/top_bar.dart';
 import 'package:battery_music/presentation/page/liked_music_page.dart';
 import 'package:battery_music/presentation/page/daily_recommendations_page.dart';
 import 'package:battery_music/presentation/components/playlist_detail.dart';
-import 'package:battery_music/presentation/page/recommended_page.dart';
+import 'package:battery_music/presentation/page/home_page.dart';
 import 'package:battery_music/presentation/page/search_result_page.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_provider.dart';
@@ -60,7 +60,7 @@ Widget _buildContent(BuildContext context) {
   // 根据侧边栏选择显示不同页面
   switch (selectedIndex) {
     case 0:
-      return const RecommendedPage();
+      return const HomePage();
     case 1:
       return const DailyRecommendationsPage();
     case 4:
