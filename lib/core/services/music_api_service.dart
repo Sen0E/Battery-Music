@@ -79,8 +79,11 @@ class MusicApiService {
   /// dfid获取
   Future<BaseApi<RegisterDev>> registerDev() async {
     final res = await Device.registerDev();
-    debugPrint("registerDev response: $res");
-    return BaseApi<RegisterDev>.fromMap(res, (map) => RegisterDev.fromMap(map));
+    debugPrint("registerDev response: ${res['body']}");
+    return BaseApi<RegisterDev>.fromMap(
+      res['body'],
+      (map) => RegisterDev.fromMap(map),
+    );
   }
 
   /// 获取用户详细信息
@@ -109,7 +112,7 @@ class MusicApiService {
   /// [pageSize] 每页数量
   Future<BaseApi<PlaylistTrack>> playlistTrack(
     String id, {
-    int? page,
+    int? page = 1,
     int? pageSize = 30,
   }) async {
     final res = await Playlist.playlistTrackAll(
@@ -169,6 +172,24 @@ class MusicApiService {
     );
     debugPrint("songUrl response: ${res['body']}");
     return SongData.fromMap(res['body']);
+  }
+
+  ///获取音乐URL（新版）
+  ///[hash] 歌曲hash
+  ///[albumAudioId] 专辑音频id
+  ///[freePart] 是否返回试听部分（仅部分歌曲）(0：否, 1：是)
+  Future<Map<String, dynamic>> songUrlNew(
+    String hash, {
+    String? albumAudioId,
+    bool? freePart = false,
+  }) async {
+    final res = await Song.songUrlNew(
+      hash: hash,
+      albumAudioId: albumAudioId ?? '',
+      freePart: freePart!,
+    );
+    debugPrint("songUrlNew response: ${res['body']}");
+    return res['body'];
   }
 
   /// 搜索

@@ -107,6 +107,7 @@ class UserService {
     if (registerDev != null) {
       dfid = registerDev.dfid;
       await _prefs!.setString('dfid', dfid);
+      log("添加设备成功: $dfid");
     }
   }
 

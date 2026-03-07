@@ -29,10 +29,12 @@ void main() async {
   });
 
   await UserService.initialize(false);
-  if (!UserService.hasLogin) {
-    final res = await MusicApiService().registerDev();
-    await UserService().saveUserInfo(registerDev: res.data);
-  }
+  // if (!UserService.hasLogin) {
+  //   final res = await MusicApiService().registerDev();
+  //   await UserService().saveUserInfo(registerDev: res.data);
+  // }
+  final res = await MusicApiService().registerDev();
+  await UserService().saveUserInfo(registerDev: res.data);
 
   runApp(const BatteryMusicApp());
 }
