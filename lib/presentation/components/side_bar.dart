@@ -45,7 +45,7 @@ class _SideBarState extends State<SideBar> {
             context,
             0,
             Icons.recommend_rounded,
-            "推荐",
+            "主页",
             provider,
             theme,
           ),
