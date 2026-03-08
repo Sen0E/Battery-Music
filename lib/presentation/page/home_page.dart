@@ -132,30 +132,24 @@ class _HomePageState extends State<HomePage> {
                     width: 160,
                     height: 160,
                     color: theme.colorScheme.surfaceContainerHighest,
-                    child: playlist.getImgurl() != null
-                        ? Image.network(
-                            playlist.getImgurl(),
-                            width: 160,
-                            height: 160,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                Icons.music_note,
-                                color: theme.colorScheme.onSurfaceVariant,
-                                size: 48,
-                              );
-                            },
-                          )
-                        : Icon(
-                            Icons.album,
-                            color: theme.colorScheme.onSurfaceVariant,
-                            size: 48,
-                          ),
+                    child: Image.network(
+                      playlist.getImgurl(),
+                      width: 160,
+                      height: 160,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.music_note,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 48,
+                        );
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  playlist.specialname ?? '未知歌单',
+                  playlist.specialname,
                   style: TextStyle(
                     color: theme.colorScheme.onSurface,
                     fontSize: 14,
@@ -166,7 +160,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  playlist.nickname ?? '未知用户',
+                  playlist.nickname,
                   style: TextStyle(
                     color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 12,
@@ -381,7 +375,6 @@ class _HomePageState extends State<HomePage> {
     HomePageProvider provider,
     ThemeData theme,
   ) {
-    print("标题: $title, 数据总数: ${items.length}"); // 添加这行来调试
     bool isLoading = false;
     String? error;
 
@@ -503,7 +496,7 @@ class _HomePageState extends State<HomePage> {
 
   String _getItemTitle(dynamic item) {
     if (item is TopSong) {
-      return item.songname ?? '未知歌曲';
+      return item.songname;
     } else if (item is SongItem) {
       return item.songname ?? item.filename ?? '未知歌曲';
     }
