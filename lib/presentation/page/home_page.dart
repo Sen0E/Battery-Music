@@ -1,63 +1,83 @@
+import 'package:battery_music/models/response/top_card.dart';
+import 'package:battery_music/presentation/providers/home_page_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:battery_music/models/response/top_song.dart';
 
-// 假设这是你从截图中提取的品牌荧光绿
-const Color brandAccentColor = Color(0xFFD4FF28);
-
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // 在组件初始化后获取所有首页数据
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<HomePageProvider>();
+      // 直接调用 provider 中已经写好的全量拉取方法
+      provider.fetchAllHomeData();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // 只需要提供一个可以垂直滚动的视图即可，不包含 Scaffold 和导航
+    // 获取主题信息
+    final theme = Theme.of(context);
+
+    // 【关键修复】使用 watch 监听状态变化，这样数据加载后 UI 才会重绘
+    final provider = context.watch<HomePageProvider>();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ========== 1. 每日歌单推荐 (API) ==========
-          _buildSectionHeader('每日歌单推荐'),
+          _buildSectionHeader('每日歌单推荐', theme),
           const SizedBox(height: 20),
-          _buildDailyPlaylists(),
+          _buildDailyPlaylists(provider, theme), // 传入 provider 而不是 context
 
           const SizedBox(height: 48),
 
           // ========== 2. 私人专属好歌 (API) ==========
-          _buildSectionHeader('私人专属好歌'),
+          _buildSectionHeader('私人专属好歌', theme),
           const SizedBox(height: 20),
-          _buildPersonalizedTracks(),
+          _buildPersonalizedTracks(provider, theme), // 传入 provider 而不是 context
 
           const SizedBox(height: 48),
 
-          // ========== 3. 探索更多音乐 (组合 4 个分类 API) ==========
-          _buildSectionHeader('探索音乐宇宙'),
+          // ========== 3. 探索音乐宇宙 (组合 4 个分类 API) ==========
+          _buildSectionHeader('探索音乐宇宙', theme),
           const SizedBox(height: 20),
-          _buildCategoryColumns(),
+          _buildCategoryColumns(provider, theme), // 传入 provider
 
-          const SizedBox(height: 60), // 底部留白，防止内容贴底
+          const SizedBox(height: 60),
         ],
       ),
     );
   }
 
-  /// 统一的区块标题，带上你的品牌色点缀
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, ThemeData theme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 品牌色小竖条
         Container(
           width: 4,
           height: 24,
           decoration: BoxDecoration(
-            color: brandAccentColor,
+            color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 12),
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontSize: 24,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
@@ -67,16 +87,40 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 每日歌单推荐 (横向滑动的大方块卡片)
-  Widget _buildDailyPlaylists() {
+  Widget _buildDailyPlaylists(HomePageProvider provider, ThemeData theme) {
+    if (provider.isLoadingPlaylists && provider.recommendedPlaylists.isEmpty) {
+      return const SizedBox(
+        height: 220,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (provider.errorPlaylists != null &&
+        provider.recommendedPlaylists.isEmpty) {
+      return SizedBox(
+        height: 220,
+        child: Center(
+          child: Text(
+            "加载失败: ${provider.errorPlaylists}",
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
+        ),
+      );
+    }
+
+    final playlists = provider.recommendedPlaylists.take(8).toList();
+    if (playlists.isEmpty) {
+      return const SizedBox(height: 220, child: Center(child: Text("暂无推荐歌单")));
+    }
+
     return SizedBox(
       height: 220,
-      // 注意：这里用回我们之前写好的 CustomHorizontalScrollView 来支持鼠标拖拽
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: 8,
+        itemCount: playlists.length,
         separatorBuilder: (context, index) => const SizedBox(width: 24),
         itemBuilder: (context, index) {
+          final playlist = playlists[index];
           return SizedBox(
             width: 160,
             child: Column(
@@ -87,19 +131,33 @@ class HomePage extends StatelessWidget {
                   child: Container(
                     width: 160,
                     height: 160,
-                    color: Colors.white.withOpacity(0.05), // 占位背景色
-                    child: Icon(
-                      Icons.album,
-                      color: Colors.white.withOpacity(0.2),
-                      size: 48,
-                    ),
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: playlist.getImgurl() != null
+                        ? Image.network(
+                            playlist.getImgurl(),
+                            width: 160,
+                            height: 160,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.music_note,
+                                color: theme.colorScheme.onSurfaceVariant,
+                                size: 48,
+                              );
+                            },
+                          )
+                        : Icon(
+                            Icons.album,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            size: 48,
+                          ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  '每日推荐歌单标题',
+                Text(
+                  playlist.specialname ?? '未知歌单',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -108,9 +166,9 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '为你量身定制',
+                  playlist.nickname ?? '未知用户',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 12,
                   ),
                 ),
@@ -122,20 +180,64 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 私人专属好歌 (横向滑动的长条形单曲卡片，排成两行)
-  Widget _buildPersonalizedTracks() {
+  Widget _buildPersonalizedTracks(HomePageProvider provider, ThemeData theme) {
+    if (provider.isLoadingCards && provider.personalizedSongs.isEmpty) {
+      return const SizedBox(
+        height: 160,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (provider.errorCards != null && provider.personalizedSongs.isEmpty) {
+      return SizedBox(
+        height: 160,
+        child: Center(
+          child: Text(
+            "加载失败: ${provider.errorCards}",
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
+        ),
+      );
+    }
+
+    final songs = provider.personalizedSongs.take(10).toList();
+    if (songs.isEmpty) {
+      return const SizedBox(
+        height: 160,
+        child: Center(child: Text("暂无私人专属好歌")),
+      );
+    }
+
     return SizedBox(
-      height: 160, // 容纳两行单曲卡片
+      height: 160,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: songs.length ~/ 2 + (songs.length % 2 > 0 ? 1 : 0),
         separatorBuilder: (context, index) => const SizedBox(width: 20),
         itemBuilder: (context, index) {
+          final firstIndex = index * 2;
+          final secondIndex = index * 2 + 1;
+
           return Column(
             children: [
-              _buildTrackCard('专属单曲 ${index * 2 + 1}'),
+              _buildTrackCard(
+                songs[firstIndex].songname ?? '未知歌曲',
+                songs[firstIndex].authorName ?? '未知艺术家',
+                songs[firstIndex].getSizableCoverUrl(size: 96),
+                firstIndex,
+                theme,
+              ),
               const SizedBox(height: 16),
-              _buildTrackCard('专属单曲 ${index * 2 + 2}'),
+              if (secondIndex < songs.length)
+                _buildTrackCard(
+                  songs[secondIndex].songname ?? '未知歌曲',
+                  songs[secondIndex].authorName ?? '未知艺术家',
+                  songs[secondIndex].getSizableCoverUrl(size: 96),
+                  secondIndex,
+                  theme,
+                )
+              else
+                const SizedBox.shrink(),
             ],
           );
         },
@@ -143,40 +245,63 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 单曲卡片 UI (长条形)
-  Widget _buildTrackCard(String title) {
+  Widget _buildTrackCard(
+    String songName,
+    String singerName,
+    String? coverUrl,
+    int index,
+    ThemeData theme,
+  ) {
     return Container(
       width: 280,
       height: 72,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
-        // hover 效果可以后续通过 InkWell 添加
       ),
       child: Row(
         children: [
-          // 歌曲封面
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: Container(
-              width: 48,
-              height: 48,
-              color: Colors.white.withOpacity(0.1),
-              child: const Icon(Icons.music_note, color: Colors.white54),
-            ),
+            child: coverUrl != null && coverUrl.isNotEmpty
+                ? Image.network(
+                    coverUrl,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 48,
+                        height: 48,
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Icon(
+                          Icons.music_note,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      );
+                    },
+                  )
+                : Container(
+                    width: 48,
+                    height: 48,
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Icon(
+                      Icons.music_note,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
           ),
           const SizedBox(width: 16),
-          // 歌曲信息
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  songName,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                   ),
@@ -185,9 +310,9 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '歌手名字',
+                  singerName,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -196,10 +321,9 @@ class HomePage extends StatelessWidget {
               ],
             ),
           ),
-          // 播放按钮使用你的品牌色
           Icon(
             Icons.play_circle_fill,
-            color: brandAccentColor.withOpacity(0.8),
+            color: theme.colorScheme.primary,
             size: 32,
           ),
         ],
@@ -207,68 +331,160 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 对应 4 个分类 API 的网格布局 (新歌、经典、热门、小众)
-  Widget _buildCategoryColumns() {
+  Widget _buildCategoryColumns(HomePageProvider provider, ThemeData theme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _buildCategoryList('新歌速递')),
+        Expanded(
+          child: _buildCategoryList(
+            '新歌速递',
+            provider.topNewSongs,
+            provider,
+            theme,
+          ),
+        ),
         const SizedBox(width: 24),
-        Expanded(child: _buildCategoryList('热门好歌精选')),
+        Expanded(
+          child: _buildCategoryList(
+            '热门好歌精选',
+            provider.hotSongs,
+            provider,
+            theme,
+          ),
+        ),
         const SizedBox(width: 24),
-        Expanded(child: _buildCategoryList('经典怀旧金曲')),
+        Expanded(
+          child: _buildCategoryList(
+            '经典怀旧金曲',
+            provider.nostalgicSongs,
+            provider,
+            theme,
+          ),
+        ),
         const SizedBox(width: 24),
-        Expanded(child: _buildCategoryList('小众宝藏佳作')),
+        Expanded(
+          child: _buildCategoryList(
+            '小众宝藏佳作',
+            provider.indieSongs,
+            provider,
+            theme,
+          ),
+        ),
       ],
     );
   }
 
-  /// 构建单个分类下的迷你榜单
-  Widget _buildCategoryList(String title) {
+  // 修改了签名，直接接收 provider 进行状态判断，不再使用 context.select
+  Widget _buildCategoryList(
+    String title,
+    List<dynamic> items,
+    HomePageProvider provider,
+    ThemeData theme,
+  ) {
+    print("标题: $title, 数据总数: ${items.length}"); // 添加这行来调试
+    bool isLoading = false;
+    String? error;
+
+    if (title == '新歌速递') {
+      isLoading = provider.isLoadingNewSongs;
+      error = provider.errorNewSongs;
+    } else {
+      isLoading = provider.isLoadingCategoryCards;
+      error = provider.errorCategoryCards;
+    }
+
+    if (isLoading && items.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ],
+        ),
+      );
+    }
+
+    if (error != null && items.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              '加载失败: $error',
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.02), // 极淡的背景色区分区块
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 20),
-          // 列表项
-          for (int i = 0; i < 4; i++) ...[
+          for (int i = 0; i < items.length && i < 9; i++) ...[
             Row(
               children: [
-                // 排名数字
                 SizedBox(
                   width: 24,
                   child: Text(
                     '${i + 1}',
                     style: TextStyle(
-                      // 前三名使用品牌色高亮
                       color: i < 3
-                          ? brandAccentColor
-                          : Colors.white.withOpacity(0.3),
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                // 歌曲名
                 Expanded(
                   child: Text(
-                    'API返回的歌曲名称...',
+                    _getItemTitle(items[i]),
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: theme.colorScheme.onSurface,
                       fontSize: 14,
                     ),
                     maxLines: 1,
@@ -277,10 +493,20 @@ class HomePage extends StatelessWidget {
                 ),
               ],
             ),
-            if (i < 3) const SizedBox(height: 16),
+            if (i < items.length - 1)
+              const SizedBox(height: 16), // 修改这里，确保所有项目之间都有间距
           ],
         ],
       ),
     );
+  }
+
+  String _getItemTitle(dynamic item) {
+    if (item is TopSong) {
+      return item.songname ?? '未知歌曲';
+    } else if (item is SongItem) {
+      return item.songname ?? item.filename ?? '未知歌曲';
+    }
+    return '未知歌曲';
   }
 }
