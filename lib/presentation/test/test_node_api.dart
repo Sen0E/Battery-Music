@@ -39,12 +39,46 @@ class _TestNodeApiState extends State<TestNodeApi> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Node API 测试')),
-      body: Center(child: _buildMusicApi()),
+      body: Center(child: _buildTopApi()),
     );
   }
 
+  Future<void> _getTopPlaylist() async {
+    final userPlayList = await _musicApiService.topPlaylist();
+    // 遍历歌单
+    for (final item in userPlayList.data!.specialList!) {
+      log(
+        "${item.specialname}\t\t\t  GlableId:${item.globalCollectionId} Pic: ${item.getFlexibleCover()}\t ",
+      );
+    }
+  }
+
+  Future<void> _getTopSong() async {
+    final topSong = await _musicApiService.topSong();
+    for (final item in topSong.data!) {
+      log(
+        "${item.songname}\t\t\t  Hash:${item.hash}\t Pic: ${item.getAlbumSizableCover()}\t",
+      );
+    }
+  }
+
   Widget _buildTopApi() {
-    return Column(children: []);
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            _getTopPlaylist();
+          },
+          child: Text("获取歌单推荐"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            _getTopSong();
+          },
+          child: Text("新歌"),
+        ),
+      ],
+    );
   }
 
   Future<void> _getUserPlayList() async {
