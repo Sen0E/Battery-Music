@@ -47,12 +47,7 @@ class HomePageProvider extends ChangeNotifier {
 
   List<SpecialList> get recommendedPlaylists {
     return _topPlaylist?.specialList
-            ?.where(
-              (playlist) =>
-                  playlist.specialname != null &&
-                  playlist.getImgurl() != null &&
-                  playlist.specialname!.isNotEmpty,
-            )
+            .where((playlist) => playlist.specialname.isNotEmpty)
             .toList() ??
         [];
   }
