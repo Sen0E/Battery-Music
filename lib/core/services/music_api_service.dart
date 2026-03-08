@@ -9,6 +9,8 @@ import 'package:battery_music/models/response/search_keywords.dart';
 import 'package:battery_music/models/response/search_suggest.dart';
 import 'package:battery_music/models/response/song_data.dart';
 import 'package:battery_music/models/response/top_card.dart';
+import 'package:battery_music/models/response/top_playlist.dart';
+import 'package:battery_music/models/response/top_song.dart';
 import 'package:battery_music/models/response/user_info.dart';
 import 'package:battery_music/models/response/user_info_detail.dart';
 import 'package:battery_music/models/response/user_playlist.dart';
@@ -147,15 +149,6 @@ class MusicApiService {
     );
   }
 
-  /// 歌曲推荐
-  /// [cardId] 1：对应安卓 精选好歌随心听 || 私人专属好歌，2：对应安卓 经典怀旧金曲，
-  /// 3：对应安卓 热门好歌精选，4：对应安卓 小众宝藏佳作，5：未知，6：对应 vip 专属推荐
-  Future<BaseApi<TopCard>> topCard(int cardId) async {
-    final res = await Top.topCard(cardId: cardId);
-    debugPrint("topCard response: ${res['body']}");
-    return BaseApi<TopCard>.fromMap(res['body'], (map) => TopCard.fromMap(map));
-  }
-
   ///获取音乐URL
   ///[hash] 歌曲hash
   ///[freePart] 是否返回试听部分（仅部分歌曲）(0：否, 1：是)
@@ -232,5 +225,36 @@ class MusicApiService {
     final res = await Search.searchSuggest(keywords);
     debugPrint("searchSuggest response: ${res['body']}");
     return SearchSuggest.fromMap(res['body']);
+  }
+
+  /// 歌曲推荐
+  /// [cardId] 1：对应安卓 精选好歌随心听 || 私人专属好歌，2：对应安卓 经典怀旧金曲，
+  /// 3：对应安卓 热门好歌精选，4：对应安卓 小众宝藏佳作，5：未知，6：对应 vip 专属推荐
+  Future<BaseApi<TopCard>> topCard(int cardId) async {
+    final res = await Top.topCard(cardId: cardId);
+    debugPrint("topCard response: ${res['body']}");
+    return BaseApi<TopCard>.fromMap(res['body'], (map) => TopCard.fromMap(map));
+  }
+
+  /// 歌单推荐
+  Future<BaseApi<TopPlaylist>> topPlaylist() async {
+    final res = await Top.topPlaylist();
+    debugPrint("topPlaylist response: ${res['body']}");
+    return BaseApi<TopPlaylist>.fromMap(
+      res['body'],
+      (map) => TopPlaylist.fromJson(map),
+    );
+  }
+
+  // 新歌推荐
+  Future<BaseApi<List<TopSong>>> topSong() async {
+    final res = await Top.topSong();
+    debugPrint("newSong response: ${res['body']}");
+    return BaseApi<List<TopSong>>.fromMap(
+      res['body'],
+      (map) => List<TopSong>.from(
+        (map as List<dynamic>).map((item) => TopSong.fromJson(item)),
+      ),
+    );
   }
 }
