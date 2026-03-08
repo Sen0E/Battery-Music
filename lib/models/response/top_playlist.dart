@@ -478,25 +478,14 @@ class Version {
     // android: List<Android>.from(
     //   json["android"].map((x) => Android.fromJson(x)),
     // ),
-    android: json["android"] == null
+    android: json["android"] == null || json["android"] == []
         ? []
-        : _parseAndroidList(json["android"]),
+        : List<Android>.from(json["android"].map((x) => Android.fromJson(x))),
     // ios: List<Android>.from(json["ios"].map((x) => Android.fromJson(x))),
-    ios: json["ios"] == null
+    ios: json["ios"] == null || json["ios"] == []
         ? []
-        : _parseAndroidList(json["ios"]),
+        : List<Android>.from(json["ios"].map((x) => Android.fromJson(x))),
   );
-
-  static List<Android> _parseAndroidList(dynamic androidData) {
-    if (androidData is List) {
-      return androidData
-          .where((item) => item is Map<String, dynamic>)
-          .map((item) => Android.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } else {
-      return [];
-    }
-  }
 
   Map<String, dynamic> toJson() => {
     "android": List<dynamic>.from(android.map((x) => x.toJson())),
