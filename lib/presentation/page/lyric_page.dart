@@ -308,8 +308,9 @@ class _LyricsScreenState extends State<LyricsScreen>
                           ),
                           itemCount: lyrics.length,
                           itemBuilder: (context, index) {
-                            if (lyrics[index].text.isEmpty)
+                            if (lyrics[index].text.isEmpty) {
                               return const SizedBox.shrink();
+                            }
                             return _buildLyricLine(index);
                           },
                         ),
