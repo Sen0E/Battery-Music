@@ -46,7 +46,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
   Future<void> _getTopPlaylist() async {
     final userPlayList = await _musicApiService.topPlaylist();
     // 遍历歌单
-    for (final item in userPlayList.data!.specialList!) {
+    for (final item in userPlayList.data!.specialList) {
       log(
         "${item.specialname}\t\t\t  GlableId:${item.globalCollectionId} Pic: ${item.getFlexibleCover()}\t ",
       );
@@ -121,8 +121,8 @@ class _TestNodeApiState extends State<TestNodeApi> {
       if (item.recCopyWrite != null) {
         // log(item.toJson());
         log(
-          "音乐名称: ${item.songname}" +
-              "\t作者: ${item.authorName}" +
+          "音乐名称: ${item.songname}"
+                  "\t作者: ${item.authorName}" +
               "\tHash: ${item.hash}" +
               "\t封面: ${item.getSizableCoverUrl()}",
         );
@@ -136,8 +136,8 @@ class _TestNodeApiState extends State<TestNodeApi> {
     for (final item in response.data!.songList ?? []) {
       // log(item.toJson());
       log(
-        "音乐名称: ${item.songname}" +
-            "\t作者: ${item.authorName}" +
+        "音乐名称: ${item.songname}"
+                "\t作者: ${item.authorName}" +
             "\tHash: ${item.hash}" +
             "\t封面: ${item.getSizableCoverUrl()}",
       );
