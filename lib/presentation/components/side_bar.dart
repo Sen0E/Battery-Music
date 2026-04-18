@@ -246,8 +246,8 @@ class _SideBarState extends State<SideBar> {
           fontSize: 12, // 字号缩小，作为层级分类的标签
           fontWeight: FontWeight.w600,
           letterSpacing: 1.0, // 增加字距，带来“控制面板”的疏离感
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(
-            0.6,
+          color: theme.colorScheme.onSurfaceVariant.withValues(
+            alpha: 0.6,
           ), // 颜色调暗，不抢歌单列表的风头
         ),
       ),

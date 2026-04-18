@@ -113,6 +113,7 @@ class UserService {
 
   /// 退出登录
   Future<void> logOut() async {
+    // 清除持久化数据
     await _prefs!.remove('cookie');
     await _prefs!.remove('userId');
     await _prefs!.remove('nickname');
@@ -122,5 +123,15 @@ class UserService {
     await _prefs!.remove('vipBeginTime');
     await _prefs!.remove('vipEndTime');
     await _prefs!.remove('birthday');
+
+    // 同步重置内存中的静态变量
+    userId = 0;
+    nickname = '';
+    avatarUrl = '';
+    vipType = 0;
+    vipBeginTime = '';
+    vipEndTime = '';
+    birthday = '';
+    cookies = {};
   }
 }

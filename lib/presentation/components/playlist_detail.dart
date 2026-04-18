@@ -131,12 +131,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               }
 
               final song = provider.songs[index];
-              if (song.name != null) {}
+              final songNameParts = (song.name ?? '未知歌曲').split(' - ');
               return SongListItem(
                 index: index,
-                songName: song.name!.split(' - ').last,
-                singerName: song.name!.split(' - ').first,
-                musicpackAdvance: song.transParam!.musicpackAdvance,
+                songName: songNameParts.length > 1 ? songNameParts.last : songNameParts.first,
+                singerName: songNameParts.length > 1 ? songNameParts.first : '未知歌手',
+                musicpackAdvance: song.transParam?.musicpackAdvance,
                 coverUrl: song.getCoverUrl(),
                 duration: song.timelen,
                 isDurationInMs: true, // 歌单详情里的时长是毫秒

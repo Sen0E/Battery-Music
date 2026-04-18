@@ -11,7 +11,6 @@ enum SearchType { songs, playlists }
 /// 搜索状态管理 Provider
 /// 负责管理搜索关键词、搜索结果（单曲/歌单）、热搜榜、搜索建议及分页加载状态
 class SearchProvider extends ChangeNotifier {
-  // final NodeServiceApi _api = NodeServiceApi.instance;
   final MusicApiService _musicApiService = MusicApiService();
 
   // --- 状态 ---
@@ -61,26 +60,12 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 默认执行歌曲搜索
-      // final response = await _api.searchKeywords<SearchSongResponse>(
-      //   _currentKeyword,
-      //   _songPage,
-      //   pageSize: _pageSize,
-      //   type: 'song',
-      //   fromJson: SearchSongResponse.fromJson,
-      // );
       final response = await _musicApiService
           .searchKeywords<SearchKeywordsSong>(
             _currentKeyword,
             page: _songPage,
             pageSize: _pageSize,
           );
-      // if (response.data != null) {
-      //   final newItems = response.data!.lists ?? [];
-      //   _songResults = newItems;
-      //   _hasMoreSongs = newItems.length >= _pageSize;
-      //   _songPage++;
-      // }
       if (response.data != null) {
         final newItems = response.data!.lists ?? [];
         _songResults = newItems;
@@ -126,25 +111,6 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // final response = await _api.searchKeywords<SearchSongResponse>(
-      //   _currentKeyword,
-      //   _songPage,
-      //   pageSize: _pageSize,
-      //   type: 'song',
-      //   fromJson: SearchSongResponse.fromJson,
-      // );
-
-      // if (response.data != null) {
-      //   final newItems = response.data!.lists ?? [];
-      //   if (isLoadMore) {
-      //     _songResults.addAll(newItems);
-      //   } else {
-      //     _songResults = newItems;
-      //   }
-      //   _hasMoreSongs = newItems.length >= _pageSize;
-      //   _songPage++;
-      // }
-
       final response = await _musicApiService
           .searchKeywords<SearchKeywordsSong>(
             _currentKeyword,
@@ -182,25 +148,6 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // final response = await _api.searchKeywords<SearchSpecialResponse>(
-      //   _currentKeyword,
-      //   _playlistPage,
-      //   pageSize: _pageSize,
-      //   type: 'special',
-      //   fromJson: SearchSpecialResponse.fromJson,
-      // );
-
-      // if (response.data != null) {
-      //   final newItems = response.data!.lists ?? [];
-      //   if (isLoadMore) {
-      //     _playlistResults.addAll(newItems);
-      //   } else {
-      //     _playlistResults = newItems;
-      //   }
-      //   _hasMorePlaylists = newItems.length >= _pageSize;
-      //   _playlistPage++;
-      // }
-
       final response = await _musicApiService
           .searchKeywords<SearchKeywordsSpecial>(
             _currentKeyword,
@@ -232,10 +179,6 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // final response = await _api.searchHot();
-      // if (response.data != null) {
-      //   _hotSearchCategories = response.data!.list ?? [];
-      // }
       final response = await _musicApiService.searchHot();
       if (response.status == 1) {
         _hotSearchCategories = response.data!.list ?? [];
@@ -257,7 +200,6 @@ class SearchProvider extends ChangeNotifier {
       return;
     }
     try {
-      // _searchSuggestions = await _api.searchSuggest(keyword);
       final response = await _musicApiService.searchSuggest(keyword);
       if (response.status == 1) {
         _searchSuggestions = response.data!.first.recordDatas!;

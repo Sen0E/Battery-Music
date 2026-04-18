@@ -414,85 +414,60 @@ class UserInfoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _loadUserInfo(),
-      builder: (context, snapshot) {
-        String userName = "游客";
-        String userInitials = "U";
-        String userPicUrl = "";
-        bool isVip = false;
+    final userName = UserService.getNickname.isNotEmpty ? UserService.getNickname : "游客";
+    final userInitials = userName.isNotEmpty ? userName.substring(0, 1).toUpperCase() : "U";
+    final userPicUrl = UserService.getAvatarUrl;
+    final isVip = UserService.vipType != 0;
 
-        if (snapshot.connectionState == ConnectionState.done &&
-            snapshot.hasData) {
-          final userInfo = snapshot.data!;
-          userName = userInfo['nickname'] ?? "游客";
-          final name = userName.isNotEmpty ? userName : "游客";
-          userInitials = name.isNotEmpty
-              ? name.substring(0, 1).toUpperCase()
-              : "U";
-          userPicUrl = userInfo['avatarUrl'] ?? "";
-          isVip = userInfo['VipType'] != 0;
-        }
-
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              backgroundImage: userPicUrl.isNotEmpty
-                  ? NetworkImage(userPicUrl)
-                  : null,
-              child: userPicUrl.isEmpty
-                  ? Text(
-                      userInitials,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              userName,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (isVip) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  "VIP",
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CircleAvatar(
+          radius: 14,
+          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+          backgroundImage: userPicUrl.isNotEmpty
+              ? NetworkImage(userPicUrl)
+              : null,
+          child: userPicUrl.isEmpty
+              ? Text(
+                  userInitials,
                   style: TextStyle(
-                    fontSize: 9,
-                    color: theme.colorScheme.onPrimary,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
+                    fontSize: 10,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
+                )
+              : null,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          userName,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(width: 8),
+        if (isVip) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              "VIP",
+              style: TextStyle(
+                fontSize: 9,
+                color: theme.colorScheme.onPrimary,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.5,
               ),
-            ],
-          ],
-        );
-      },
+            ),
+          ),
+        ],
+      ],
     );
-  }
-
-  Future<Map<String, dynamic>> _loadUserInfo() async {
-    // 使用新的 UserService 方法
-    final nickname = UserService.getNickname;
-    final avatarUrl = UserService.getAvatarUrl;
-    final vipType = UserService.vipType;
-    return {'nickname': nickname, 'avatarUrl': avatarUrl, 'VipType': vipType};
   }
 }

@@ -17,17 +17,14 @@ class _DailyRecommendationsPageState extends State<DailyRecommendationsPage> {
   void initState() {
     super.initState();
     // 初始化时获取每日推荐数据
-    Future.microtask(
-      () => Provider.of<DailyRecommendationProvider>(
-        context,
-        listen: false,
-      ).fetchDailyRecommendation(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DailyRecommendationProvider>().fetchDailyRecommendation();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<DailyRecommendationProvider>(context);
+    final provider = context.watch<DailyRecommendationProvider>();
 
     return Scaffold(
       body: RefreshIndicator(

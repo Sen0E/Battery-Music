@@ -18,6 +18,7 @@ class AudioPlayerService {
 
   final List<MusicItem> _playlist = [];
   int _currentIndex = -1;
+  int _skipCount = 0; // 连续跳过计数器，防止所有歌曲都无法播放时无限递归
 
   AudioPlayerService._internal() {
     MediaKit.ensureInitialized();
@@ -63,6 +64,13 @@ class AudioPlayerService {
   Future<void> _playInternal(int index) async {
     if (index < 0 || index >= _playlist.length) return;
 
+    // 防止所有歌曲都无法播放时无限递归
+    if (_skipCount >= _playlist.length) {
+      log("所有歌曲均无法播放，停止尝试");
+      _skipCount = 0;
+      return;
+    }
+
     _currentIndex = index;
     final targetMusic = _playlist[_currentIndex];
 
@@ -73,16 +81,20 @@ class AudioPlayerService {
       log("正在解析哈希值... 歌曲: ${targetMusic.songName} (Hash: ${targetMusic.hash})");
       final realUrl = await _fetchRealUrlFromHash(targetMusic.hash);
       if (realUrl != null) {
-        // 解析成功，交给 media_kit 播放
+        // 解析成功，重置跳过计数
+        _skipCount = 0;
+        // 交给 media_kit 播放
         await player.open(Media(realUrl));
         await player.play();
       } else {
         log("当前音乐无法播放，正在切换下一首");
+        _skipCount++;
         playNext();
       }
     } catch (e) {
       log("获取播放链接失败: $e");
-      // 解析失败策略：可以自动跳过当前歌曲播放下一首
+      // 解析失败策略：自动跳过当前歌曲播放下一首
+      _skipCount++;
       playNext();
     }
   }

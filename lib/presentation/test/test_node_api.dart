@@ -4,18 +4,13 @@ import 'dart:typed_data';
 import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/models/response/base_api.dart';
-import 'package:battery_music/models/response/daily_recommend.dart';
 import 'package:battery_music/models/response/login_qr_check.dart';
 import 'package:battery_music/models/response/login_qr_key.dart';
-import 'package:battery_music/models/response/register_dev.dart';
 import 'package:battery_music/models/response/search_hot.dart';
 import 'package:battery_music/models/response/search_keywords_song.dart';
 import 'package:battery_music/models/response/search_keywords_special.dart';
-import 'package:battery_music/models/response/top_card.dart';
 import 'package:battery_music/models/response/user_info.dart';
 import 'package:battery_music/models/response/user_info_detail.dart';
-import 'package:battery_music/models/response/user_playlist.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class TestNodeApi extends StatefulWidget {
@@ -33,13 +28,34 @@ class _TestNodeApiState extends State<TestNodeApi> {
   final _userService = UserService();
   Uint8List? _qrCode;
   String? _qrCodeKey;
-  int? _userId;
-  RegisterDev? _registerDev;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Node API 测试')),
-      body: Center(child: _buildTopApi()),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text("Top API", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ),
+            _buildTopApi(),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text("Music API", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ),
+            _buildMusicApi(),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text("Auth API", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ),
+            _buildPhoneLogin(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -121,10 +137,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
       if (item.recCopyWrite != null) {
         // log(item.toJson());
         log(
-          "音乐名称: ${item.songname}"
-                  "\t作者: ${item.authorName}" +
-              "\tHash: ${item.hash}" +
-              "\t封面: ${item.getSizableCoverUrl()}",
+          "音乐名称: ${item.songname}\t作者: ${item.authorName}\tHash: ${item.hash}\t封面: ${item.getSizableCoverUrl()}",
         );
       }
     }
@@ -136,10 +149,7 @@ class _TestNodeApiState extends State<TestNodeApi> {
     for (final item in response.data!.songList ?? []) {
       // log(item.toJson());
       log(
-        "音乐名称: ${item.songname}"
-                "\t作者: ${item.authorName}" +
-            "\tHash: ${item.hash}" +
-            "\t封面: ${item.getSizableCoverUrl()}",
+        "音乐名称: ${item.songname}\t作者: ${item.authorName}\tHash: ${item.hash}\t封面: ${item.getSizableCoverUrl()}",
       );
     }
   }
@@ -265,9 +275,6 @@ class _TestNodeApiState extends State<TestNodeApi> {
       _codeController.text,
     );
     debugPrint(result.data?.toJson().toString());
-    setState(() {
-      _userId = result.data!.userId;
-    });
     _userService.saveUserInfo(userInfo: result.data);
   }
 

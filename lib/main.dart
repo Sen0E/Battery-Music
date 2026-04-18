@@ -30,12 +30,12 @@ void main() async {
   });
 
   await UserService.initialize(false);
-  // if (!UserService.hasLogin) {
-  //   final res = await MusicApiService().registerDev();
-  //   await UserService().saveUserInfo(registerDev: res.data);
-  // }
-  final res = await MusicApiService().registerDev();
-  await UserService().saveUserInfo(registerDev: res.data);
+
+  // 仅在没有 dfid 时注册设备
+  if (UserService.dfid.isEmpty) {
+    final res = await MusicApiService().registerDev();
+    await UserService().saveUserInfo(registerDev: res.data);
+  }
 
   runApp(const BatteryMusicApp());
 }
@@ -71,7 +71,6 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SidebarProvider()), // 侧边栏状态
-        ChangeNotifierProvider(create: (_) => PlayerStateProvider()), // 播放器状态
         ChangeNotifierProvider(create: (_) => SearchProvider()), // 搜索
         ChangeNotifierProvider(create: (_) => PlaylistProvider()), // 歌单列表
         ChangeNotifierProvider(create: (_) => PlaylistDetailProvider()), // 歌单详情

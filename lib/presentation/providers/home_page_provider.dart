@@ -5,6 +5,8 @@ import 'package:battery_music/models/response/top_song.dart';
 import 'package:flutter/foundation.dart';
 
 class HomePageProvider extends ChangeNotifier {
+  final MusicApiService _musicApiService = MusicApiService();
+
   TopPlaylist? _topPlaylist;
   TopCard? _topCard;
   List<TopSong>? _newSongs;
@@ -108,8 +110,7 @@ class HomePageProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final apiService = MusicApiService();
-      final response = await apiService.topPlaylist();
+      final response = await _musicApiService.topPlaylist();
 
       if (response.status == 1) {
         _topPlaylist = response.data;
@@ -130,8 +131,7 @@ class HomePageProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final apiService = MusicApiService();
-      final response = await apiService.topCard(1);
+      final response = await _musicApiService.topCard(1);
 
       if (response.status == 1) {
         _topCard = response.data;
@@ -152,8 +152,7 @@ class HomePageProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final apiService = MusicApiService();
-      final response = await apiService.topSong();
+      final response = await _musicApiService.topSong();
 
       if (response.status == 1 && response.data != null) {
         _newSongs = response.data;
@@ -174,11 +173,9 @@ class HomePageProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final apiService = MusicApiService();
-
-      final hotSongsFuture = apiService.topCard(3);
-      final nostalgicSongsFuture = apiService.topCard(2);
-      final indieSongsFuture = apiService.topCard(4);
+      final hotSongsFuture = _musicApiService.topCard(3);
+      final nostalgicSongsFuture = _musicApiService.topCard(2);
+      final indieSongsFuture = _musicApiService.topCard(4);
 
       final responses = await Future.wait([
         hotSongsFuture,
