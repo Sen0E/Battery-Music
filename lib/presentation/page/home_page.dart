@@ -1,5 +1,6 @@
 import 'package:battery_music/models/response/top_card.dart';
 import 'package:battery_music/presentation/providers/home_page_provider.dart';
+import 'package:battery_music/presentation/widgets/loading/skeleton_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:battery_music/models/response/top_song.dart';
@@ -89,10 +90,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildDailyPlaylists(HomePageProvider provider, ThemeData theme) {
     if (provider.isLoadingPlaylists && provider.recommendedPlaylists.isEmpty) {
-      return const SizedBox(
-        height: 220,
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const _DailyPlaylistsSkeleton();
     }
 
     if (provider.errorPlaylists != null &&
@@ -176,10 +174,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildPersonalizedTracks(HomePageProvider provider, ThemeData theme) {
     if (provider.isLoadingCards && provider.personalizedSongs.isEmpty) {
-      return const SizedBox(
-        height: 160,
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const _TrackCardsSkeleton();
     }
 
     if (provider.errorCards != null && provider.personalizedSongs.isEmpty) {
@@ -387,28 +382,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     if (isLoading && items.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: theme.colorScheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          ],
-        ),
-      );
+      return _CategoryListSkeleton(title: title);
     }
 
     if (error != null && items.isEmpty) {
@@ -501,5 +475,164 @@ class _HomePageState extends State<HomePage> {
       return item.songname ?? item.filename ?? '未知歌曲';
     }
     return '未知歌曲';
+  }
+}
+
+class _DailyPlaylistsSkeleton extends StatelessWidget {
+  const _DailyPlaylistsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 220,
+      child: SkeletonPulse(
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: 6,
+          separatorBuilder: (context, index) => const SizedBox(width: 24),
+          itemBuilder: (context, index) => const _PlaylistCardSkeleton(),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaylistCardSkeleton extends StatelessWidget {
+  const _PlaylistCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 160,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SkeletonBox(width: 160, height: 160, radius: 12),
+          SizedBox(height: 12),
+          SkeletonBox(width: 138, height: 13),
+          SizedBox(height: 8),
+          SkeletonBox(width: 92, height: 10),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrackCardsSkeleton extends StatelessWidget {
+  const _TrackCardsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 160,
+      child: SkeletonPulse(
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: 4,
+          separatorBuilder: (context, index) => const SizedBox(width: 20),
+          itemBuilder: (context, index) {
+            return const Column(
+              children: [
+                _TrackCardSkeleton(),
+                SizedBox(height: 16),
+                _TrackCardSkeleton(),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _TrackCardSkeleton extends StatelessWidget {
+  const _TrackCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 280,
+      height: 72,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Row(
+        children: [
+          SkeletonBox(width: 48, height: 48, radius: 6),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SkeletonBox(width: double.infinity, height: 13),
+                SizedBox(height: 8),
+                FractionallySizedBox(
+                  widthFactor: 0.56,
+                  child: SkeletonBox(width: double.infinity, height: 10),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 12),
+          SkeletonCircle(size: 32),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryListSkeleton extends StatelessWidget {
+  const _CategoryListSkeleton({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SkeletonPulse(
+            child: Column(
+              children: List.generate(7, (index) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: index == 6 ? 0 : 16),
+                  child: const Row(
+                    children: [
+                      SkeletonBox(width: 24, height: 14, radius: 4),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: SkeletonBox(width: double.infinity, height: 12),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

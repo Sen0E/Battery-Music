@@ -904,6 +904,6 @@ class SearchKeywordsSong {
 
   /// 获取音乐封面URL
   String getImageUrl({int? size = 256}) {
-    return image!.replaceAll('{size}', size.toString());
+    return image?.replaceAll('{size}', size.toString()) ?? '';
   }
 }

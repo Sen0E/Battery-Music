@@ -2,6 +2,7 @@ import 'package:battery_music/models/response/search_keywords_special.dart';
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
+import 'package:battery_music/presentation/widgets/loading/skeleton_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -122,9 +123,7 @@ class _SearchResultPageState extends State<SearchResultPage>
     return Consumer<SearchProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading && provider.playlistResults.isEmpty) {
-          return Center(
-            child: CircularProgressIndicator(color: theme.colorScheme.primary),
-          );
+          return const _SearchPlaylistSkeleton();
         }
         if (provider.playlistResults.isEmpty) {
           return _buildEmptyState(theme, '没有找到相关歌单');
@@ -152,15 +151,7 @@ class _SearchResultPageState extends State<SearchResultPage>
               if (index == provider.playlistResults.length &&
                   provider.isLoading &&
                   provider.hasMorePlaylists) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: CircularProgressIndicator(
-                      color: theme.colorScheme.primary,
-                      strokeWidth: 2,
-                    ),
-                  ),
-                );
+                return const _LoadMoreSkeletonRow();
               }
 
               return _PlaylistItemWidget(
@@ -178,9 +169,7 @@ class _SearchResultPageState extends State<SearchResultPage>
     return Consumer<SearchProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading && provider.songResults.isEmpty) {
-          return Center(
-            child: CircularProgressIndicator(color: theme.colorScheme.primary),
-          );
+          return const _SearchSongSkeleton();
         }
         if (provider.songResults.isEmpty) {
           return _buildEmptyState(theme, '没有找到相关歌曲');
@@ -209,20 +198,19 @@ class _SearchResultPageState extends State<SearchResultPage>
               if (index == provider.songResults.length &&
                   provider.isLoading &&
                   provider.hasMoreSongs) {
-                return Container(
-                  height: 60,
-                  alignment: Alignment.center,
-                  child: CircularProgressIndicator(
-                    color: theme.colorScheme.primary,
-                    strokeWidth: 2,
-                  ),
-                );
+                return const _LoadMoreSkeletonRow();
               }
               final song = provider.songResults[index];
+              final fileName = song.fileName ?? song.oriSongName ?? '未知歌曲';
+              final nameParts = fileName.split(' - ');
+              final songName = nameParts.length > 1 ? nameParts.last : fileName;
+              final singerName =
+                  song.singerName ??
+                  (nameParts.length > 1 ? nameParts.first : '未知歌手');
               return SongListItem(
                 index: index,
-                songName: song.fileName!.split(' - ').last,
-                singerName: song.singerName ?? '未知歌手',
+                songName: songName,
+                singerName: singerName,
                 coverUrl: song.getImageUrl(),
                 duration: song.duration,
                 isDurationInMs: false, // 搜索结果是秒
@@ -329,6 +317,55 @@ class _PlaylistItemWidget extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SearchSongSkeleton extends StatelessWidget {
+  const _SearchSongSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonPulse(
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        itemCount: 10,
+        separatorBuilder: (context, index) => const SizedBox(height: 4),
+        itemBuilder: (context, index) => const SkeletonSongRow(),
+      ),
+    );
+  }
+}
+
+class _SearchPlaylistSkeleton extends StatelessWidget {
+  const _SearchPlaylistSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonPulse(
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        itemCount: 8,
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
+        itemBuilder: (context, index) => const SkeletonSongRow(
+          coverSize: 48,
+          showIndex: false,
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadMoreSkeletonRow extends StatelessWidget {
+  const _LoadMoreSkeletonRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SkeletonPulse(
+      child: SkeletonSongRow(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       ),
     );
   }

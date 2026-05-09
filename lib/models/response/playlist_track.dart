@@ -402,7 +402,7 @@ class SongTransParam {
   String toJson() => json.encode(toMap());
 
   String getUnionCoverUrl({int size = 100}) {
-    return unionCover!.replaceAll('{size}', size.toString());
+    return unionCover?.replaceAll('{size}', size.toString()) ?? '';
   }
 }
 
@@ -778,7 +778,7 @@ class PlaylistTrackSongItem {
   /// 获取歌曲封面图片
   /// [size] 封面大小，默认256
   String getCoverUrl({int size = 256}) {
-    return cover!.replaceAll('{size}', size.toString());
+    return cover?.replaceAll('{size}', size.toString()) ?? '';
   }
 }
 

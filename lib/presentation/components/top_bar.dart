@@ -5,6 +5,7 @@ import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/models/response/search_suggest.dart';
 import 'package:battery_music/presentation/components/window_controls.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
+import 'package:battery_music/presentation/widgets/loading/skeleton_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -202,10 +203,7 @@ class _HotSearch extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (isLoading && hotSearchCategories.isEmpty) {
-      return const SizedBox(
-        height: 100,
-        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-      );
+      return const _HotSearchSkeleton();
     }
     if (hotSearchCategories.isEmpty) {
       return SizedBox(
@@ -414,8 +412,12 @@ class UserInfoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final userName = UserService.getNickname.isNotEmpty ? UserService.getNickname : "游客";
-    final userInitials = userName.isNotEmpty ? userName.substring(0, 1).toUpperCase() : "U";
+    final userName = UserService.getNickname.isNotEmpty
+        ? UserService.getNickname
+        : "游客";
+    final userInitials = userName.isNotEmpty
+        ? userName.substring(0, 1).toUpperCase()
+        : "U";
     final userPicUrl = UserService.getAvatarUrl;
     final isVip = UserService.vipType != 0;
 
@@ -468,6 +470,48 @@ class UserInfoWidget extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _HotSearchSkeleton extends StatelessWidget {
+  const _HotSearchSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonPulse(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SkeletonBox(width: 88, height: 12, radius: 4),
+            const SizedBox(height: 12),
+            for (var index = 0; index < 5; index++)
+              Padding(
+                padding: EdgeInsets.only(bottom: index == 4 ? 0 : 12),
+                child: Row(
+                  children: [
+                    const SkeletonBox(width: 24, height: 12, radius: 4),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FractionallySizedBox(
+                        widthFactor: 0.94 - (index * 0.08),
+                        alignment: Alignment.centerLeft,
+                        child: const SkeletonBox(
+                          width: double.infinity,
+                          height: 12,
+                          radius: 4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

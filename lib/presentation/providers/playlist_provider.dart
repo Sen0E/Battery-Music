@@ -35,8 +35,8 @@ class PlaylistProvider extends ChangeNotifier {
     try {
       final BaseApi<UserPlaylist> response = await _musicApiService
           .userPlaylist();
-      if (response.status == 1) {
-        _allPlaylists = response.data!.info ?? [];
+      if (response.status == 1 && response.data != null) {
+        _allPlaylists = response.data?.info ?? [];
         _filterPlaylists();
       } else {
         _errorMessage = "获取失败";

@@ -1,6 +1,7 @@
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/daily_recommendation_provider.dart';
+import 'package:battery_music/presentation/widgets/loading/skeleton_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +31,7 @@ class _DailyRecommendationsPageState extends State<DailyRecommendationsPage> {
       body: RefreshIndicator(
         onRefresh: () => provider.fetchDailyRecommendation(),
         child: provider.isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const _DailyRecommendationsSkeleton()
             : provider.error != null
             ? Center(
                 child: Column(
@@ -68,10 +69,18 @@ class _DailyRecommendationsPageState extends State<DailyRecommendationsPage> {
       itemBuilder: (context, index) {
         final song = songs[index];
 
+        final filenameParts = (song.filename ?? '').split(' - ');
+        final fallbackSinger = filenameParts.length > 1
+            ? filenameParts.first
+            : '未知歌手';
+        final fallbackSong = filenameParts.length > 1
+            ? filenameParts.last
+            : (song.filename ?? '未知歌曲');
+
         return SongListItem(
           index: index,
-          songName: song.songname!,
-          singerName: song.authorName!,
+          songName: song.songname ?? fallbackSong,
+          singerName: song.authorName ?? fallbackSinger,
           coverUrl: song.getSizableCoverUrl(size: 120),
           duration: song.timeLength,
           musicpackAdvance: song.payType != 1 ? 1 : 0,
@@ -86,6 +95,22 @@ class _DailyRecommendationsPageState extends State<DailyRecommendationsPage> {
           },
         );
       },
+    );
+  }
+}
+
+class _DailyRecommendationsSkeleton extends StatelessWidget {
+  const _DailyRecommendationsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonPulse(
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        itemCount: 12,
+        separatorBuilder: (context, index) => const SizedBox(height: 4),
+        itemBuilder: (context, index) => const SkeletonSongRow(),
+      ),
     );
   }
 }

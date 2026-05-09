@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:battery_music/utils/safe_convert.dart';
+
 class DailyRecommend {
   /// 生成日期，格式 YYYYMMDD (例如: 20260226)
   final String? creationDate;
@@ -58,13 +60,10 @@ class DailyRecommend {
       olexpIds: map['OlexpIds'],
       clientPlaylistFlag: map['client_playlist_flag'],
       isGuaranteeRec: map['is_guarantee_rec'],
-      songList: map['song_list'] != null
-          ? List<DailyRecommendSongItem>.from(
-              (map['song_list'] as List).map(
-                (x) => DailyRecommendSongItem.fromMap(x),
-              ),
-            )
-          : null,
+      songList: SafeConvert.toMappedList(
+        map['song_list'],
+        DailyRecommendSongItem.fromMap,
+      ),
       subTitle: map['sub_title'],
       coverImgUrl: map['cover_img_url'],
     );
@@ -408,11 +407,7 @@ class DailyRecommendSongItem {
       mvHash: map['mv_hash'],
       hash: map['hash'],
       authorName: map['author_name'],
-      tags: map['tags'] != null
-          ? List<SongTag>.from(
-              (map['tags'] as List).map((x) => SongTag.fromMap(x)),
-            )
-          : null,
+      tags: SafeConvert.toMappedList(map['tags'], SongTag.fromMap),
       rankLabel: map['rank_label'],
       bitrate: map['bitrate'],
       isMvFileHead: map['is_mv_file_head'],
@@ -450,11 +445,10 @@ class DailyRecommendSongItem {
       publishTime: map['publish_time'],
       filesizeApe: map['filesize_ape'],
       recLabelType: map['rec_label_type'],
-      singerInfo: map['singerinfo'] != null
-          ? List<SingerInfo>.from(
-              (map['singerinfo'] as List).map((x) => SingerInfo.fromMap(x)),
-            )
-          : null,
+      singerInfo: SafeConvert.toMappedList(
+        map['singerinfo'],
+        SingerInfo.fromMap,
+      ),
       hashApe: map['hash_ape'],
       transParam: map['trans_param'] != null
           ? TransParam.fromMap(map['trans_param'])
@@ -560,7 +554,7 @@ class DailyRecommendSongItem {
   ///获取封面url
   /// [size] 封面大小
   String getSizableCoverUrl({int size = 256}) {
-    return sizableCover!.replaceAll('{size}', size.toString());
+    return sizableCover?.replaceAll('{size}', size.toString()) ?? '';
   }
 }
 
@@ -835,7 +829,7 @@ class TransParam {
   /// 获取封面url
   /// [size] 封面大小
   String getUnionCoverUrl({int size = 256}) {
-    return unionCover!.replaceAll('{size}', size.toString());
+    return unionCover?.replaceAll('{size}', size.toString()) ?? '';
   }
 }
 

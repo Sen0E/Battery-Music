@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:battery_music/utils/safe_convert.dart';
+
 class TopCard {
   /// 在线实验 ID 列表 (Online Experiment IDs)
   /// 用于灰度发布或 A/B 测试，记录用户命中了哪些算法实验策略
@@ -41,11 +43,7 @@ class TopCard {
   factory TopCard.fromMap(Map<String, dynamic> map) {
     return TopCard(
       olexpIds: map['OlexpIds'],
-      songList: map['song_list'] != null
-          ? List<SongItem>.from(
-              (map['song_list'] as List).map((x) => SongItem.fromMap(x)),
-            )
-          : null,
+      songList: SafeConvert.toMappedList(map['song_list'], SongItem.fromMap),
       songListSize: map['song_list_size'],
       biBiz: map['bi_biz'],
       recDesc: map['rec_desc'],
@@ -277,11 +275,7 @@ class SongItem {
       mvHash: map['mv_hash'],
       hash: map['hash'],
       authorName: map['author_name'],
-      tags: map['tags'] != null
-          ? List<SongTag>.from(
-              (map['tags'] as List).map((x) => SongTag.fromMap(x)),
-            )
-          : null,
+      tags: SafeConvert.toMappedList(map['tags'], SongTag.fromMap),
       rankLabel: map['rank_label'],
       bitrate: map['bitrate'],
       isMvFileHead: map['is_mv_file_head'],
@@ -305,21 +299,16 @@ class SongItem {
       trackerInfo: map['tracker_info'] != null
           ? TrackerInfo.fromMap(map['tracker_info'])
           : null,
-      ipsTags: map['ips_tags'] != null
-          ? List<IpsTag>.from(
-              (map['ips_tags'] as List).map((x) => IpsTag.fromMap(x)),
-            )
-          : null,
+      ipsTags: SafeConvert.toMappedList(map['ips_tags'], IpsTag.fromMap),
       relateGoods: map['relate_goods'] != null
           ? RelateGoods.fromMap(map['relate_goods'])
           : null,
       filesizeOther: map['filesize_other'],
       sizableCover: map['sizable_cover'],
-      singerInfo: map['singerinfo'] != null
-          ? List<SingerInfo>.from(
-              (map['singerinfo'] as List).map((x) => SingerInfo.fromMap(x)),
-            )
-          : null,
+      singerInfo: SafeConvert.toMappedList(
+        map['singerinfo'],
+        SingerInfo.fromMap,
+      ),
       mvType: map['mv_type'],
       publishTime: map['publish_time'],
       filesizeApe: map['filesize_ape'],
@@ -423,7 +412,7 @@ class SongItem {
   }
 
   String getSizableCoverUrl({int size = 256}) {
-    return sizableCover!.replaceAll('{size}', size.toString());
+    return sizableCover?.replaceAll('{size}', size.toString()) ?? '';
   }
 }
 
@@ -640,7 +629,7 @@ class TransParam {
   }
 
   String getUnionCoverUrl({int size = 256}) {
-    return unionCover!.replaceAll('{size}', size.toString());
+    return unionCover?.replaceAll('{size}', size.toString()) ?? '';
   }
 }
 

@@ -1,41 +1,25 @@
 import 'dart:io';
-import 'package:battery_music/core/services/music_api_service.dart';
-import 'package:battery_music/core/services/user_service.dart';
-import 'package:battery_music/presentation/providers/audio_player_provider.dart';
-import 'package:battery_music/presentation/providers/daily_recommendation_provider.dart';
-import 'package:battery_music/presentation/providers/home_page_provider.dart';
-import 'package:battery_music/presentation/providers/player_ui_provider.dart';
-import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
-import 'package:battery_music/presentation/providers/playlist_provider.dart';
-import 'package:battery_music/presentation/providers/search_provider.dart';
-import 'package:battery_music/presentation/theme/app_theme.dart';
+
+import 'package:battery_music/app/app_providers.dart';
 import 'package:battery_music/presentation/page/splash_page.dart';
+import 'package:battery_music/presentation/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await windowManager.ensureInitialized(); // 初始化窗口管理器
-
+  await windowManager.ensureInitialized();
   windowManager.waitUntilReadyToShow().then((_) async {
-    await windowManager.setTitle('Battery Music'); // 设置标题
-    await windowManager.setSize(const Size(1440, 900)); // 设置尺寸
-    await windowManager.setMinimumSize(const Size(800, 600)); // 设置最小尺寸
-    await windowManager.center(); // 居中
-    await windowManager.show(); // 显示窗口
-    await windowManager.focus(); // 聚焦窗口
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden); // 隐藏标题栏
+    await windowManager.setTitle('Battery Music');
+    await windowManager.setSize(const Size(1440, 900));
+    await windowManager.setMinimumSize(const Size(800, 600));
+    await windowManager.center();
+    await windowManager.show();
+    await windowManager.focus();
+    await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
   });
-
-  await UserService.initialize(false);
-
-  // 仅在没有 dfid 时注册设备
-  if (UserService.dfid.isEmpty) {
-    final res = await MusicApiService().registerDev();
-    await UserService().saveUserInfo(registerDev: res.data);
-  }
 
   runApp(const BatteryMusicApp());
 }
@@ -47,21 +31,18 @@ class BatteryMusicApp extends StatefulWidget {
   State<BatteryMusicApp> createState() => _BatteryMusicAppState();
 }
 
-class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
+class _BatteryMusicAppState extends State<BatteryMusicApp>
+    with WindowListener {
   @override
   void initState() {
     super.initState();
-
-    windowManager.addListener(this); // 添加监听器
-    windowManager.setPreventClose(true); // 拦截关闭事件
+    windowManager.addListener(this);
+    windowManager.setPreventClose(true);
   }
 
   @override
   void onWindowClose() async {
-    // 先隐藏窗口
     await windowManager.hide();
-
-    // 销毁窗口并退出进程
     await windowManager.destroy();
     exit(0);
   }
@@ -69,22 +50,12 @@ class _BatteryMusicAppState extends State<BatteryMusicApp> with WindowListener {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SidebarProvider()), // 侧边栏状态
-        ChangeNotifierProvider(create: (_) => SearchProvider()), // 搜索
-        ChangeNotifierProvider(create: (_) => PlaylistProvider()), // 歌单列表
-        ChangeNotifierProvider(create: (_) => PlaylistDetailProvider()), // 歌单详情
-        ChangeNotifierProvider(create: (_) => AudioPlayerProvider()), // 音频播放器
-        ChangeNotifierProvider(create: (_) => HomePageProvider()), // 主页数据
-        ChangeNotifierProvider(
-          create: (_) => DailyRecommendationProvider(),
-        ), // 每日推荐
-      ],
+      providers: buildAppProviders(),
       child: MaterialApp(
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.system,
-        home: SplashPage(),
+        home: const SplashPage(),
       ),
     );
   }

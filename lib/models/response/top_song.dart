@@ -4,8 +4,10 @@
 
 import 'dart:convert';
 
+import 'package:battery_music/utils/safe_convert.dart';
+
 List<TopSong> topSongFromJson(String str) =>
-    List<TopSong>.from(json.decode(str).map((x) => TopSong.fromJson(x)));
+    SafeConvert.toMappedList(json.decode(str), TopSong.fromJson);
 
 String topSongToJson(List<TopSong> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
@@ -274,7 +276,7 @@ class TopSong {
   });
 
   factory TopSong.fromJson(Map<String, dynamic> json) => TopSong(
-    authors: List<Author>.from(json["authors"].map((x) => Author.fromJson(x))),
+    authors: SafeConvert.toMappedList(json["authors"], Author.fromJson),
     oldHideFlac: json["old_hide_flac"],
     topSongStatus: json["status"],
     status128: json["status_128"],
@@ -285,7 +287,11 @@ class TopSong {
     cdUrl: json["cd_url"],
     failProcess: json["fail_process"],
     payType: json["pay_type"],
-    rpType: rpTypeValues.map[json["rp_type"]]!,
+    rpType: SafeConvert.enumValue(
+      rpTypeValues.map,
+      json["rp_type"],
+      RpType.EMPTY,
+    ),
     topicUrlFlac: json["topic_url_flac"],
     privilegeHigh: json["privilege_high"],
     parentId: json["parent_id"],
@@ -303,14 +309,24 @@ class TopSong {
     videoId: json["video_id"],
     buyCount: json["buy_count"],
     hash: json["hash"],
-    rpType320: rpTypeValues.map[json["rp_type_320"]]!,
+    rpType320: SafeConvert.enumValue(
+      rpTypeValues.map,
+      json["rp_type_320"],
+      RpType.EMPTY,
+    ),
     price128: json["price_128"],
-    rpTypeFlac: rpTypeValues.map[json["rp_type_flac"]]!,
+    rpTypeFlac: SafeConvert.enumValue(
+      rpTypeValues.map,
+      json["rp_type_flac"],
+      RpType.EMPTY,
+    ),
     timelengthHigh: json["timelength_high"],
     albumName: json["album_name"],
     topicUrl128: json["topic_url_128"],
     issue: json["issue"],
-    publishDate: DateTime.parse(json["publish_date"]),
+    publishDate:
+        SafeConvert.toDateTime(json["publish_date"]) ??
+        DateTime.fromMillisecondsSinceEpoch(0),
     adId: json["ad_id"],
     timelengthSuper: json["timelength_super"],
     oldHideSuper: json["old_hide_super"],
@@ -327,7 +343,11 @@ class TopSong {
     timelength: json["timelength"],
     privilegeSuper: json["privilege_super"],
     lastSort: json["last_sort"],
-    rpType128: rpTypeValues.map[json["rp_type_128"]]!,
+    rpType128: SafeConvert.enumValue(
+      rpTypeValues.map,
+      json["rp_type_128"],
+      RpType.EMPTY,
+    ),
     filesizeFlac: json["filesize_flac"],
     rankCount: json["rank_count"],
     songname: json["songname"],
@@ -344,14 +364,20 @@ class TopSong {
     offset: json["offset"],
     filename: json["filename"],
     status: json["__status"],
-    rpTypeHigh: rpTypeValues.map[json["rp_type_high"]]!,
+    rpTypeHigh: SafeConvert.enumValue(
+      rpTypeValues.map,
+      json["rp_type_high"],
+      RpType.EMPTY,
+    ),
     timelengthFlac: json["timelength_flac"],
     topicUrl: json["topic_url"],
     rpPublish: json["rp_publish"],
     oldCpySuper: json["old_cpy_super"],
     audioId: json["audio_id"],
     remark: json["remark"],
-    musical: Musical.fromJson(json["musical"]),
+    musical: SafeConvert.toMap(json["musical"]) == null
+        ? Musical()
+        : Musical.fromJson(SafeConvert.toMap(json["musical"])!),
     pkgPriceHigh: json["pkg_price_high"],
     filesize128: json["filesize_128"],
     albumId: json["album_id"],
@@ -373,12 +399,16 @@ class TopSong {
     sort: json["sort"],
     timelength320: json["timelength_320"],
     albumSizableCover: json["album_sizable_cover"],
-    extname: extnameValues.map[json["extname"]]!,
+    extname: SafeConvert.enumValue(
+      extnameValues.map,
+      json["extname"],
+      Extname.MP3,
+    ),
     topicUrlHigh: json["topic_url_high"],
     statusFlac: json["status_flac"],
     privilegeFlac: json["privilege_flac"],
     oldCpy: json["old_cpy"],
-    remarks: List<Remark>.from(json["remarks"].map((x) => Remark.fromJson(x))),
+    remarks: SafeConvert.toMappedList(json["remarks"], Remark.fromJson),
     oldCpy128: json["old_cpy_128"],
     topicUrlSuper: json["topic_url_super"],
     videoTimelength: json["video_timelength"],
@@ -391,7 +421,9 @@ class TopSong {
     rpTypeSuper: json["rp_type_super"],
     payType320: json["pay_type_320"],
     bitrate: json["bitrate"],
-    transParam: TransParam.fromJson(json["trans_param"]),
+    transParam: TransParam.fromJson(
+      SafeConvert.toMap(json["trans_param"]) ?? <String, dynamic>{},
+    ),
     hashFlac: json["hash_flac"],
     hash128: json["hash_128"],
     failProcessSuper: json["fail_process_super"],
@@ -402,7 +434,9 @@ class TopSong {
     privilege: json["privilege"],
     pkgPrice: json["pkg_price"],
     bitrateFlac: json["bitrate_flac"],
-    addtime: DateTime.parse(json["addtime"]),
+    addtime:
+        SafeConvert.toDateTime(json["addtime"]) ??
+        DateTime.fromMillisecondsSinceEpoch(0),
   );
 
   Map<String, dynamic> toJson() => {
@@ -677,31 +711,41 @@ class TransParam {
   });
 
   factory TransParam.fromJson(Map<String, dynamic> json) => TransParam(
-    cpyGrade: json["cpy_grade"],
-    unionCover: json["union_cover"],
-    language: languageValues.map[json["language"]]!,
+    cpyGrade: SafeConvert.toInt(json["cpy_grade"]),
+    unionCover: SafeConvert.toStringValue(json["union_cover"]),
+    language: SafeConvert.enumValue(
+      languageValues.map,
+      json["language"],
+      Language.EMPTY,
+    ),
     freeLimited: json["free_limited"],
-    cpyAttr0: json["cpy_attr0"],
-    musicpackAdvance: json["musicpack_advance"],
-    ogg128Filesize: json["ogg_128_filesize"],
-    displayRate: json["display_rate"],
-    qualitymap: Qualitymap.fromJson(json["qualitymap"]),
-    cid: json["cid"],
-    payBlockTpl: json["pay_block_tpl"],
-    display: json["display"],
-    ipmap: ClassmapClass.fromJson(json["ipmap"]),
+    cpyAttr0: SafeConvert.toInt(json["cpy_attr0"]),
+    musicpackAdvance: SafeConvert.toInt(json["musicpack_advance"]),
+    ogg128Filesize: SafeConvert.toInt(json["ogg_128_filesize"]),
+    displayRate: SafeConvert.toInt(json["display_rate"]),
+    qualitymap: Qualitymap.fromJson(
+      SafeConvert.toMap(json["qualitymap"]) ?? <String, dynamic>{},
+    ),
+    cid: SafeConvert.toInt(json["cid"]),
+    payBlockTpl: SafeConvert.toInt(json["pay_block_tpl"]),
+    display: SafeConvert.toInt(json["display"]),
+    ipmap: ClassmapClass.fromJson(
+      SafeConvert.toMap(json["ipmap"]) ?? <String, dynamic>{},
+    ),
     hashMultitrack: json["hash_multitrack"],
-    ogg128Hash: json["ogg_128_hash"],
-    classmap: ClassmapClass.fromJson(json["classmap"]),
-    cpyLevel: json["cpy_level"],
+    ogg128Hash: SafeConvert.toStringValue(json["ogg_128_hash"]),
+    classmap: ClassmapClass.fromJson(
+      SafeConvert.toMap(json["classmap"]) ?? <String, dynamic>{},
+    ),
+    cpyLevel: SafeConvert.toInt(json["cpy_level"]),
     ogg320Filesize: json["ogg_320_filesize"],
     ogg320Hash: json["ogg_320_hash"],
     songnameSuffix: json["songname_suffix"],
     appidBlock: json["appid_block"],
     provider: json["provider"],
-    hashOffset: json["hash_offset"] == null
+    hashOffset: SafeConvert.toMap(json["hash_offset"]) == null
         ? null
-        : HashOffset.fromJson(json["hash_offset"]),
+        : HashOffset.fromJson(SafeConvert.toMap(json["hash_offset"])!),
     initPubDay: json["init_pub_day"],
   );
 
@@ -739,7 +783,7 @@ class ClassmapClass {
   ClassmapClass({required this.attr0});
 
   factory ClassmapClass.fromJson(Map<String, dynamic> json) =>
-      ClassmapClass(attr0: json["attr0"]);
+      ClassmapClass(attr0: SafeConvert.toInt(json["attr0"]));
 
   Map<String, dynamic> toJson() => {"attr0": attr0};
 }
@@ -764,13 +808,13 @@ class HashOffset {
   });
 
   factory HashOffset.fromJson(Map<String, dynamic> json) => HashOffset(
-    clipHash: json["clip_hash"],
-    startByte: json["start_byte"],
-    endMs: json["end_ms"],
-    endByte: json["end_byte"],
-    fileType: json["file_type"],
-    startMs: json["start_ms"],
-    offsetHash: json["offset_hash"],
+    clipHash: SafeConvert.toStringValue(json["clip_hash"]),
+    startByte: SafeConvert.toInt(json["start_byte"]),
+    endMs: SafeConvert.toInt(json["end_ms"]),
+    endByte: SafeConvert.toInt(json["end_byte"]),
+    fileType: SafeConvert.toInt(json["file_type"]),
+    startMs: SafeConvert.toInt(json["start_ms"]),
+    offsetHash: SafeConvert.toStringValue(json["offset_hash"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -799,9 +843,9 @@ class Qualitymap {
   Qualitymap({required this.bits, required this.attr0, required this.attr1});
 
   factory Qualitymap.fromJson(Map<String, dynamic> json) => Qualitymap(
-    bits: json["bits"],
-    attr0: json["attr0"],
-    attr1: json["attr1"],
+    bits: SafeConvert.toStringValue(json["bits"]),
+    attr0: SafeConvert.toInt(json["attr0"]),
+    attr1: SafeConvert.toInt(json["attr1"]),
   );
 
   Map<String, dynamic> toJson() => {

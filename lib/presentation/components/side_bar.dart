@@ -2,6 +2,7 @@ import 'package:battery_music/models/response/user_playlist.dart';
 import 'package:battery_music/presentation/providers/player_ui_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_provider.dart';
 import 'package:battery_music/presentation/providers/search_provider.dart';
+import 'package:battery_music/presentation/widgets/loading/skeleton_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -117,19 +118,7 @@ class _SideBarState extends State<SideBar> {
   ) {
     final playlistProvider = context.watch<PlaylistProvider>();
     if (playlistProvider.isLoading) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              color: theme.colorScheme.primary,
-              strokeWidth: 2,
-            ),
-          ),
-        ),
-      );
+      return const _SidebarPlaylistSkeleton();
     }
 
     if (playlistProvider.errorMessage != null) {
@@ -428,6 +417,71 @@ class _SideBarState extends State<SideBar> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SidebarPlaylistSkeleton extends StatelessWidget {
+  const _SidebarPlaylistSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SkeletonPulse(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(16, 12, 16, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SidebarSkeletonSection(rowCount: 4, titleWidth: 76),
+            SizedBox(height: 18),
+            _SidebarSkeletonSection(rowCount: 3, titleWidth: 78),
+            SizedBox(height: 18),
+            _SidebarSkeletonSection(rowCount: 3, titleWidth: 74),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarSkeletonSection extends StatelessWidget {
+  const _SidebarSkeletonSection({
+    required this.rowCount,
+    required this.titleWidth,
+  });
+
+  final int rowCount;
+  final double titleWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SkeletonBox(width: titleWidth, height: 12, radius: 4),
+        const SizedBox(height: 12),
+        for (var index = 0; index < rowCount; index++)
+          Padding(
+            padding: EdgeInsets.only(bottom: index == rowCount - 1 ? 0 : 12),
+            child: Row(
+              children: [
+                const SkeletonBox(width: 24, height: 24, radius: 6),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FractionallySizedBox(
+                    widthFactor: 0.92 - (index * 0.08),
+                    alignment: Alignment.centerLeft,
+                    child: const SkeletonBox(
+                      width: double.infinity,
+                      height: 12,
+                      radius: 4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

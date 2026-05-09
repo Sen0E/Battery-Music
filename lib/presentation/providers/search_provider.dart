@@ -181,7 +181,7 @@ class SearchProvider extends ChangeNotifier {
     try {
       final response = await _musicApiService.searchHot();
       if (response.status == 1) {
-        _hotSearchCategories = response.data!.list ?? [];
+        _hotSearchCategories = response.data?.list ?? [];
       }
     } catch (e) {
       debugPrint('Error fetching hot searches: $e');
@@ -201,8 +201,8 @@ class SearchProvider extends ChangeNotifier {
     }
     try {
       final response = await _musicApiService.searchSuggest(keyword);
-      if (response.status == 1) {
-        _searchSuggestions = response.data!.first.recordDatas!;
+      if (response.status == 1 && response.data?.isNotEmpty == true) {
+        _searchSuggestions = response.data!.first.recordDatas ?? [];
       } else {
         _searchSuggestions = [];
       }

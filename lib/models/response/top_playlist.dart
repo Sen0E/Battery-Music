@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:battery_music/utils/safe_convert.dart';
+
 TopPlaylist topPlaylistFromJson(String str) =>
     TopPlaylist.fromJson(json.decode(str));
 
@@ -33,17 +35,18 @@ class TopPlaylist {
   });
 
   factory TopPlaylist.fromJson(Map<String, dynamic> json) => TopPlaylist(
-    hasNext: json["has_next"],
-    biBiz: json["bi_biz"],
-    session: json["session"],
-    algId: json["alg_id"],
-    specialList: List<SpecialList>.from(
-      json["special_list"].map((x) => SpecialList.fromJson(x)),
+    hasNext: SafeConvert.toInt(json["has_next"]),
+    biBiz: SafeConvert.toStringValue(json["bi_biz"]),
+    session: SafeConvert.toStringValue(json["session"]),
+    algId: SafeConvert.toInt(json["alg_id"]),
+    specialList: SafeConvert.toMappedList(
+      json["special_list"],
+      SpecialList.fromJson,
     ),
-    olexpIds: json["OlexpIds"],
-    showTime: json["show_time"],
-    allClientPlaylistFlag: json["all_client_playlist_flag"],
-    refreshTime: json["refresh_time"],
+    olexpIds: SafeConvert.toStringValue(json["OlexpIds"]),
+    showTime: SafeConvert.toInt(json["show_time"]),
+    allClientPlaylistFlag: SafeConvert.toInt(json["all_client_playlist_flag"]),
+    refreshTime: SafeConvert.toInt(json["refresh_time"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -125,43 +128,52 @@ class SpecialList {
   });
 
   factory SpecialList.fromJson(Map<String, dynamic> json) => SpecialList(
-    abtags: json["abtags"] == null
-        ? []
-        : List<Abtag>.from(json["abtags"]!.map((x) => Abtag.fromJson(x))),
-    sync: json["sync"],
-    specialid: json["specialid"],
-    percount: json["percount"],
-    listInfoTransParam: ListInfoTransParam.fromJson(
-      json["list_info_trans_param"],
+    abtags: SafeConvert.toMappedList(json["abtags"], Abtag.fromJson),
+    sync: SafeConvert.toInt(json["sync"]),
+    specialid: SafeConvert.toInt(json["specialid"]),
+    percount: SafeConvert.toInt(json["percount"]),
+    listInfoTransParam: SafeConvert.toMap(json["list_info_trans_param"]) == null
+        ? ListInfoTransParam(specialTag: 0, iden: 0, transFlag: 0)
+        : ListInfoTransParam.fromJson(
+            SafeConvert.toMap(json["list_info_trans_param"])!,
+          ),
+    bzStatus: SafeConvert.toInt(json["bz_status"]),
+    singername: SafeConvert.enumValue(
+      singernameValues.map,
+      json["singername"],
+      Singername.EMPTY,
     ),
-    bzStatus: json["bz_status"],
-    singername: singernameValues.map[json["singername"]]!,
-    from: json["from"],
-    algPath: algPathValues.map[json["alg_path"]]!,
-    // tags: List<Tag>.from(json["tags"].map((x) => Tag.fromJson(x))),
-    tags: json["tags"].isEmpty
-        ? []
-        : List<Tag>.from(json["tags"].map((x) => Tag.fromJson(x))),
-    ugcTalentReview: json["ugc_talent_review"],
-    type: json["type"],
-    slid: json["slid"],
-    flexibleCover: json["flexible_cover"],
-    nickname: json["nickname"],
-    show: showValues.map[json["show"]]!,
-    collectType: json["collectType"],
-    collectcount: json["collectcount"],
-    transParam: TransParam.fromJson(json["trans_param"]),
-    reportInfo: json["report_info"],
-    specialname: json["specialname"],
-    imgurl: json["imgurl"],
-    playCount: json["play_count"],
-    pic: json["pic"],
-    fromHash: json["from_hash"],
-    fromTag: json["from_tag"],
-    publishtime: DateTime.parse(json["publishtime"]),
-    globalCollectionId: json["global_collection_id"],
-    intro: json["intro"],
-    suid: json["suid"],
+    from: SafeConvert.toInt(json["from"]),
+    algPath: SafeConvert.enumValue(
+      algPathValues.map,
+      json["alg_path"],
+      AlgPath.RECALL_FAISS,
+    ),
+    tags: SafeConvert.toMappedList(json["tags"], Tag.fromJson),
+    ugcTalentReview: SafeConvert.toInt(json["ugc_talent_review"]),
+    type: SafeConvert.toInt(json["type"]),
+    slid: SafeConvert.toInt(json["slid"]),
+    flexibleCover: SafeConvert.toStringValue(json["flexible_cover"]),
+    nickname: SafeConvert.toStringValue(json["nickname"]),
+    show: SafeConvert.enumValue(showValues.map, json["show"], Show.EMPTY),
+    collectType: SafeConvert.toInt(json["collectType"]),
+    collectcount: SafeConvert.toInt(json["collectcount"]),
+    transParam: SafeConvert.toMap(json["trans_param"]) == null
+        ? TransParam(specialTag: 0)
+        : TransParam.fromJson(SafeConvert.toMap(json["trans_param"])!),
+    reportInfo: SafeConvert.toStringValue(json["report_info"]),
+    specialname: SafeConvert.toStringValue(json["specialname"]),
+    imgurl: SafeConvert.toStringValue(json["imgurl"]),
+    playCount: SafeConvert.toInt(json["play_count"]),
+    pic: SafeConvert.toStringValue(json["pic"]),
+    fromHash: SafeConvert.toStringValue(json["from_hash"]),
+    fromTag: SafeConvert.toInt(json["from_tag"]),
+    publishtime:
+        SafeConvert.toDateTime(json["publishtime"]) ??
+        DateTime.fromMillisecondsSinceEpoch(0),
+    globalCollectionId: SafeConvert.toStringValue(json["global_collection_id"]),
+    intro: SafeConvert.toStringValue(json["intro"]),
+    suid: SafeConvert.toInt(json["suid"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -244,13 +256,15 @@ class ListInfoTransParam {
 
   factory ListInfoTransParam.fromJson(Map<String, dynamic> json) =>
       ListInfoTransParam(
-        specialTag: json["special_tag"],
-        iden: json["iden"],
-        transFlag: json["trans_flag"],
-        skin: json["skin"] == null ? null : Skin.fromJson(json["skin"]),
-        aimusic: json["aimusic"] == null
+        specialTag: SafeConvert.toInt(json["special_tag"]),
+        iden: SafeConvert.toInt(json["iden"]),
+        transFlag: SafeConvert.toInt(json["trans_flag"]),
+        skin: SafeConvert.toMap(json["skin"]) == null
             ? null
-            : Aimusic.fromJson(json["aimusic"]),
+            : Skin.fromJson(SafeConvert.toMap(json["skin"])!),
+        aimusic: SafeConvert.toMap(json["aimusic"]) == null
+            ? null
+            : Aimusic.fromJson(SafeConvert.toMap(json["aimusic"])!),
       );
 
   Map<String, dynamic> toJson() => {
@@ -603,7 +617,7 @@ class TransParam {
   TransParam({required this.specialTag});
 
   factory TransParam.fromJson(Map<String, dynamic> json) =>
-      TransParam(specialTag: json["special_tag"]);
+      TransParam(specialTag: SafeConvert.toInt(json["special_tag"]));
 
   Map<String, dynamic> toJson() => {"special_tag": specialTag};
 }

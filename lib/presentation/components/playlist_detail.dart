@@ -1,6 +1,7 @@
 import 'package:battery_music/presentation/components/song_list_item.dart';
 import 'package:battery_music/presentation/providers/audio_player_provider.dart';
 import 'package:battery_music/presentation/providers/playlist_detail_provider.dart';
+import 'package:battery_music/presentation/widgets/loading/skeleton_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -89,7 +90,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   /// 构建页面主体内容
   Widget _buildBody(PlaylistDetailProvider provider, ThemeData theme) {
     if (provider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const _PlaylistDetailSkeleton();
     }
 
     if (provider.errorMessage != null && provider.songs.isEmpty) {
@@ -124,9 +125,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
             itemBuilder: (context, index) {
               // 如果是最后一个是加载指示器
               if (index >= provider.songs.length) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(child: CircularProgressIndicator()),
+                return const SkeletonPulse(
+                  child: SkeletonSongRow(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  ),
                 );
               }
 
@@ -134,8 +136,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               final songNameParts = (song.name ?? '未知歌曲').split(' - ');
               return SongListItem(
                 index: index,
-                songName: songNameParts.length > 1 ? songNameParts.last : songNameParts.first,
-                singerName: songNameParts.length > 1 ? songNameParts.first : '未知歌手',
+                songName: songNameParts.length > 1
+                    ? songNameParts.last
+                    : songNameParts.first,
+                singerName: songNameParts.length > 1
+                    ? songNameParts.first
+                    : '未知歌手',
                 musicpackAdvance: song.transParam?.musicpackAdvance,
                 coverUrl: song.getCoverUrl(),
                 duration: song.timelen,
@@ -153,6 +159,22 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PlaylistDetailSkeleton extends StatelessWidget {
+  const _PlaylistDetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonPulse(
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        itemCount: 14,
+        separatorBuilder: (context, index) => const SizedBox(height: 4),
+        itemBuilder: (context, index) => const SkeletonSongRow(),
+      ),
     );
   }
 }

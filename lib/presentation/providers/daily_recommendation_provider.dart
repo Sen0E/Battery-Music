@@ -21,7 +21,7 @@ class DailyRecommendationProvider extends ChangeNotifier {
     try {
       final response = await _musicApiService.everydayRecommend();
 
-      if (response.status == 1) {
+      if (response.status == 1 && response.data != null) {
         _dailyRecommendation = response.data;
       } else {
         _error = '获取每日推荐失败';

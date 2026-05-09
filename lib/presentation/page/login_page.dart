@@ -6,6 +6,7 @@ import 'package:battery_music/core/services/music_api_service.dart';
 import 'package:battery_music/core/services/user_service.dart';
 import 'package:battery_music/presentation/components/window_controls.dart';
 import 'package:battery_music/presentation/layout/main_layout.dart';
+import 'package:battery_music/presentation/widgets/loading/skeleton_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -482,7 +483,11 @@ class _LoginPageState extends State<LoginPage> {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               child: _isQrLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: SkeletonPulse(
+                        child: SkeletonBox(width: 132, height: 132, radius: 12),
+                      ),
+                    )
                   : _qrImageBytes != null
                   ? Image.memory(
                       _qrImageBytes!,
