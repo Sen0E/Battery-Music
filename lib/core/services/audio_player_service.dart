@@ -24,6 +24,9 @@ class AudioPlayerService {
     MediaKit.ensureInitialized();
     player = Player();
 
+    // 显式关闭 WASAPI 独占模式，使用共享模式
+    _disableExclusiveAudio();
+
     // 绑定 SMTC 到播放器的操作
     _smtcService.onPlay = play;
     _smtcService.onPause = pause;
@@ -198,5 +201,17 @@ class AudioPlayerService {
   void dispose() {
     _smtcService.dispose(); // 释放 SMTC 资源
     player.dispose();
+  }
+
+  /// 显式禁用 WASAPI 独占模式，确保使用共享模式
+  /// 这样录屏软件等其他应用可以正常捕获音频
+  Future<void> _disableExclusiveAudio() async {
+    try {
+      final nativePlayer = player.platform as NativePlayer;
+      await nativePlayer.setProperty('audio-exclusive', 'no');
+      log('已设置 WASAPI 共享模式 (audio-exclusive=no)');
+    } catch (e) {
+      log('设置 WASAPI 共享模式失败: $e');
+    }
   }
 }
