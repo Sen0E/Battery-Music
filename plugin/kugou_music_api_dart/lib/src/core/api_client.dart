@@ -92,15 +92,16 @@ class ApiClient {
     Map<String, dynamic>? headers,
     EncryptType encryptType = EncryptType.android,
     Map<String, String>? cookie, // 局部特供 Cookie
+    bool mergeGlobalCookies = true,
+    bool preserveRequestBody = false,
     bool encryptKey = false,
     bool clearDefaultParams = false,
     bool notSignature = false,
     String? ip,
   }) async {
-    final Map<String, String> mergedCookie = {
-      ..._globalCookies,
-      if (cookie != null) ...cookie,
-    };
+    final Map<String, String> mergedCookie = mergeGlobalCookies
+        ? {..._globalCookies, if (cookie != null) ...cookie}
+        : {if (cookie != null) ...cookie};
     // 1. 提取基础信息
     final String dfid = mergedCookie['dfid'] ?? '-';
     final String mid = mergedCookie['KUGOU_API_MID'] ?? '-';
@@ -171,6 +172,9 @@ class ApiClient {
     final String dataString = (data is Map || data is List)
         ? jsonEncode(data)
         : (data?.toString() ?? '');
+    final dynamic requestBody = preserveRequestBody
+        ? data
+        : (dataString.isNotEmpty ? dataString : null);
 
     // 6. 核心：全自动防伪签名 (Signature)
     if (!finalParams.containsKey('signature') && !notSignature) {
@@ -236,7 +240,7 @@ class ApiClient {
       final response = await _dio.request(
         finalBaseUrl + reqUrl,
         queryParameters: finalParams.isNotEmpty ? finalParams : null,
-        data: dataString.isNotEmpty ? dataString : null,
+        data: requestBody,
         options: options,
       );
       final List<String> setCookies = response.headers['set-cookie'] ?? [];
