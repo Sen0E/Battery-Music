@@ -4,8 +4,6 @@ class Yueku {
   // 从底层引擎快速提取用户状态
   static int get _userid =>
       int.tryParse(ApiClient().currentCookies['userid'] ?? '0') ?? 0;
-  static int get _vipType =>
-      int.tryParse(ApiClient().currentCookies['vip_type'] ?? '0') ?? 0;
 
   // ==========================================
   // 乐库大盘信息 (Music Library)
@@ -37,7 +35,7 @@ class Yueku {
       'operator': 7,
       'networktype': 2,
       'userid': _userid,
-      'vip_type': _vipType, // 自动注入 VIP 状态获取高级 Banner
+      'vip_type': 0,
       'm_type': 0,
       'tags': [],
       'apiver': 5,
