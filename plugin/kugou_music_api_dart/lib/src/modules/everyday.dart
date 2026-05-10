@@ -1,10 +1,6 @@
 import '../core/api_client.dart';
 
 class Everyday {
-  // 提取当前用户的 UserID
-  static int get _userid =>
-      int.tryParse(ApiClient().currentCookies['userid'] ?? '0') ?? 0;
-
   // ==========================================
   // 每日推荐核心功能
   // ==========================================
@@ -65,14 +61,19 @@ class Everyday {
   // 社交与互动推荐
   // ==========================================
 
-  /// 歌友推荐 / 基于听歌列表推荐好友 (everyday_friend.js)
+  /// 歌友推荐 / 基于听歌列表推荐好友 (everyday_friend.js)(当前不可用)
   /// [mixsongIds] 传入一组混音歌曲 ID，服务器据此推荐品味相似的好友
   static Future<Map<String, dynamic>> everydayFriend({
     int? userId,
     List<int>? mixsongIds,
+    Map<String, String>? cookie,
   }) async {
-    // 优先使用传入的 userId，其次使用当前登录的 userId，最后兜底使用原 JS 的测试 ID
-    final int finalUserId = userId ?? (_userid != 0 ? _userid : 853927886);
+    final int finalUserId =
+        userId ??
+        int.tryParse(
+          cookie?['userid'] ?? ApiClient().currentCookies['userid'] ?? '0',
+        ) ??
+        853927886;
 
     // 如果没有传入歌曲列表，则使用原 JS 提取的超长流行歌曲测试列表
     final List<int> finalSongIds =
@@ -121,8 +122,11 @@ class Everyday {
       },
       params: {'channel': 130, 'isteen': 0, 'platform': 2, 'usemkv': 1},
       encryptType: EncryptType.android,
+      preserveRequestBody: true,
+      mergeGlobalCookies: false,
       // ⚠️ 这里有一个特殊的 pid 头部鉴权，保留原 JS 的逻辑
-      headers: {'pid': 126556797},
+      headers: {'pid': '126556797'},
+      cookie: cookie ?? ApiClient().currentCookies,
     );
   }
 }
