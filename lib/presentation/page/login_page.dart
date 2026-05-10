@@ -293,78 +293,83 @@ class _LoginPageState extends State<LoginPage> {
           ),
           Expanded(
             child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(32.0),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 380),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        '登录 Battery Music',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '同步你的酷狗音乐体验',
-                        style: Theme.of(context).textTheme.titleSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ToggleButtons(
-                            borderRadius: BorderRadius.circular(8),
-                            isSelected: [
-                              _loginType == _LoginType.phone,
-                              _loginType == _LoginType.qrCode,
-                            ],
-                            onPressed: (index) {
-                              setState(() {
-                                _loginType = _LoginType.values[index];
-                                if (_loginType != _LoginType.qrCode) {
-                                  _resetQrState();
-                                } else {
-                                  // 用户切换到二维码时，如果之前没加载过，就主动加载
-                                  if (_qrImageBytes == null && !_isQrLoading) {
-                                    _getQrAndPoll();
-                                  }
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 380),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 顶部弹性留白，让内容整体偏上居中
+                    const Spacer(flex: 2),
+                    // 固定的标题区域，不随切换移动
+                    Text(
+                      '登录 Battery Music',
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '同步你的酷狗音乐体验',
+                      style: Theme.of(context).textTheme.titleSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ToggleButtons(
+                          borderRadius: BorderRadius.circular(8),
+                          isSelected: [
+                            _loginType == _LoginType.phone,
+                            _loginType == _LoginType.qrCode,
+                          ],
+                          onPressed: (index) {
+                            setState(() {
+                              _loginType = _LoginType.values[index];
+                              if (_loginType != _LoginType.qrCode) {
+                                _resetQrState();
+                              } else {
+                                // 用户切换到二维码时，如果之前没加载过，就主动加载
+                                if (_qrImageBytes == null && !_isQrLoading) {
+                                  _getQrAndPoll();
                                 }
-                              });
-                            },
-                            children: const [
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24.0),
-                                child: Text('手机号登录'),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24.0),
-                                child: Text('二维码登录'),
-                              ),
-                            ],
-                          ),
-                        ],
+                              }
+                            });
+                          },
+                          children: const [
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 24.0),
+                              child: Text('手机号登录'),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 24.0),
+                              child: Text('二维码登录'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    // 表单区域占据剩余空间，内容高度变化不影响上方位置
+                    Expanded(
+                      flex: 5,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(bottom: 32.0),
+                        child: AnimatedCrossFade(
+                          duration: const Duration(milliseconds: 300),
+                          sizeCurve: Curves.easeInOut,
+                          firstCurve: Curves.easeInOut,
+                          secondCurve: Curves.easeInOut,
+                          alignment: Alignment.topCenter,
+                          crossFadeState: _loginType == _LoginType.phone
+                              ? CrossFadeState.showFirst
+                              : CrossFadeState.showSecond,
+                          firstChild: _buildPhoneLoginSection(),
+                          secondChild: _buildQrCodeLoginSection(),
+                        ),
                       ),
-                      const SizedBox(height: 32),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                              return FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              );
-                            },
-                        child: _loginType == _LoginType.phone
-                            ? _buildPhoneLoginSection()
-                            : _buildQrCodeLoginSection(),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -469,7 +474,9 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 二维码登录区域
   Widget _buildQrCodeLoginSection() {
-    return Column(
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
       children: [
         Container(
           width: 180,
@@ -514,6 +521,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ],
+      ),
     );
   }
 }
