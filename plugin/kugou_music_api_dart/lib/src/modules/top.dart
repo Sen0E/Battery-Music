@@ -54,7 +54,7 @@ class Top {
     String tagid = '',
   }) async {
     return ApiClient().createRequest(
-      url: 'youth/v1/song/single_card_recommend',
+      url: '/youth/v1/song/single_card_recommend',
       method: 'POST',
       params: {
         'card_id': cardId,
