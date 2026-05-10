@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:kugou_music_api_dart/src/core/api_client.dart';
 import 'package:kugou_music_api_dart/src/utils/config.dart';
@@ -5,19 +6,45 @@ import 'package:kugou_music_api_dart/src/utils/encrypt_util.dart';
 import 'package:kugou_music_api_dart/src/utils/helper_util.dart';
 
 class Login {
+  static dynamic _decodeDioData(dynamic data) {
+    if (data is String) {
+      try {
+        return jsonDecode(data);
+      } catch (_) {
+        return data;
+      }
+    }
+    return data;
+  }
+
   /// 发送手机验证码 (上一回合的接口)
   static Future<Map<String, dynamic>> sendMobileCode(
     String mobile, {
     String? mid,
   }) async {
+    final String? resolvedMid =
+        mid ?? ApiClient().currentCookies['KUGOU_API_MID'];
+    final Map<String, String>? requestCookie =
+        resolvedMid != null && resolvedMid.isNotEmpty
+        ? {'mid': resolvedMid, 'KUGOU_API_MID': resolvedMid}
+        : null;
+
     return ApiClient().createRequest(
       method: 'POST',
       baseURL: 'http://login.user.kugou.com',
       url: '/v7/send_mobile_code',
       data: {'businessid': 5, 'mobile': mobile, 'plat': 3},
       encryptType: EncryptType.android,
-      cookie: mid != null ? {'KUGOU_API_MID': mid} : null,
+      cookie: requestCookie,
     );
+  }
+
+  /// 发送验证码 (JS: captcha_sent)
+  static Future<Map<String, dynamic>> captchaSent(
+    String mobile, {
+    String? mid,
+  }) {
+    return sendMobileCode(mobile, mid: mid);
   }
 
   /// 手机验证码登录 (终极 Boss 接口)
@@ -174,6 +201,15 @@ class Login {
     return response;
   }
 
+  /// 手机号 + 验证码登录 (JS: login_cellphone)
+  static Future<Map<String, dynamic>> loginCellphone(
+    String mobile,
+    String code, {
+    Map<String, String>? cookie,
+  }) {
+    return loginByVerifyCode(mobile, code, cookie: cookie);
+  }
+
   /// 获取设备信息 (login_device.js)
   /// [token] 当前用户的 token
   /// [userid] 当前用户的 userid
@@ -238,8 +274,9 @@ class Login {
         },
       );
 
-      final wxData = wxResponse.data;
+      final wxData = _decodeDioData(wxResponse.data);
       if (wxData == null ||
+          wxData is! Map ||
           wxData['access_token'] == null ||
           wxData['openid'] == null) {
         return {
@@ -782,14 +819,14 @@ class Login {
         },
       );
 
-      final String? accessToken = tokenResp.data['access_token'];
+      final tokenData = _decodeDioData(tokenResp.data);
+      final String? accessToken = tokenData is Map
+          ? tokenData['access_token']?.toString()
+          : null;
       if (accessToken == null) {
         return {
           'status': 502,
-          'body': {
-            'status': 0,
-            'msg': 'WeChat Token Fetch Failed: ${tokenResp.data}',
-          },
+          'body': {'status': 0, 'msg': 'WeChat Token Fetch Failed: $tokenData'},
         };
       }
 
@@ -799,17 +836,18 @@ class Login {
         queryParameters: {'access_token': accessToken, 'type': 2},
       );
 
-      if (ticketResp.data['errcode'] != 0) {
+      final ticketData = _decodeDioData(ticketResp.data);
+      if (ticketData is! Map || ticketData['errcode'] != 0) {
         return {
           'status': 502,
           'body': {
             'status': 0,
-            'msg': 'WeChat Ticket Fetch Failed: ${ticketResp.data}',
+            'msg': 'WeChat Ticket Fetch Failed: $ticketData',
           },
         };
       }
 
-      final String ticket = ticketResp.data['ticket'];
+      final String ticket = ticketData['ticket'];
       final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       final String noncestr = EncryptUtil.cryptoMd5(EncryptUtil.randomString());
 
@@ -829,16 +867,19 @@ class Login {
         },
       );
 
-      if (connectResp.data['errcode'] == 0) {
-        final data = connectResp.data;
+      final connectData = _decodeDioData(connectResp.data);
+      if (connectData is Map && connectData['errcode'] == 0) {
+        final data = Map<String, dynamic>.from(connectData);
         // 拼接出给前端用的扫码确认链接
-        data['qrcode']['qrcodeurl'] =
-            'https://open.weixin.qq.com/connect/confirm?uuid=${data['uuid']}';
+        if (data['qrcode'] is Map) {
+          data['qrcode']['qrcodeurl'] =
+              'https://open.weixin.qq.com/connect/confirm?uuid=${data['uuid']}';
+        }
         return {'status': 200, 'body': data};
       } else {
         return {
           'status': 502,
-          'body': {'status': 0, 'msg': connectResp.data},
+          'body': {'status': 0, 'msg': connectData},
         };
       }
     } catch (e) {
