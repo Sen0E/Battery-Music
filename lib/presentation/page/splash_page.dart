@@ -20,6 +20,7 @@ class _SplashPageState extends State<SplashPage> {
   final MusicApiService _musicApiService = MusicApiService();
   final UserService _userService = UserService();
   bool _didRoute = false;
+  bool _showMainSkeleton = false;
 
   @override
   void initState() {
@@ -42,6 +43,13 @@ class _SplashPageState extends State<SplashPage> {
     if (!UserService.hasLogin) {
       _navigateToLogin();
       return;
+    }
+
+    // 已登录用户验证 token 时才显示主页骨架屏
+    if (mounted) {
+      setState(() {
+        _showMainSkeleton = true;
+      });
     }
 
     late final BaseApi<UserInfo> result;
@@ -82,6 +90,34 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: AppLoadingView());
+    return Scaffold(
+      body: _showMainSkeleton
+          ? const AppLoadingView()
+          : Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Battery Music',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.6),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+    );
   }
 }
